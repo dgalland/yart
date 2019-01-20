@@ -6,5 +6,5 @@ For now the project only includes this documentation file as proof of concept an
 
 Documentation (in french ! Google translate is your best friend)
 
-[yart.md](yart.md)
+[yart.md](./yart.md)
 

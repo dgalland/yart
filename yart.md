@@ -12,7 +12,7 @@ Raspberry Modèle B+
 
 ### Caméra et optique
 
-J'utilise une camera Raspberry V2 8MP NoIR camera Arducam avec monture CS. Il faut noter:
+J'utilise une camera Raspberry V2 8MP NoIR Arducam avec monture CS. Il faut noter:
 
 - Beaucoup sont également satisfaits de la camera V1
 
@@ -20,7 +20,11 @@ J'utilise une camera Raspberry V2 8MP NoIR camera Arducam avec monture CS. Il fa
 
 - Une caméra avec une monture CS permet de choisir un objectif adapté. 
 
-La taille de l'image 8mm est de 4,5mmx3mm, celle du capteur IMX219 3,68x2,67mm. Le grandissement n'est pas très différent de 1. Donc la distance du centre de l'objectif à l'image et du centre de l'objectif au capteur sont à peu près deux fois la distance focale. La distance de l'image au capteur à peu près quatre fois la distance focale. C'est pourquoi j'ai choisi un objectif de 35mm. Dans mon cas il faut 30mm de bagues d'extension CS. La caméra est montée à l'emplacement de la lampe du projecteur. Une table millimétrique permet une mise au point précise.
+La taille de l'image 8mm est de 4,5mmx3mm, celle du capteur IMX219 3,68x2,67mm. Le grandissement n'est pas très différent de 1. Donc la distance du centre de l'objectif à l'image et du centre de l'objectif au capteur sont à peu près deux fois la distance focale. La distance de l'image au capteur à peu près quatre fois la distance focale. C'est pourquoi j'ai choisi un objectif de 35mm. Dans mon cas il faut 30mm de bagues d'extension CS. La caméra est montée à l'emplacement de la lampe du projecteur. Une table millimétrique permet une mise au point précise. Ci dessous le calcul optique:
+
+- Image film 8mm 4,5x3,3 mm Capteur IMX219 3,68x2,76mm Grossissement 0,81 
+- Distance bague de l'objectif/Capteur 46mm Distance Face avant de l'objectif/Image 61mm
+- Distance totale Image/capteur 141 mm
 
 L'objectif de la camera Raspberry est collé et non adéquat pour la macrophotographie, c'est pourquoi j'ai choisi un autre objectif. Il semble aussi possible de décoller et régler cet objectif et de lui ajouter une lentille additionnelle.
 
@@ -63,7 +67,7 @@ L'application Python reprend l'idée de Joe, une application client-serveur comm
 
 ### Programmation réseau
 
-Le mécanisme des sockets est utilisé pour la communication réseau. Une classe MessageSocket permet sur un socket:
+Le mécanisme des sockets est utilisé pour la communication réseau. Une classe `MessageSocket` permet sur un socket:
 
 - Envoi et réception d'un buffer
 - Envoi et réception de string
@@ -86,13 +90,13 @@ Comme expliqué dans ce projet cette modification n'est pas comprise dans la ver
 
 https://github.com/rwb27/openflexure_microscope_software
 
-Voilà l'image d'une feuille blanche avant calibration
+Voilà l'image d'une feuille blanche avant calibration (il y a quelques taches sur le capteur)
 
 
 
 ![lens-before](images/lens-before.jpg)
 
-et après (depuis j'ai nettoyé le capteur)
+et après 
 
 ![lens-after](/images/lens-after.jpg)
 
@@ -100,7 +104,7 @@ Il semble que ceci soit moins nécessaire avec la camera V1 (5MP)
 
 La capture s'effectue en résolution 1640x1232 en JPEG sur le port video avec un framerate de 30fps
 
-Comme expliqué dans la documentation on utilise la méthode la plus rapide capture_sequence avec un générateur. 
+Comme expliqué dans la documentation picamera on utilise la méthode la plus rapide `capture_sequence` avec un générateur. 
 
 https://picamera.readthedocs.io/en/release-1.13/
 
@@ -127,7 +131,7 @@ Dans la première méthode le moteur avance de façon discontinue, frame par fra
 
 ### Paramètres de la caméra, Merge, HDR
 
-En premier lieu, il faut dire que la librairie picamera fait un excellent travail pour la qualité de l'image. L'exposition et la balance des blancs automatiques sont très bien calculées, il est difficile et donc pas nécessaire de faire mieux manuellement.
+En premier lieu, il faut souligner que la librairie picamera fait un excellent travail pour la qualité de l'image. L'exposition et la balance des blancs automatiques sont très bien calculées, il est difficile et donc pas nécessaire de faire mieux manuellement.
 
 Cependant la camera est limitée dans sa dynamique, si on augmente l'exposition pour éclaircir les sombres, il n'y a plus de détails dans les clairs et inversement. Il est pratiquement impossible d'obtenir une image qui reflète correctement toutes les luminosités de la scène.
 
@@ -142,7 +146,7 @@ On peut se référer à :
 et
 <https://www.learnopencv.com/exposure-fusion-using-opencv-cpp-python/>
 
-Comme exemple, ci-dessous la même image avec 25 expositions également réparties en luminosité. Aucune n'est vraiment satisfaisante, la dernière bien meilleure est le résultat d'un merge HDR (MergeDebevec et TonemapReinhard)
+Comme exemple, ci-dessous la même image avec 25 expositions également réparties en luminosité. On constate que aucune image n'est vraiment satisfaisante, la dernière bien meilleure est le résultat d'un merge HDR (MergeDebevec et TonemapReinhard)
 
 ![result (2460 x 1540)](images/result.jpg)
 
@@ -152,7 +156,7 @@ Autre exemple, l'image sous-exposée, l'image sur-exposée , l'image avec l'expo
 
 
 
-D'après mon expérience par rapport au temps t d'exposition automatique, l'exposition sous exposée peut être de 0.1xt et le temps sur exposé de 8*t. ces facteurs sont stables sur la durée de la capture.
+D'après mon expérience par rapport a l'exposition automatique t, l'exposition sous exposée peut être de 0.1xt et l'exposition sur exposée de 8*t. ces facteurs sont stables sur la durée de la capture.
 
 D'un point de vue programmation la mise en œuvre du bracketing est très délicate, en effet il faut bien avoir l'idée que la caméra n'est pas un appareil photo mais une caméra qui fournit un flux continu d'images.  Donc après avoir changé l'exposition il faut attendre quelques frames (minimum 4 d'après mon expérience) avant d'obtenir la bonne exposition. De même après  être repassé en automatique il faut attendre quelques trames (minimum 7 d'après mon expérience) avant d'avoir la bonne exposition. La capture devient:
 
@@ -178,7 +182,7 @@ Comme dans le projet de Joe le GUI sur le PC Windows est réalisé avec PyQt5
 
 Ces deux techniques ont de objectifs différents. Un traitement multithread s'impose pour ne pas bloquer l'application pendant une opération d'entrée sortie. Un traitement multiprocessus permet de tirer partie des différent cores du processeur.
 
-Sur le Pi aucun traitement lourd n'est effectué, le contrôle du moteur et du trigger sont effectués par pigpio en dehors de l'application donc le multiprocessus ne s'impose pas. Par contre pour pouvoir effectuer concurremment la capture et l'envoi sur le réseau le multithread est indispensable. Donc sur le Pi on a les threads suivants
+Sur le Pi aucun traitement lourd n'est effectué, le contrôle du moteur et du trigger sont effectués en dehors de l'application par pigpio donc le multiprocessus ne s'impose pas. Par contre pour pouvoir effectuer concurremment la capture et l'envoi sur le réseau le multithread est indispensable. Donc sur le Pi on a les threads suivants
 
 - La thread principale avec la boucle de réception des commandes
 - La thread de capture
@@ -191,7 +195,7 @@ Sur le PC windows le GUI est réalisé avec Qt on a les threads suivants
 - La thread principale avec la boucle d'évènements de Qt
 - Une thread pour recevoir et traiter les images
 
-Ici aussi on pourrait avoir une thread de réception et une thread de traitement. Le multiprocessus n'est pas vraiment nécessaire car le PC est suffisamment puissant.
+Ici aussi on pourrait avoir une thread de réception et une thread de traitement mais ce n'est pas vraiment nécessaire. Le multiprocessus n'est pas non plus nécessaire car le PC est suffisamment puissant.
 
 Il est intéressant de noter que le réseau n'est pas un facteur limitant, avec la résolution 1640x1232 et une capture à 1fps, le débit réseau est d'environ 20mb/s. L'interface réseau du Raspberry est indiquée comme 1Gb/s mais en réalité elle utilise le bus USB donc plus lente.
 
@@ -211,11 +215,12 @@ Sur le PC Windows
 
 Sur le Pi raspian:
 
-numpy
+- numpy
 
-pigpio
+- pigpio
 
-picamera (version expérimentale)
+- picamera (version expérimentale)
+
 
 ## Usage
 
@@ -227,24 +232,26 @@ picamera (version expérimentale)
 
 ### Contrôle du moteur
 
-- Paraméter le nombre de steps par révolution et le ratio Moteur/Projecteur des poulies
-- En avant ou en arrière à une certaine vitesse ou par image
+- Paramétrer le nombre de steps par révolution, le ratio des poulies Moteur/Projecteur  et les numéros de pins (ENABLE, DIR, PULSE, et la pin du TRIGGER)
+- Le moteur peut tourner en avant ou en arrière à une certaine vitesse ou par image
 
 ### Paramètres de la caméra
 
 On peut ajuster les paramètres de la caméra, cependant les meilleurs résultats sont obtenus en laissant les paramètres automatiques, color (White balance) auto et shutter 0 (auto). 
 
-Sur le Raspberry le program calibrate.py (derived from the openflexure projet) calcule une table de correction lens_shading_table sauvegardée dans un fichier calibrate.npz. Si ce fichier est présent lors de l'exécution il est pris en compte. Vous pouvez essayer avec ou sans ce fichier pour voir les effets de la calibration.
+Sur le Raspberry le program calibrate.py (dérivé du projet openflexure projet) calcule une table de correction `lens_shading_table` sauvegardée dans un fichier calibrate.npz. Si ce fichier est présent lors de l'exécution il est pris en compte. Vous pouvez essayer avec ou sans ce fichier pour voir les effets de la calibration.
+
+Pour calibrer il faut capturer une image uniformément blanche (pas de cadre noir par exemple). Personnellement  je place un diffuseur blanc devant la fenêtre du film et je mets la caméra hors focus
 
 ### Capture
 
 - Shot: Capture une image (sans bracket)
-- Play: Capture sans avancer le moteur
-- Capture: Capture en avançant le moteur. Utiliser OnFrame (On Trigger n'est pas bien testé)
+- Play: Capture sans avancer le moteur, utile pour tester les paramètres et le bracket
+- Capture: Capture en avançant le moteur. Utiliser la méthode OnFrame (On Trigger n'est pas bien testé)
 
 ### Bracketing et fusion
 
-La capture peut d'effectuer sans bracket une exposition par image ou bien avec un bracket de trois exposition par image. 
+La capture peut d'effectuer sans bracket une exposition par image ou bien avec un bracket de trois expositions par image. 
 
 Si un bracket de 3 est choisi il faut ajuster:
 
@@ -255,26 +262,26 @@ Si un bracket de 3 est choisi il faut ajuster:
 
 Pour ajuster ces coefficients il faut faire des essais sur une image dans votre film:
 
-Sans "Merge" mais avec "Save" choisir "Play":
+Sans "Merge" mais avec "Save" choisir "Play" framerate 30fps
 
-- Vous devez bien voir dans le répertoire les trois images dans l'ordre (sous-exposée, sur-exposée, normale) sinon il faut augmenter "Shutter speed wait"
+- Vous devez bien voir dans le répertoire de sauvegarde les trois images dans l'ordre (sous-exposée, sur-exposée, normale) sinon il faut augmenter "Shutter speed wait"
 - De plus l'exposition auto de la trame normale doit être stable, sinon il faut augmenter "Shutter auto wait"
 
-Avec "Merge" vous pouvez constater l'effet de la fusion
+Avec "Merge" vous pouvez ensuite constater l'effet de la fusion
 
 Ensuite vous pouvez faire les mêmes essais en "Capture"
 
 - Vérifier également que l'image normale n'est pas bougée. Sinon il faut augmenter "Shutter auto wait" pour attendre la stabilisation après l'avance du moteur.
 
-Au final avec un bracket de 3 vous devez obtenir un débit d'environ 1 image par seconde.
+Au final avec un bracket de 3 et un framerate de 30fps vous devez obtenir un débit d'environ 1 image par seconde.
 
 ### Traitement des images
 
 Il s'effectue sur le PC
 
 - "Histo" affiche l'histogramme de l'image
-- "Sharpness" Evalue et affiche la netteté de l'image pour une bonne mise au point (utiliser "Shot") . La meilleur mise au point correspond à la valeur maximum.  
-- "Merge"  Commande l'algorithme de fusion "None"  "Mertens" ou "Debevec"
+- "Sharpness" Evalue et affiche la netteté de l'image pour une bonne mise au point (utiliser "Shot" ou "play" avec 5fps) . La meilleur mise au point correspond à la valeur maximum.  
+- "Merge"  Détermine l'algorithme de fusion "None"  "Mertens" ou "Debevec"
 - "Save" Sauvegarde les images dans le répertoire choisi. On peut choisir un numéro de bande et un numéro de clip. Pour chaque "Capture" les images sont numérotées à partir de 0
 
 ### Post Traitement

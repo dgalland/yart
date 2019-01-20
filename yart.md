@@ -47,15 +47,15 @@ Le projecteur, la caméra et la lampe
 
 
 
-![1](images\1.jpg)
+![1](images/1.jpg)
 
 Le moteur et le disque avec le capteur optique
 
-![2](images\2.jpg)
+![2](images/2.jpg)
 
 De gauche à droite: Alimentation 24v, Contrôleur TB6600, bredboard et Raspberry et son alimentation 5V
 
-![3](images\3.jpg)
+![3](images/3.jpg)
 
 ## Software
 
@@ -90,11 +90,11 @@ Voilà l'image d'une feuille blanche avant calibration
 
 
 
-![lens-before](D:\yart\images\lens-before.jpg)
+![lens-before](images/lens-before.jpg)
 
 et après (depuis j'ai nettoyé le capteur)
 
-![lens-after](D:\yart\images\lens-after.jpg)
+![lens-after](/images/lens-after.jpg)
 
 Il semble que ceci soit moins nécessaire avec la camera V1 (5MP)
 
@@ -144,11 +144,11 @@ et
 
 Comme exemple, ci-dessous la même image avec 25 expositions également réparties en luminosité. Aucune n'est vraiment satisfaisante, la dernière bien meilleure est le résultat d'un merge HDR (MergeDebevec et TonemapReinhard)
 
-![result (2460 x 1540)](images\result (2460 x 1540).jpg)
+![result (2460 x 1540)](images/result (2460 x 1540).jpg)
 
 Autre exemple, l'image sous-exposée, l'image sur-exposée , l'image avec l'exposition automatique puis l'image merge Mertens et l'image HDR (un peu foncée car la seconde image n'est pas assez sur exposée)
 
-![merge](images\merge.jpg)
+![merge](images/merge.jpg)
 
 
 

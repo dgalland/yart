@@ -144,7 +144,7 @@ et
 
 Comme exemple, ci-dessous la même image avec 25 expositions également réparties en luminosité. Aucune n'est vraiment satisfaisante, la dernière bien meilleure est le résultat d'un merge HDR (MergeDebevec et TonemapReinhard)
 
-![result (2460 x 1540)](images/result (2460 x 1540).jpg)
+![result (2460 x 1540)](images/result(2460 x 1540).jpg)
 
 Autre exemple, l'image sous-exposée, l'image sur-exposée , l'image avec l'exposition automatique puis l'image merge Mertens et l'image HDR (un peu foncée car la seconde image n'est pas assez sur exposée)
 

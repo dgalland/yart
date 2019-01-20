@@ -8,3 +8,7 @@ Documentation (in french ! Google translate is your best friend)
 
 [yart.md](./yart.md)
 
+Google group
+
+https://groups.google.com/forum/#!forum/yart
+

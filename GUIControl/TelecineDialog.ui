@@ -1,0 +1,2378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TelecineDialog</class>
+ <widget class="QDialog" name="TelecineDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1332</width>
+    <height>1041</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>CamDialog</string>
+  </property>
+  <widget class="QGroupBox" name="cameraSettingsGroupBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>730</y>
+     <width>591</width>
+     <height>241</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Camera settings</string>
+   </property>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>70</y>
+      <width>25</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Color</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="awbModeBox">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>70</y>
+      <width>89</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>1</number>
+    </property>
+    <item>
+     <property name="text">
+      <string notr="true">off</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string notr="true">auto</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string notr="true">sunlight</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string notr="true">cloudy</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>shade</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>tungsten</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>fluorescent</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>incandescent</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>flash</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>horizon</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QSpinBox" name="redGainBox">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>70</y>
+      <width>41</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 0, 0);</string>
+    </property>
+    <property name="minimum">
+     <number>50</number>
+    </property>
+    <property name="maximum">
+     <number>400</number>
+    </property>
+    <property name="singleStep">
+     <number>10</number>
+    </property>
+    <property name="value">
+     <number>100</number>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="blueGainBox">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>70</y>
+      <width>41</width>
+      <height>18</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgba(0, 0, 255, 100);</string>
+    </property>
+    <property name="minimum">
+     <number>50</number>
+    </property>
+    <property name="maximum">
+     <number>400</number>
+    </property>
+    <property name="singleStep">
+     <number>10</number>
+    </property>
+    <property name="value">
+     <number>100</number>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="setGainsButton">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>70</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>100</y>
+      <width>36</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Shutter</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="shutterSpeedBox">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>100</y>
+      <width>61</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>100000</number>
+    </property>
+    <property name="singleStep">
+     <number>1000</number>
+    </property>
+    <property name="value">
+     <number>20000</number>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="setShutterSpeedButton">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>100</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="setFrameRateButton">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>130</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="exposureSpeedLabel">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>100</y>
+      <width>61</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="autoExposureCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>100</y>
+      <width>46</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Auto</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>130</y>
+      <width>26</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Gains</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="digitalGainLabel">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>130</y>
+      <width>41</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="analogGainLabel">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>130</y>
+      <width>71</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_7">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>130</y>
+      <width>29</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Digital</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_8">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>130</y>
+      <width>33</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Analog</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="exposureModeBox">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>130</y>
+      <width>48</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="currentText">
+     <string>auto</string>
+    </property>
+    <property name="currentIndex">
+     <number>1</number>
+    </property>
+    <item>
+     <property name="text">
+      <string notr="true">off</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>auto</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QSpinBox" name="brightnessBox">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>170</y>
+      <width>43</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>100</number>
+    </property>
+    <property name="singleStep">
+     <number>10</number>
+    </property>
+    <property name="value">
+     <number>50</number>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="contrastBox">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>170</y>
+      <width>47</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>-100</number>
+    </property>
+    <property name="maximum">
+     <number>100</number>
+    </property>
+    <property name="singleStep">
+     <number>10</number>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>170</y>
+      <width>50</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Brightness</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_6">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>170</y>
+      <width>42</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Contrast</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="autoGetSettingsCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>30</y>
+      <width>70</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>AutoGet</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="setCorrectionsButton">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>160</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_10">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>170</y>
+      <width>50</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Saturation</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="saturationBox">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>170</y>
+      <width>47</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>-100</number>
+    </property>
+    <property name="maximum">
+     <number>100</number>
+    </property>
+    <property name="singleStep">
+     <number>10</number>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="isoBox">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>200</y>
+      <width>43</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>800</number>
+    </property>
+    <property name="singleStep">
+     <number>100</number>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_14">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>200</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Iso</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="setIsoButton">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>200</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="exposureCompensationBox">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>100</y>
+      <width>41</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>-25</number>
+    </property>
+    <property name="maximum">
+     <number>25</number>
+    </property>
+    <property name="singleStep">
+     <number>1</number>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_15">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>100</y>
+      <width>66</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>compensation</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="getCameraSettingsButton">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>30</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Get Settings</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="cameraControlGroupBox">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>230</y>
+     <width>571</width>
+     <height>161</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Camera control</string>
+   </property>
+   <widget class="QPushButton" name="takeImageButton">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>20</y>
+      <width>61</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>61</width>
+      <height>16777215</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>Shot</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="captureStopButton">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>20</y>
+      <width>61</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>61</width>
+      <height>16777215</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>Stop</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="captureStartButton">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>20</y>
+      <width>61</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>61</width>
+      <height>16777215</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>Capture</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_5">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>60</y>
+      <width>461</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Capture parameters</string>
+    </property>
+    <widget class="QRadioButton" name="playButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>82</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Preview</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="onFrameButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>67</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>OnFrame</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="onTriggerButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>71</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>OnTrigger</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>20</y>
+       <width>50</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Framerate</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_31">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>50</y>
+       <width>50</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Framerate</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="framerateBox">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>50</y>
+       <width>37</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <number>30</number>
+     </property>
+     <property name="singleStep">
+      <number>1</number>
+     </property>
+     <property name="value">
+      <number>30</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_29">
+     <property name="geometry">
+      <rect>
+       <x>210</x>
+       <y>50</y>
+       <width>60</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Motor speed</string>
+     </property>
+    </widget>
+    <widget class="QDoubleSpinBox" name="captureMotorSpeedBox">
+     <property name="geometry">
+      <rect>
+       <x>280</x>
+       <y>50</y>
+       <width>41</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="decimals">
+      <number>1</number>
+     </property>
+     <property name="minimum">
+      <double>0.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>10.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.100000000000000</double>
+     </property>
+     <property name="value">
+      <double>5.000000000000000</double>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="playFramerateBox">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>20</y>
+       <width>37</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <number>30</number>
+     </property>
+     <property name="singleStep">
+      <number>1</number>
+     </property>
+     <property name="value">
+      <number>5</number>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="motorControlGroupBox">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>160</y>
+     <width>631</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Motor control</string>
+   </property>
+   <widget class="QPushButton" name="forwardButton">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>61</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>61</width>
+      <height>16777215</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>Fwd</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="backwardButton">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>20</y>
+      <width>61</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>61</width>
+      <height>16777215</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>Bck</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="motorStopButton">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>20</y>
+      <width>61</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>61</width>
+      <height>16777215</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>Stop</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="forwardOneButton">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>20</y>
+      <width>61</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>61</width>
+      <height>16777215</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>FwdOne</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="backwardOneButton">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>20</y>
+      <width>61</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>61</width>
+      <height>16777215</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>BwkOne</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_17">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>20</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Speed</string>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="motorSpeedBox">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>20</y>
+      <width>41</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="decimals">
+     <number>1</number>
+    </property>
+    <property name="minimum">
+     <double>0.000000000000000</double>
+    </property>
+    <property name="maximum">
+     <double>10.000000000000000</double>
+    </property>
+    <property name="singleStep">
+     <double>0.100000000000000</double>
+    </property>
+    <property name="value">
+     <double>5.000000000000000</double>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="lcdDisplayCount">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>20</y>
+      <width>64</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <property name="lineWidth">
+     <number>1</number>
+    </property>
+    <property name="digitCount">
+     <number>5</number>
+    </property>
+    <property name="segmentStyle">
+     <enum>QLCDNumber::Filled</enum>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_7">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>20</y>
+     <width>681</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Initialization</string>
+   </property>
+   <widget class="QGroupBox" name="cameraGroupBox">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>10</y>
+      <width>461</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Camera</string>
+    </property>
+    <widget class="QLabel" name="label_16">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>47</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Mode</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="modeBox">
+     <property name="geometry">
+      <rect>
+       <x>60</x>
+       <y>50</y>
+       <width>42</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>0</number>
+     </property>
+     <property name="maximum">
+      <number>7</number>
+     </property>
+     <property name="value">
+      <number>4</number>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="useCalibrationCheckBox">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>80</y>
+       <width>91</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Use calibration</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="cameraVersionLabel">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>50</y>
+       <width>71</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Box</enum>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="cameraResolutionLabel">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>80</y>
+       <width>71</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Box</enum>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="hresLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>50</y>
+       <width>81</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="vresLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>80</y>
+       <width>81</width>
+       <height>20</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_9">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>50</y>
+       <width>47</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Hres</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_30">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>80</y>
+       <width>47</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Vres</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="openCameraButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Open</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="closeCameraButton">
+     <property name="geometry">
+      <rect>
+       <x>100</x>
+       <y>20</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Close</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="calibrateButton">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>20</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Calibrate</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>141</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Raspberry</string>
+    </property>
+    <widget class="QPushButton" name="connectButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>91</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Connect</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="ipLineEdit">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>50</y>
+       <width>91</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>192.168.0.22</string>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="frameProcessingGroupBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>530</y>
+     <width>651</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Frame processing</string>
+   </property>
+   <widget class="QCheckBox" name="saveCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>61</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Save</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="chooseDirectoryButton">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>20</y>
+      <width>61</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Directory</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="tapeBox">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>20</y>
+      <width>51</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>99</number>
+    </property>
+    <property name="singleStep">
+     <number>1</number>
+    </property>
+    <property name="value">
+     <number>1</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_27">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>20</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Tape</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_28">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>20</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Clip</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="clipBox">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>20</y>
+      <width>51</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>99</number>
+    </property>
+    <property name="singleStep">
+     <number>1</number>
+    </property>
+    <property name="value">
+     <number>1</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="directoryDisplay">
+    <property name="geometry">
+     <rect>
+      <x>60</x>
+      <y>50</y>
+      <width>371</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_12">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>10</y>
+      <width>141</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Display</string>
+    </property>
+    <widget class="QCheckBox" name="histosCheckBox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>61</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Histos</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="sharpnessCheckBox">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>121</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Sharpness</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="reduceFactorBox">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>50</y>
+       <width>37</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>20</number>
+     </property>
+     <property name="singleStep">
+      <number>1</number>
+     </property>
+     <property name="value">
+      <number>1</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_32">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>61</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Reduce by </string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QPushButton" name="setDirectoryButton">
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>20</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_22">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>50</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>To</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="messageLabel">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>1000</y>
+     <width>601</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font color:'red'</string>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QGroupBox" name="bracketControlGroupBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>400</y>
+     <width>531</width>
+     <height>111</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Bracket control</string>
+   </property>
+   <widget class="QDoubleSpinBox" name="darkCoefficientBox">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>20</y>
+      <width>62</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <double>0.100000000000000</double>
+    </property>
+    <property name="maximum">
+     <double>1.000000000000000</double>
+    </property>
+    <property name="singleStep">
+     <double>0.100000000000000</double>
+    </property>
+    <property name="value">
+     <double>1.000000000000000</double>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="lightCoefficientBox">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>20</y>
+      <width>62</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <double>0.100000000000000</double>
+    </property>
+    <property name="maximum">
+     <double>10.000000000000000</double>
+    </property>
+    <property name="singleStep">
+     <double>0.100000000000000</double>
+    </property>
+    <property name="value">
+     <double>1.000000000000000</double>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_12">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>20</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Dark</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_21">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>20</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Light</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_23">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>60</y>
+      <width>94</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Shutter speed wait </string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="shutterSpeedWaitBox">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>60</y>
+      <width>37</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>10</number>
+    </property>
+    <property name="singleStep">
+     <number>1</number>
+    </property>
+    <property name="value">
+     <number>3</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_24">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>60</y>
+      <width>87</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Shutter auto wait </string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="shutterAutoWaitBox">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>60</y>
+      <width>37</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>20</number>
+    </property>
+    <property name="singleStep">
+     <number>1</number>
+    </property>
+    <property name="value">
+     <number>6</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_26">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>60</y>
+      <width>33</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>frames</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="bracketCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>20</y>
+      <width>70</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Bracket </string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_11">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>20</y>
+      <width>120</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Merge method</string>
+    </property>
+    <widget class="QRadioButton" name="mergeNoneRadioButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>82</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>None</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="mergeMertensRadioButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>82</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Mertens</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="mergeDebevecRadioButton">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>82</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Debevec</string>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="motorSettingsGroupBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>630</y>
+     <width>591</width>
+     <height>81</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Motor settings</string>
+   </property>
+   <widget class="QDoubleSpinBox" name="pulleyRatioBox">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>50</y>
+      <width>62</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <double>0.250000000000000</double>
+    </property>
+    <property name="maximum">
+     <double>4.000000000000000</double>
+    </property>
+    <property name="singleStep">
+     <double>0.250000000000000</double>
+    </property>
+    <property name="value">
+     <double>1.000000000000000</double>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_18">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>20</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Steps per Rev</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="stepsPerRevBox">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>20</y>
+      <width>61</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>12000</number>
+    </property>
+    <property name="singleStep">
+     <number>200</number>
+    </property>
+    <property name="value">
+     <number>200</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_20">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>50</y>
+      <width>111</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Frame/Motor ratio</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="enaEdit">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>20</y>
+      <width>41</width>
+      <height>16</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_11">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>20</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>ENA</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="pulseEdit">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>50</y>
+      <width>41</width>
+      <height>16</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="dirEdit">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>20</y>
+      <width>41</width>
+      <height>16</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_13">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>50</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PULSE</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_19">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>20</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>DIR</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_25">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>50</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TRIGGER</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="triggerEdit">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>50</y>
+      <width>41</width>
+      <height>16</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="setMotorButton">
+    <property name="geometry">
+     <rect>
+      <x>440</x>
+      <y>20</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Set</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>takeImageButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>takeImage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>90</x>
+     <y>140</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>359</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>captureStopButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>captureStop()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>260</x>
+     <y>192</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>279</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>setGainsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setGains()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>494</x>
+     <y>550</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>423</x>
+     <y>194</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>setShutterSpeedButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setShutterSpeed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>494</x>
+     <y>580</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>483</x>
+     <y>231</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>setFrameRateButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setFrameRate()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>494</x>
+     <y>610</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>570</x>
+     <y>262</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoExposureCheckBox</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setAutoExposure()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>185</x>
+     <y>584</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>620</x>
+     <y>339</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>forwardOneButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>forwardOne()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>200</x>
+     <y>470</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>716</x>
+     <y>177</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>backwardOneButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>backwardOne()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>290</x>
+     <y>470</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>692</x>
+     <y>248</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>forwardButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>forward()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>200</x>
+     <y>440</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>710</x>
+     <y>314</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>backwardButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>backward()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>290</x>
+     <y>440</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>726</x>
+     <y>367</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>motorStopButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>motorStop()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>370</x>
+     <y>440</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>728</x>
+     <y>424</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>setCorrectionsButton</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setCorrections()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>494</x>
+     <y>640</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>865</x>
+     <y>428</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>saveCheckBox</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setSave()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>90</x>
+     <y>480</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>866</x>
+     <y>71</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>setIsoButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setIso()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>494</x>
+     <y>670</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>877</x>
+     <y>519</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>getCameraSettingsButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>getCameraSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>72</x>
+     <y>520</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>862</x>
+     <y>582</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>chooseDirectoryButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>chooseDirectory()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>113</x>
+     <y>480</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>917</x>
+     <y>655</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sharpnessCheckBox</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setSharpness()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>490</x>
+     <y>570</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>869</x>
+     <y>472</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>histosCheckBox</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setHistos()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>490</x>
+     <y>550</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>755</x>
+     <y>455</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>connectButton</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>connectDisconnect()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>107</x>
+     <y>51</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>891</x>
+     <y>173</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoGetSettingsCheckBox</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setAutoGetSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>199</x>
+     <y>520</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>618</x>
+     <y>226</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>openCameraButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>openCamera()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>69</x>
+     <y>185</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>689</x>
+     <y>305</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>setMotorButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setMotorInitSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>467</x>
+     <y>656</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>722</x>
+     <y>752</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>captureStartButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>captureStart()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>212</x>
+     <y>183</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>707</x>
+     <y>435</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>setDirectoryButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setDirectory()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>403</x>
+     <y>494</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>720</x>
+     <y>570</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mergeNoneRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setMerge()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>430</x>
+     <y>369</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>680</x>
+     <y>265</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mergeMertensRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setMerge()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>450</x>
+     <y>387</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>666</x>
+     <y>388</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mergeDebevecRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setMerge()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>441</x>
+     <y>408</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>758</x>
+     <y>383</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>closeCameraButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>closeCamera()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>354</x>
+     <y>177</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>680</x>
+     <y>320</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>reduceFactorBox</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setReduce()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>568</x>
+     <y>601</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>783</x>
+     <y>590</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>calibrateButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>calibrate()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>415</x>
+     <y>63</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>814</x>
+     <y>217</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>takeImage()</slot>
+  <slot>captureStop()</slot>
+  <slot>terminate()</slot>
+  <slot>blueGain(int)</slot>
+  <slot>setGains()</slot>
+  <slot>setShutterSpeed()</slot>
+  <slot>setFrameRate()</slot>
+  <slot>setAutoExposure()</slot>
+  <slot>setAutoGetSettings()</slot>
+  <slot>forwardOne()</slot>
+  <slot>backwardOne()</slot>
+  <slot>forward()</slot>
+  <slot>backward()</slot>
+  <slot>motorStop()</slot>
+  <slot>setCorrections()</slot>
+  <slot>setMotorSpeed()</slot>
+  <slot>setSave()</slot>
+  <slot>setIso()</slot>
+  <slot>setMerge()</slot>
+  <slot>getCameraSettings()</slot>
+  <slot>saveSettings()</slot>
+  <slot>chooseDirectory()</slot>
+  <slot>setSharpness()</slot>
+  <slot>setHistos()</slot>
+  <slot>connectDisconnect()</slot>
+  <slot>calibrateHDR()</slot>
+  <slot>captureStart()</slot>
+  <slot>play()</slot>
+  <slot>openCamera()</slot>
+  <slot>setMotorInitSettings()</slot>
+  <slot>setDirectory()</slot>
+  <slot>closeCamera()</slot>
+  <slot>setReduce()</slot>
+  <slot>calibrate()</slot>
+ </slots>
+</ui>

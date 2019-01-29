@@ -14,11 +14,9 @@ Raspberry Modèle B+
 
 J'utilise une camera Raspberry V2 8MP NoIR Arducam avec monture CS. Il faut noter:
 
-- Beaucoup sont également satisfaits de la camera V1
-
-- Un filtre infra-rouge n'est pas vraiment nécessaire pour une application Telecine
-
-- Une caméra avec une monture CS permet de choisir un objectif adapté. 
+- Un filtre infra-rouge n'est pas vraiment nécessaire pour une application Telecine, donc une camera NoIR convient.
+- Une caméra avec une monture CS ou M12 permet de choisir un objectif adapté. 
+- La camera V1 semble aussi donner de bons résultats pour certains. Elle est peut être préférable pour être utilisée avec un objectif non standard. Il n'est pas sûr que la camera V2 soit le meilleur choix, c'est un point à élucider.
 
 La taille de l'image 8mm est de 4,5mmx3mm, celle du capteur IMX219 3,68x2,67mm. Le grandissement n'est pas très différent de 1. Donc la distance du centre de l'objectif à l'image et du centre de l'objectif au capteur sont à peu près deux fois la distance focale. La distance de l'image au capteur à peu près quatre fois la distance focale. C'est pourquoi j'ai choisi un objectif de 35mm. Dans mon cas il faut 30mm de bagues d'extension CS. La caméra est montée à l'emplacement de la lampe du projecteur. Une table millimétrique permet une mise au point précise. Ci dessous le calcul optique:
 
@@ -30,6 +28,8 @@ L'objectif de la camera Raspberry est collé et non adéquat pour la macrophotog
 
 Il est important de noter que la caméra V2 (V1 ?)  avec un objectif autre que l'objectif standard nécessite absolument une calibration de l'objectif (cf ci dessous)
 
+
+
 ### Lampe
 
 J'ai de bon résultats avec une LED TrueColor Phillips faisceau étroit 3500K
@@ -39,7 +39,9 @@ J'ai placé un diffuseur à la surface de la LED
 
 Mon projecteur est un Elmo GP, il faut enlever toutes les parties électriques et conserver uniquement le mécanisme d'avancement du film. Il faut enlever la pale avec les trois fenêtres et la remplacer par un disque avec un capteur "trigger" qui se déclenche quand l'image est bien positionnée dans la fenêtre de projection. J'utilise un capteur optique qui se déclenche au passage d'un petit trou dans le disque.
 
-Le moteur pas à pas est un moteur NEMA 17 alimenté en 24v. Comme contrôleur j'ai choisi un TB6600 qui présente certains avantages, les hauts voltages sont bien séparés des broches du Pi, les broches sont protégées par des coupleurs optiques et le micro-stepping et l'intensité sont contrôlables par des switchs 
+Si possible agrandir au maximum ou supprimer la fenêtre de projection pour capturer la totalité de l'image.
+
+Le moteur pas à pas est un moteur NEMA 17 alimenté en 24v. Comme contrôleur j'ai choisi un TB6600 qui présente certains avantages, les hauts voltages sont bien séparés des broches du Pi (moins dangereux pour le Pi), les broches sont protégées par des coupleurs optiques et le micro-stepping et l'intensité sont contrôlables par des switchs 
 
 Le moteur entraine l'axe du projecteur par des poulies GT, avec un ratio de 1:1
 
@@ -53,7 +55,7 @@ Le projecteur, la caméra et la lampe
 
 ![1](images/1.jpg)
 
-Le moteur et le disque avec le capteur optique
+Le moteur et le disque avec le capteur optique. Les équerres pour rigidifier et éviter les vibrations.
 
 ![2](images/2.jpg)
 
@@ -67,11 +69,13 @@ L'application Python reprend l'idée de Joe, une application client-serveur comm
 
 ### Programmation réseau
 
-Le mécanisme des sockets est utilisé pour la communication réseau. Une classe `MessageSocket` permet sur un socket:
+Le mécanisme des sockets est utilisé pour la communication réseau. Une classe `MessageSocket` permet sur un socket des envois ou réceptions orientés objet
 
 - Envoi et réception d'un buffer
 - Envoi et réception de string
 - Envoi et réception d'un objet python quelconque (dictionnary, tuple, ...)
+
+Ainsi on peut envoyer ou recevoir sur ce socket des objets Python, commande et ses paramètres, réponse, dictionnaire d'attributs, header de frame avec des informations, ...
 
 Deux sockets sont utilisés, un socket bidirectionnel pour envoyer des commandes et recevoir des réponses et un socket unidirectionnel pour recevoir les frames et des headers d'information.
 
@@ -85,8 +89,7 @@ On utilise la librairie pigpio qui permet de générer les pulses PWM par hardwa
 
 ### Camera	
 
-Bien entendu on utilise la librairie Python picamera. Cependant comme indiqué plus haut la camera V2 avec un objectif non d'origine produit une image très mauvaise. Il est absolument nécessaire de calibrer l'objectif en construisant une table de correction lens_shading_table. On pourra se référer au projet.
-Comme expliqué dans ce projet cette modification n'est pas comprise dans la version actuelle de la librairie, il faut donc  installer et utiliser une version spéciale de la librairie., On pourra se référer au projet:
+Bien entendu on utilise la librairie Python picamera. Cependant comme indiqué plus haut la camera V2 avec un objectif non d'origine produit une image très mauvaise. Il est absolument nécessaire de calibrer l'objectif en construisant une table de correction `lens_shading_table`. Cette modification n'est pas encore comprise dans la version actuelle de la librairie, il faut donc  installer et utiliser une version spéciale de la librairie., On pourra se référer au projet:
 
 https://github.com/rwb27/openflexure_microscope_software
 
@@ -180,9 +183,9 @@ Comme dans le projet de Joe le GUI sur le PC Windows est réalisé avec PyQt5
 
 ### Multithreading Multiprocessing
 
-Ces deux techniques ont de objectifs différents. Un traitement multithread s'impose pour ne pas bloquer l'application pendant une opération d'entrée sortie. Un traitement multiprocessus permet de tirer partie des différent cores du processeur.
+Ces deux techniques ont de buts différents. Un traitement multithread permet d'effectuer simultanément des opérations d'entrée-sortie sans bloquer l'application. Un traitement multiprocessus permet de tirer partie des différent cores du processeur. Noter que normalement des thread pourraient exécuter du code simultanément mais ce n'est pas possible en Python, donc en Python les threads sont pour des applications intensives en IO et les processus pour des applications intensives en CPU.
 
-Sur le Pi aucun traitement lourd n'est effectué, le contrôle du moteur et du trigger sont effectués en dehors de l'application par pigpio donc le multiprocessus ne s'impose pas. Par contre pour pouvoir effectuer concurremment la capture et l'envoi sur le réseau le multithread est indispensable. Donc sur le Pi on a les threads suivants
+Sur le Pi aucun traitement intensif en CPU n'est effectué, le contrôle du moteur et du trigger sont effectués en dehors de l'application par pigpio donc le multiprocessus ne s'impose pas. Par contre pour pouvoir effectuer concurremment la capture et l'envoi sur le réseau le multithread est indispensable. Donc sur le Pi on a les threads suivants
 
 - La thread principale avec la boucle de réception des commandes
 - La thread de capture
@@ -192,7 +195,7 @@ La communication entre les deux threads est assurée par une Queue d'images et d
 
 Sur le PC windows le GUI est réalisé avec Qt on a les threads suivants		
 
-- La thread principale avec la boucle d'évènements de Qt
+- La thread principale avec la boucle d'évènements de Qt, envoi des commandes et réception des réponses.
 - Une thread pour recevoir et traiter les images
 
 Ici aussi on pourrait avoir une thread de réception et une thread de traitement mais ce n'est pas vraiment nécessaire. Le multiprocessus n'est pas non plus nécessaire car le PC est suffisamment puissant.
@@ -208,10 +211,10 @@ Les images fusionnées sont écrites individuellement dans des fichiers JPEG. En
 Sur le PC Windows
 
 - Python 3.7
-- matplotlib
-- numpy
-- openCV
-- pyqt5
+- matplotlib        pip3 install mathplotlib
+- numpy              pip3 install numpy
+- openCV             pip3 install opencv-python
+- PyQt5                 pip3 install PyQt5
 
 Sur le Pi raspian:
 
@@ -221,23 +224,44 @@ Sur le Pi raspian:
 
 - picamera (version expérimentale)
 
-
 ## Usage
+
+Ci-dessous l'image de l'interface de l'application sur le PC
+
+![gui](images/gui.jpg)
 
 ### Exécuter l'application
 
-- Sur le PC dans le répertoire GUIControl exécuter: python Telecineapplication.py
-- Sur le Raspberry dans le répertoire Respberry exécuter: python Controler.py
-- Sur le PC saisir l'adresse IP du Raspberry et cliquer "Connect"
+Sur le PC dans le répertoire GUIControl exécuter: python Telecineapplication.py
+
+Sur le Raspberry exécuter le démon  pigpiod : sudo pigpiod
+
+Sur le Raspberry dans le répertoire Respberry exécuter: python Controller.py
+
+Sur le PC saisir l'adresse IP du Raspberry et cliquer "Connect"
+
+### Ouvrir la camera
+
+Le plus simple est de choisir un sensor_mode prédéfini 
+
+https://picamera.readthedocs.io/en/release-1.13/fov.html#sensor-modes
+
+La résolution sera alors la résolution par défaut de ce mode. On peut aussi spécifier la résolution désirée.
+
+On peut ouvrir la caméra avec ou sans calibration, ce qui permet de constater la différence.
+
+### Calibrer la caméra
+
+Le bouton "Calibrate" exécute le programme de calibration repris du projet openflexure. Il crée un fichier calibrate.npz qui contient la lens_shading_table et qui sera utilisé à la prochaine ouverture de la caméra.
 
 ### Contrôle du moteur
 
-- Paramétrer le nombre de steps par révolution, le ratio des poulies Moteur/Projecteur  et les numéros de pins (ENABLE, DIR, PULSE, et la pin du TRIGGER)
+- En premier lieu paramétrer le nombre de steps par révolution, le ratio des poulies Moteur/Projecteur  et les numéros de pins (ENABLE, DIR, PULSE, et la pin du TRIGGER)
 - Le moteur peut tourner en avant ou en arrière à une certaine vitesse ou par image
 
 ### Paramètres de la caméra
 
-On peut ajuster les paramètres de la caméra, cependant les meilleurs résultats sont obtenus en laissant les paramètres automatiques, color (White balance) auto et shutter 0 (auto). 
+On peut ajuster les paramètres de la caméra, cependant les meilleurs résultats sont obtenus en laissant les paramètres automatiques, color auto(White balance) et shutter_speed  0 (auto). 
 
 Sur le Raspberry le program calibrate.py (dérivé du projet openflexure projet) calcule une table de correction `lens_shading_table` sauvegardée dans un fichier calibrate.npz. Si ce fichier est présent lors de l'exécution il est pris en compte. Vous pouvez essayer avec ou sans ce fichier pour voir les effets de la calibration.
 
@@ -246,7 +270,7 @@ Pour calibrer il faut capturer une image uniformément blanche (pas de cadre noi
 ### Capture
 
 - Shot: Capture une image (sans bracket)
-- Play: Capture sans avancer le moteur, utile pour tester les paramètres et le bracket
+- Preview: Capture sans moteur, utile pour tester la mise au point, les paramètres de la caméra et le bracket
 - Capture: Capture en avançant le moteur. Utiliser la méthode OnFrame (On Trigger n'est pas bien testé)
 
 ### Bracketing et fusion
@@ -262,25 +286,25 @@ Si un bracket de 3 est choisi il faut ajuster:
 
 Pour ajuster ces coefficients il faut faire des essais sur une image dans votre film:
 
-Sans "Merge" mais avec "Save" choisir "Play" framerate 30fps
+Sans "Merge" mais avec "Save" choisir "Preview" framerate 30fps
 
-- Vous devez bien voir dans le répertoire de sauvegarde les trois images dans l'ordre (sous-exposée, sur-exposée, normale) sinon il faut augmenter "Shutter speed wait"
-- De plus l'exposition auto de la trame normale doit être stable, sinon il faut augmenter "Shutter auto wait"
+- Vous devez bien voir dans le répertoire de sauvegarde les trois images dans l'ordre (sous-exposée, sur-exposée, normale) sinon il faut augmenter "Shutter speed wait" pour laisser le temps à la caméra d'ajuster l'exposition.
+- De plus l'exposition auto de la trame normale doit être stable, sinon il faut augmenter "Shutter auto wait" pour laisser le temps à la caméra de revenir en exposition automatique.
 
 Avec "Merge" vous pouvez ensuite constater l'effet de la fusion
 
 Ensuite vous pouvez faire les mêmes essais en "Capture"
 
-- Vérifier également que l'image normale n'est pas bougée. Sinon il faut augmenter "Shutter auto wait" pour attendre la stabilisation après l'avance du moteur.
+- Vérifier également que l'image normale n'est pas bougée (blurred) . Sinon il faut augmenter "Shutter auto wait" pour attendre la stabilisation totale après l'avance du moteur.
 
-Au final avec un bracket de 3 et un framerate de 30fps vous devez obtenir un débit d'environ 1 image par seconde.
+Au final avec un bracket de 3 et un framerate  camera de 30fps vous devez obtenir un débit d'environ 1 image par seconde.
 
 ### Traitement des images
 
 Il s'effectue sur le PC
 
 - "Histo" affiche l'histogramme de l'image
-- "Sharpness" Evalue et affiche la netteté de l'image pour une bonne mise au point (utiliser "Shot" ou "play" avec 5fps) . La meilleur mise au point correspond à la valeur maximum.  
+- "Sharpness" Evalue et affiche la netteté de l'image pour une bonne mise au point (utiliser "Shot" ou "Play" 5fps) . La meilleur mise au point correspond à la valeur maximum de sharpness. L'amorce blanche au début du film permet de bien tester la mise au point.
 - "Merge"  Détermine l'algorithme de fusion "None"  "Mertens" ou "Debevec"
 - "Save" Sauvegarde les images dans le répertoire choisi. On peut choisir un numéro de bande et un numéro de clip. Pour chaque "Capture" les images sont numérotées à partir de 0
 
@@ -300,7 +324,7 @@ Pour la restauration, stabilisation, cleaning, degrain, sharpness, final white b
 
 C'est un peu ancien mais cela reste une référence.
 
-Encodage direct en sortie du script en AVC, HEVC avec MeGui
+Encodage direct en sortie du script en AVC ou HEVC avec MeGui
 
 Ou bien sûr tout autre éditeur Video
 

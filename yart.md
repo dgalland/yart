@@ -16,7 +16,6 @@ J'utilise une camera Raspberry V2 8MP NoIR Arducam avec monture CS. Il faut note
 
 - Un filtre infra-rouge n'est pas vraiment nécessaire pour une application Telecine, donc une camera NoIR convient.
 - Une caméra avec une monture CS ou M12 permet de choisir un objectif adapté. 
-- La camera V1 semble aussi donner de bons résultats pour certains. Elle est peut être préférable pour être utilisée avec un objectif non standard. Il n'est pas sûr que la camera V2 soit le meilleur choix, c'est un point à élucider.
 
 La taille de l'image 8mm est de 4,5mmx3mm, celle du capteur IMX219 3,68x2,67mm. Le grandissement n'est pas très différent de 1. Donc la distance du centre de l'objectif à l'image et du centre de l'objectif au capteur sont à peu près deux fois la distance focale. La distance de l'image au capteur à peu près quatre fois la distance focale. C'est pourquoi j'ai choisi un objectif de 35mm. Dans mon cas il faut 30mm de bagues d'extension CS. La caméra est montée à l'emplacement de la lampe du projecteur. Une table millimétrique permet une mise au point précise. Ci dessous le calcul optique:
 
@@ -28,12 +27,13 @@ L'objectif de la camera Raspberry est collé et non adéquat pour la macrophotog
 
 Il est important de noter que la caméra V2 (V1 ?)  avec un objectif autre que l'objectif standard nécessite absolument une calibration de l'objectif (cf ci dessous)
 
+### Camera V1 ou V2 ?
 
+La camera V1 semble aussi donner de bons résultats pour certains. Sa résolution est suffisante. Elle est peut être préférable pour être utilisée avec un objectif non standard. Il n'est pas sûr que la camera V2 soit le meilleur choix, c'est un point à élucider. 
 
 ### Lampe
 
-J'ai de bon résultats avec une LED TrueColor Phillips faisceau étroit 3500K
-J'ai placé un diffuseur à la surface de la LED
+J'ai de bon résultats avec une LED TrueColor Phillips faisceau étroit 3500K. J'ai placé un diffuseur à la surface de la LED.  Il faut ajuster le diffuseur et la distance de la lampe pour avoir une durée d'exposition convenable. Si la caméra fonctionne à 30fps l'exposition maximum est de 33333 micro seconds. Si le bracketing (cf infra) est utilisé il faut que l'exposition auto sur une image normale soit d'environ 2000 à 3000 micro-seconds.
 
   ### Projecteur, Trigger, Moteur
 
@@ -49,7 +49,7 @@ Un moteur pas à pas fonctionne en général à 200 pulses par tour. Utiliser le
 
 Maintenant quelques images:
 
-Le projecteur, la caméra et la lampe
+Le projecteur, la caméra et la lampe. Une petite table micrométrique permet une mise au point précise.
 
 
 
@@ -59,7 +59,7 @@ Le moteur et le disque avec le capteur optique. Les équerres pour rigidifier et
 
 ![2](images/2.jpg)
 
-De gauche à droite: Alimentation 24v, Contrôleur TB6600, bredboard et Raspberry et son alimentation 5V
+De gauche à droite: Alimentation 24v, Contrôleur TB6600, breadboard et Raspberry et son alimentation 5V
 
 ![3](images/3.jpg)
 
@@ -93,17 +93,15 @@ Bien entendu on utilise la librairie Python picamera. Cependant comme indiqué p
 
 https://github.com/rwb27/openflexure_microscope_software
 
-Voilà l'image d'une feuille blanche avant calibration (il y a quelques taches sur le capteur)
-
-
+Voilà l'image d'une feuille blanche avant calibration
 
 ![lens-before](images/lens-before.jpg)
 
-et après 
+et après calibration
 
 ![lens-after](/images/lens-after.jpg)
 
-Il semble que ceci soit moins nécessaire avec la camera V1 (5MP)
+Il semble que ceci soit moins nécessaire avec la camera V1 (5MP) ?
 
 La capture s'effectue en résolution 1640x1232 en JPEG sur le port video avec un framerate de 30fps
 
@@ -132,9 +130,9 @@ Tant que captureEvent
 
 Dans la première méthode le moteur avance de façon discontinue, frame par frame, dans la seconde il tourne à vitesse constate, le trigger déclenche la capture. 	J'ai choisi pour l'instant le première plus sécurisante.
 
-### Paramètres de la caméra, Merge, HDR
+### Paramètres de la caméra, Bracketing, Merge, HDR
 
-En premier lieu, il faut souligner que la librairie picamera fait un excellent travail pour la qualité de l'image. L'exposition et la balance des blancs automatiques sont très bien calculées, il est difficile et donc pas nécessaire de faire mieux manuellement.
+En premier lieu, il faut souligner que la librairie picamera fait un excellent travail pour la qualité de l'image. <u>L'exposition et la balance des blancs automatiques sont très bien calculées</u>, il est difficile et donc pas nécessaire de faire mieux manuellement.
 
 Cependant la camera est limitée dans sa dynamique, si on augmente l'exposition pour éclaircir les sombres, il n'y a plus de détails dans les clairs et inversement. Il est pratiquement impossible d'obtenir une image qui reflète correctement toutes les luminosités de la scène.
 
@@ -149,15 +147,19 @@ On peut se référer à :
 et
 <https://www.learnopencv.com/exposure-fusion-using-opencv-cpp-python/>
 
-Comme exemple, ci-dessous la même image avec 25 expositions également réparties en luminosité. On constate que aucune image n'est vraiment satisfaisante, la dernière bien meilleure est le résultat d'un merge HDR (MergeDebevec et TonemapReinhard)
+Comme exemple, ci-dessous la même image avec 25 expositions également réparties en luminosité. On constate que <u>aucune image n'est vraiment satisfaisante</u>. Quand on commence à voir le fond sombre les blancs sont surexposés. la dernière image bien meilleure est le résultat d'un merge HDR (MergeDebevec et TonemapReinhard)
 
 ![result (2460 x 1540)](images/result.jpg)
 
-Autre exemple, l'image sous-exposée, l'image sur-exposée , l'image avec l'exposition automatique puis l'image merge Mertens et l'image HDR (un peu foncée car la seconde image n'est pas assez sur exposée)
+Autre exemple, l'image sous-exposée, l'image sur-exposée , l'image avec l'exposition automatique puis l'image merge Mertens et l'image HDR. L'image Mertens est un peu artificielle car elle ne rend pas compte de la luminosité réelle de la scène, les sombres sont exagérément accentués.
 
 ![merge](images/merge.jpg)
 
+###### Note sur les algorithmes de fusion HDR et de Tone Mapping
 
+La littérature est abondante sur le sujet. J'ai fait divers essais et le meilleur résultat est obtenu avec un MergeDebevec et un ToneMap Durand. Normalement le merge Debevec devrait prendre en compte la courbe de réponse de la caméra mais cela ne donne pas de bons résultats. Je suspecte que les images JPEG reçues de la caméra ne sont pas la réponse du capteur mais sont traitées, en particulier ajustées en gamma. Le merge utilisé dans l'application prend en compte une réponse linéaire. 
+
+###### Mise en œuvre du merge
 
 D'après mon expérience par rapport a l'exposition automatique t, l'exposition sous exposée peut être de 0.1xt et l'exposition sur exposée de 8*t. ces facteurs sont stables sur la durée de la capture.
 
@@ -216,6 +218,10 @@ Sur le PC Windows
 - openCV             pip3 install opencv-python
 - PyQt5                 pip3 install PyQt5
 
+Si on utilise l'IDE Thonny, il est préférable de l'installer dans Python lui-même plutôt que la version qui comprend une autre installation de Python:
+
+- pip3 install thonnyapp
+
 Sur le Pi raspian:
 
 - numpy
@@ -232,13 +238,14 @@ Ci-dessous l'image de l'interface de l'application sur le PC
 
 ### Exécuter l'application
 
-Sur le PC dans le répertoire GUIControl exécuter: python Telecineapplication.py
+- Sur le PC dans le répertoire GUIControl exécuter: python Telecineapplication.py
 
-Sur le Raspberry exécuter le démon  pigpiod : sudo pigpiod
+- Sur le Raspberry exécuter le démon  pigpiod : sudo pigpiod
 
-Sur le Raspberry dans le répertoire Respberry exécuter: python Controller.py
+- Sur le Raspberry dans le répertoire Respberry exécuter: python Controller.py
 
-Sur le PC saisir l'adresse IP du Raspberry et cliquer "Connect"
+- Sur le PC saisir l'adresse IP du Raspberry et cliquer "Connect"
+
 
 ### Ouvrir la camera
 
@@ -254,6 +261,8 @@ On peut ouvrir la caméra avec ou sans calibration, ce qui permet de constater l
 
 Le bouton "Calibrate" exécute le programme de calibration repris du projet openflexure. Il crée un fichier calibrate.npz qui contient la lens_shading_table et qui sera utilisé à la prochaine ouverture de la caméra.
 
+Pour calibrer il faut capturer une image <u>uniformément blanche</u> (pas de cadre noir par exemple). Personnellement  je place un diffuseur blanc devant la fenêtre du film et je mets la caméra un peu hors focus
+
 ### Contrôle du moteur
 
 - En premier lieu paramétrer le nombre de steps par révolution, le ratio des poulies Moteur/Projecteur  et les numéros de pins (ENABLE, DIR, PULSE, et la pin du TRIGGER)
@@ -262,10 +271,6 @@ Le bouton "Calibrate" exécute le programme de calibration repris du projet open
 ### Paramètres de la caméra
 
 On peut ajuster les paramètres de la caméra, cependant les meilleurs résultats sont obtenus en laissant les paramètres automatiques, color auto(White balance) et shutter_speed  0 (auto). 
-
-Sur le Raspberry le program calibrate.py (dérivé du projet openflexure projet) calcule une table de correction `lens_shading_table` sauvegardée dans un fichier calibrate.npz. Si ce fichier est présent lors de l'exécution il est pris en compte. Vous pouvez essayer avec ou sans ce fichier pour voir les effets de la calibration.
-
-Pour calibrer il faut capturer une image uniformément blanche (pas de cadre noir par exemple). Personnellement  je place un diffuseur blanc devant la fenêtre du film et je mets la caméra hors focus
 
 ### Capture
 
@@ -295,7 +300,7 @@ Avec "Merge" vous pouvez ensuite constater l'effet de la fusion
 
 Ensuite vous pouvez faire les mêmes essais en "Capture"
 
-- Vérifier également que l'image normale n'est pas bougée (blurred) . Sinon il faut augmenter "Shutter auto wait" pour attendre la stabilisation totale après l'avance du moteur.
+- Vérifier également que lorsque le moteur  s'arrête l'image normale n'est pas bougée (blurred) . Sinon il faut augmenter "Shutter auto wait" pour attendre la stabilisation totale après l'avance du moteur.
 
 Au final avec un bracket de 3 et un framerate  camera de 30fps vous devez obtenir un débit d'environ 1 image par seconde.
 
@@ -304,7 +309,7 @@ Au final avec un bracket de 3 et un framerate  camera de 30fps vous devez obteni
 Il s'effectue sur le PC
 
 - "Histo" affiche l'histogramme de l'image
-- "Sharpness" Evalue et affiche la netteté de l'image pour une bonne mise au point (utiliser "Shot" ou "Play" 5fps) . La meilleur mise au point correspond à la valeur maximum de sharpness. L'amorce blanche au début du film permet de bien tester la mise au point.
+- "Sharpness" Evalue et affiche la netteté de l'image pour une bonne mise au point (utiliser "Shot" ou "Play" avec 5fps) . La meilleur mise au point correspond à la valeur maximum de sharpness. L'amorce blanche au début du film permet de bien tester la mise au point.
 - "Merge"  Détermine l'algorithme de fusion "None"  "Mertens" ou "Debevec"
 - "Save" Sauvegarde les images dans le répertoire choisi. On peut choisir un numéro de bande et un numéro de clip. Pour chaque "Capture" les images sont numérotées à partir de 0
 

@@ -151,7 +151,7 @@ Comme exemple, ci-dessous la même image avec 25 expositions également réparti
 
 ![result (2460 x 1540)](images/result.jpg)
 
-Autre exemple, l'image sous-exposée, l'image sur-exposée , l'image avec l'exposition automatique puis l'image merge Mertens et l'image HDR. L'image Mertens est un peu artificielle car elle ne rend pas compte de la luminosité réelle de la scène, les sombres sont exagérément accentués.
+Autre exemple, l'image sous-exposée,  l'image avec l'exposition automatique, l'image sur-exposée puis l'image merge Mertens et l'image HDR. L'image Mertens est un peu artificielle car elle ne rend pas compte de la luminosité réelle de la scène, les sombres sont exagérément accentués. On constate également que le merge Debevec réduit le grain.
 
 ![merge](images/merge.jpg)
 

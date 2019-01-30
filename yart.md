@@ -41,7 +41,7 @@ Mon projecteur est un Elmo GP, il faut enlever toutes les parties électriques e
 
 Si possible agrandir au maximum ou supprimer la fenêtre de projection pour capturer la totalité de l'image.
 
-Le moteur pas à pas est un moteur NEMA 17 alimenté en 24v. Comme contrôleur j'ai choisi un TB6600 qui présente certains avantages, les hauts voltages sont bien séparés des broches du Pi (moins dangereux pour le Pi), les broches sont protégées par des coupleurs optiques et le micro-stepping et l'intensité sont contrôlables par des switchs 
+Le moteur pas à pas est un moteur NEMA 17 alimenté en 24v. Comme contrôleur j'ai choisi un TB6600 qui présente certains avantages, les hauts voltages sont bien séparés des broches du Pi (moins dangereux pour le Pi !), les broches sont protégées par des coupleurs optiques et le micro-stepping et l'intensité sont contrôlables par des switchs 
 
 Le moteur entraine l'axe du projecteur par des poulies GT, avec un ratio de 1:1
 
@@ -97,7 +97,7 @@ Voilà l'image d'une feuille blanche avant calibration
 
 ![lens-before](images/lens-before.jpg)
 
-et après calibration
+et après calibration !
 
 ![lens-after](/images/lens-after.jpg)
 
@@ -157,7 +157,7 @@ Autre exemple, l'image sous-exposée, l'image sur-exposée , l'image avec l'expo
 
 ###### Note sur les algorithmes de fusion HDR et de Tone Mapping
 
-La littérature est abondante sur le sujet. J'ai fait divers essais et le meilleur résultat est obtenu avec un MergeDebevec et un ToneMap Durand. Normalement le merge Debevec devrait prendre en compte la courbe de réponse de la caméra mais cela ne donne pas de bons résultats. Je suspecte que les images JPEG reçues de la caméra ne sont pas la réponse du capteur mais sont traitées, en particulier ajustées en gamma. Le merge utilisé dans l'application prend en compte une réponse linéaire. 
+La littérature est abondante sur le sujet. J'ai fait divers essais et le meilleur résultat est obtenu avec un MergeDebevec et un ToneMap Durand. Normalement le merge Debevec devrait prendre en compte la courbe de réponse de la caméra mais cela ne donne pas de bons résultats. Je suspecte que les images JPEG reçues de la caméra ne sont pas la vraie réponse du capteur mais sont traitées, en particulier ajustées en gamma. Le merge utilisé dans l'application prend en compte une réponse linéaire. 
 
 ###### Mise en œuvre du merge
 
@@ -218,7 +218,7 @@ Sur le PC Windows
 - openCV             pip3 install opencv-python
 - PyQt5                 pip3 install PyQt5
 
-Si on utilise l'IDE Thonny, il est préférable de l'installer dans Python lui-même plutôt que la version qui comprend une autre installation de Python:
+Si on utilise l'IDE Thonny, il est préférable de l'installer dans Python lui-même plutôt que d'installer la version qui comprend une autre installation de Python:
 
 - pip3 install thonnyapp
 
@@ -238,7 +238,7 @@ Ci-dessous l'image de l'interface de l'application sur le PC
 
 ### Exécuter l'application
 
-- Sur le PC dans le répertoire GUIControl exécuter: python Telecineapplication.py
+- Sur le PC dans le répertoire GUIControl exécuter: python TelecineApplication.py
 
 - Sur le Raspberry exécuter le démon  pigpiod : sudo pigpiod
 
@@ -259,7 +259,7 @@ On peut ouvrir la caméra avec ou sans calibration, ce qui permet de constater l
 
 ### Calibrer la caméra
 
-Le bouton "Calibrate" exécute le programme de calibration repris du projet openflexure. Il crée un fichier calibrate.npz qui contient la lens_shading_table et qui sera utilisé à la prochaine ouverture de la caméra.
+Le bouton "Calibrate" exécute le programme de calibration repris du projet openflexure cité ci-dessus. Il crée un fichier calibrate.npz qui contient la lens_shading_table et qui sera utilisé à la prochaine ouverture de la caméra.
 
 Pour calibrer il faut capturer une image <u>uniformément blanche</u> (pas de cadre noir par exemple). Personnellement  je place un diffuseur blanc devant la fenêtre du film et je mets la caméra un peu hors focus
 
@@ -270,7 +270,7 @@ Pour calibrer il faut capturer une image <u>uniformément blanche</u> (pas de ca
 
 ### Paramètres de la caméra
 
-On peut ajuster les paramètres de la caméra, cependant les meilleurs résultats sont obtenus en laissant les paramètres automatiques, color auto(White balance) et shutter_speed  0 (auto). 
+On peut ajuster les paramètres de la caméra, cependant les meilleurs résultats sont obtenus en laissant les paramètres automatiques, color auto (automatic white balance) et shutter_speed  0 (automatic exposure). 
 
 ### Capture
 

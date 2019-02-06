@@ -87,6 +87,23 @@ L'objet camera et l'objet motor ont des attributs de propriétés. Des méthodes
 
 On utilise la librairie pigpio qui permet de générer les pulses PWM par hardware en dehors de l'application Python. C'est plus précis et ne ralentit pas l'application. La librairie pigpio permet aussi dé démarrer le moteur en contrôlant l'accélération pour éviter de le bloquer (ramping).  Le moteur peut fonctionner en continu à une certaine vitesse ou bien en discontinu frame by frame avec arrêt sur le trigger.
 
+Câblage du moteur
+
+Deux broches sont absolument nécessaires PUL/STEP et DIR
+Unr broche supplémentaire ENA ou RESET peut être utilisée pour mettre le moteur ON/OFF
+
+TB6600
+
+ENA- PUL- DIR- to GND
+ENA+ DIR+ PUL+ To Pi GPIO 
+Si ENA+ HIGH le moteur est Off Line 
+
+DRV8825
+
+STEP DIR and SLEEP to Pi GPIO
+RESET non utilisé connecté sur Pi VDD 3.3V
+Si SLEEP est HIGH le moteur est On Line
+
 ### Camera	
 
 Bien entendu on utilise la librairie Python picamera. Cependant comme indiqué plus haut la camera V2 avec un objectif non d'origine produit une image très mauvaise. Il est absolument nécessaire de calibrer l'objectif en construisant une table de correction `lens_shading_table`. Cette modification n'est pas encore comprise dans la version actuelle de la librairie, il faut donc  installer et utiliser une version spéciale de la librairie., On pourra se référer au projet:
@@ -265,8 +282,24 @@ Pour calibrer il faut capturer une image <u>uniformément blanche</u> (pas de ca
 
 ### Contrôle du moteur
 
-- En premier lieu paramétrer le nombre de steps par révolution, le ratio des poulies Moteur/Projecteur  et les numéros de pins (ENABLE, DIR, PULSE, et la pin du TRIGGER)
-- Le moteur peut tourner en avant ou en arrière à une certaine vitesse ou par image
+En premier lieu paramétrer le nombre de steps par révolution, le ratio des poulies Moteur/Projecteur  et les numéros de pins. Pour chaque pin choisir le niveau HIGH ou LOW.
+
+La pin ON contrôle le moteur ON/OFF
+
+Par exemple pour le TB600
+ON correspond à la pin ENA+ level LOW
+PULSE correspond à la pin PUL+ level HIGH
+DIR correspond à la pin DIR+ choisir level pour avoir le bon sens de rotation
+
+Pour le DRV8825
+ON correspond à la pin SLEEP level HIGH
+PULSE correspond à la pin STEP level HIGH
+DIR correspond à la pin DIR choisir level pour avoir le bon sens de rotation
+
+ Le niveau HIGH ou LOW de la pin TRIGGER dépend du senseur utilisé
+Par exemple pour mon capteur optique le niveau est LOW quand le trou est détecté.
+
+Le moteur peut tourner en avant ou en arrière à une certaine vitesse ou par image
 
 ### Paramètres de la caméra
 

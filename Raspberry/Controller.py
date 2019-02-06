@@ -24,7 +24,7 @@ from TelecineMotor import *
 initSettings = ("sensor_mode",)
 controlSettings = ("awb_mode","awb_gains","shutter_speed","analog_gain","digital_gain","brightness","contrast","saturation", "framerate","exposure_mode","iso", "exposure_compensation")
 addedSettings = ("bracket_steps","use_video_port", "bracket_dark_coefficient", "bracket_light_coefficient","capture_method", "shutter_speed_wait", "shutter_auto_wait")
-motorSettings = ("speed","pulley_ratio","steps_per_rev","ena_pin","dir_pin","pulse_pin","trigger_pin","capture_speed","play_speed")
+motorSettings = ("speed","pulley_ratio","steps_per_rev","ena_pin","dir_pin","pulse_pin","trigger_pin","capture_speed","play_speed","ena_level","dir_level","pulse_level","trigger_level")
 
 commandSock = None
 imageSock = None
@@ -148,7 +148,6 @@ class TelecineCamera(PiCamera) :
                         stream.truncate(0)
         if self.capture_method == CAPTURE_ON_TRIGGER :
             motor.stop()
-                    
 
     def captureSequence(self) :
         self.frameCounter = 0
@@ -160,58 +159,6 @@ class TelecineCamera(PiCamera) :
         header = {'type':HEADER_MESSAGE, 'msg':msg}
         queue.put(header)
         
-    def captureAndLuma(self, exposure) :
-        stream = BytesIO()
-        self.shutter_speed = int(exposure)
-        time.sleep(0.5)
-        camera.capture(stream, format="jpeg", quality=90, use_video_port=self.use_video_port)
-        stream.seek(0)
-        image = stream.getvalue()
-        jpeg = np.frombuffer(image, np.uint8,count = len(image)) 
-        rgb = cv2.imdecode(jpeg, 1)   #Jpeg decode
-        luma = rgb.mean()
-        return luma
-    
-    def calibrateBetween(self, lumas, exposures, i, j) :
-        if j-i > 2 :
-            k = int((i+j)/2)
-            luma = lumas[k]  #but à atteindre
-            e1 = exposures[i]
-            e2 = exposures[j-1]
-            print('For luma:', luma, ' Between:', i, ' ', e1, ' and ', j, ' ', e2)
-            inter = (e2-e1)/100 + 1
-            while e2-e1 > inter :
-                e = (e1 + e2)/2.
-                l = self.captureAndLuma(e)
-                if l > luma :
-                    e2 = e
-                else :
-                    e1 = e
-            exposures[k] = e2
-            self.calibrateBetween(lumas, exposures, i, k+1)
-            self.calibrateBetween(lumas, exposures, k, j)
-            
-            
-    def calibrateHDR(self, frames) :
-        stream = BytesIO()
-        lumas = [luma for luma in range(0,255,10)]
-        exposures = [0]*len(lumas)
-        exposures[0] = 1
-        exposures[-1] = 1000000./self.framerate
-        self.calibrateBetween(lumas, exposures, 0, len(lumas))
-        print(exposures)
-        for i,e in enumerate(exposures) :
-            self.shutter_speed = int(e)
-            time.sleep(0.5)
-            camera.capture(stream, format="jpeg", quality=90, use_video_port=self.use_video_port)
-            stream.seek(0)
-            image = stream.getvalue()
-            header = {'type':HEADER_HDR, 'count':0, 'bracket':len(lumas)-i, 'shutter':self.exposure_speed}
-#            header = {'type':HEADER_IMAGE, 'count':0, 'bracket':0, 'shutter':self.exposure_speed}
-            queue.put(copy.deepcopy(header))
-            queue.put(image)
-            stream.truncate(0)
-
         
     def captureImage(self) :
         stream = BytesIO()
@@ -267,15 +214,13 @@ def openCamera(mode, resolution, useCalibration) :
         cam = TelecineCamera(sensor_mode = mode)
     if resolution != None :
         cam.resolution = resolution
-    print(cam.framerate)
-    print(cam.resolution)
-    npz = np.load("telecine.npz")
     try:
+        npz = np.load("camera.npz")
         setSettings(cam, npz['control'][()])
-    except :
-        pass
-    try :
-        setSettings(cam, npz['added'][()])
+        try :
+            setSettings(cam, npz['added'][()])
+        except :
+            pass
     except :
         pass
 #Start capture Thread
@@ -286,8 +231,11 @@ def openCamera(mode, resolution, useCalibration) :
 
 #To properly close the camera we shoud terminate the capture thread
 def closeCamera() :
-    exitFlag = True 
+    global camera
+    exitFlag = True
+    saveSettings()
     camera.close()
+    camera = None
 
 def calibrateCamera() :
     if camera != None :
@@ -297,16 +245,16 @@ def calibrateCamera() :
 
    
 def saveSettings() :
-    if camera != None and motor != None :
-        np.savez('telecine.npz', init = getSettings(camera, initSettings) , \
+    if camera != None :
+        np.savez('camera.npz', init = getSettings(camera, initSettings) , \
              control=getSettings(camera, controlSettings), \
-             added=getSettings(camera, addedSettings), \
-             motor=getSettings(motor, motorSettings))
-            
+             added=getSettings(camera, addedSettings))
+    if motor != None :        
+        np.savez('motor.npz', motor=getSettings(motor, motorSettings))
 try:
     pi = pigpio.pi()
     if not pi.connected:
-        print('Not connected')
+        print('Launch pigpio daemon !')
         exit()
     
     queue = Queue() #sending queue
@@ -314,10 +262,10 @@ try:
     motor = TelecineMotor(pi, queue)
     motor.triggerEvent = triggerEvent
     try :
-        npz = np.load("telecine.npz")
+        npz = np.load("motor.npz")
         setSettings(motor, npz['motor'][()])
-    except :
-        pass
+    except Exception as e :
+        print(e)
 
     time.sleep(0.1)
     listenSock = socket.socket()
@@ -376,8 +324,8 @@ try:
         elif command == MOTOR_STOP :
             motor.stop()
             motor.advanceUntilTrigger()
-        elif command == CALIBRATE_HDR :
-            camera.calibrateHDR(request[1])
+##        elif command == CALIBRATE_HDR :
+##            camera.calibrateHDR(request[1])
         elif command == OPEN_CAMERA :
             camera = openCamera(request[1],request[2], request[3])
         elif command == CLOSE_CAMERA :
@@ -385,11 +333,14 @@ try:
         elif command == CALIBRATE_CAMERA :
             calibrateCamera()
             commandSock.sendObject('Calibrate done')
+        elif command == MOTOR_ON :
+            motor.on()
+        elif command == MOTOR_OFF :
+            motor.off()
         else :
             pass            
        
 finally:
-    saveSettings()
     exitFlag = True
     if captureEvent != None :
         captureEvent.clear() #stop capture

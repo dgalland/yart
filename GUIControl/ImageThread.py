@@ -26,7 +26,6 @@ class ImageThread (QThread):
     histos = False
     images = []
     shutters = []
-    linearize = False
     def __init__(self):
         QThread.__init__(self)
         self.threadID = 1
@@ -35,37 +34,14 @@ class ImageThread (QThread):
         self.saveOn = False
         self.mergeMertens = cv2.createMergeMertens()
         self.mergeDebevec = cv2.createMergeDebevec()
-        self.toneMap = None
-        self.calibrateDebevec = cv2.createCalibrateDebevec()
-        self.responseDebevec = None
-        self.crf = False
+        self.toneMap = cv2.createTonemapReinhard()
         self.reduceFactor = 1;
-#        self.lookUpTable = np.empty((1,256), np.uint8)
-#        for i in range(256):
-#            self.lookUpTable[0,i] = np.clip(pow(i / 255.0, self.gamma) * 255.0, 0, 255)
-#Revert the gamma 
-        self.lookUpTable = np.empty([256,1]).astype("uint8")
-        for i in range (0,256) :
-            self.lookUpTable[i:] = ((i/255.)**(1./0.45))*255
-#Read the camera response file if exists -> not really useful            
-        try:
-            npz = np.load("crf.npz")
-            self.responseDebevec = npz['crf'][()]
-            self.crf = True
-        except Exception as e:
-            pass
-        if self.crf :
-            self.toneMap = cv2.createTonemapReinhard(1.5,0,0,0)
-        else :
-            self.toneMap = cv2.createTonemapReinhard()
-
-   
+        self.equalize = False
     def calcHistogram(self, image) :
         histos = []
         for i in range(3):
             histo = cv2.calcHist([image],[i],None,[256],[0,256])
             histos.append(histo)
-#        self.histoSignal.emit(histos)  #Display histo in QT
         self.displayHistogramOverImage(histos, image)
         
     def displayHistogramOverImage(self, histos, image) :
@@ -91,8 +67,6 @@ class ImageThread (QThread):
         jpeg = np.frombuffer(jpeg, np.uint8,count = len(jpeg)) 
         image = cv2.imdecode(jpeg, 1)   #Jpeg decode
         if self.merge != MERGE_NONE and bracket != 0 : #Merge
-            if self.linearize :
-                image = cv2.LUT(image, self.lookUpTable)
             self.images.append(image)
             self.shutters.append(header['shutter'])
             if bracket != 1 :
@@ -101,12 +75,16 @@ class ImageThread (QThread):
                 if self.merge == MERGE_MERTENS:
                     image = self.mergeMertens.process(self.images)
                 else :
-                    if self.crf :
-                        image = self.mergeDebevec.process(self.images, np.asarray(self.shutters,dtype=np.float32)/1000000., self.responseDebevec)
-                    else:
-                        image = self.mergeDebevec.process(self.images, np.asarray(self.shutters,dtype=np.float32)/1000000.)
+                    image = self.mergeDebevec.process(self.images, np.asarray(self.shutters,dtype=np.float32)/1000000.)
                     image = self.toneMap.process(image)
                 image = np.clip(image*255, 0, 255).astype('uint8')
+                if False : #Not really concluding
+                    H, S, V = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2HSV))
+                    eq_V = cv2.equalizeHist(V)
+                    image = cv2.cvtColor(cv2.merge([H, S, eq_V]), cv2.COLOR_HSV2BGR)
+#                    yuv = cv2.cvtColor(image,cv2.COLOR_BGR2YUV)
+#                    yuv[:,:,0] = cv2.equalizeHist(yuv[:,:,0])
+#                    image = cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR)
                 if self.saveOn :
                     cv2.imwrite(self.directory + "/image_%#05d.jpg" % count, image)
                 self.images.clear()
@@ -133,7 +111,6 @@ class ImageThread (QThread):
             
     def run(self):
         print('ImageThread started')
-        print(self.crf)
         self.imageSock = None
         try:
             sock = socket.socket()
@@ -155,9 +132,9 @@ class ImageThread (QThread):
                 if  typ == HEADER_IMAGE :
                     image = self.imageSock.receiveMsg()
                     self.processImage(header, image)
-                if  typ == HEADER_HDR :
-                    image = self.imageSock.receiveMsg()
-                    self.processHdrImage(header, image)
+#                if  typ == HEADER_HDR :
+#                    image = self.imageSock.receiveMsg()
+#                    self.processHdrImage(header, image)
                 
         finally:
             print('ImageThread terminated')
@@ -166,7 +143,7 @@ class ImageThread (QThread):
                 self.imageSock.shutdown()
                 self.imageSock.close()
 
-#Experimental Receive a set of exposures
+#Experimental Receive a set of exposures not used
     def processHdrImage(self, header, jpeg):
         jpeg = np.frombuffer(jpeg, np.uint8,count = len(jpeg))
         file = open(self.directory + "/ldr_%#05d.jpg" % (header['shutter']) ,'wb')

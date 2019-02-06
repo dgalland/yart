@@ -18,6 +18,10 @@ class TelecineMotor() :
     pulse_pin = 23
     trigger_pin = 24
     pulley_ratio = 1  #  Motor/Frame
+    ena_level = 0
+    dir_level = 0
+    pulse_level = 1
+    trigger_level = 0
     frameCounter = 0
     triggerCallback = None
     speed = 0
@@ -33,20 +37,28 @@ class TelecineMotor() :
         self.pi.set_mode(self.pulse_pin, pigpio.OUTPUT)
         self.pi.set_mode(self.ena_pin, pigpio.OUTPUT)
         self.pi.set_mode(self.trigger_pin, pigpio.INPUT)
-        self.pi.write(self.dir_pin, 0)
-        self.pi.write(self.pulse_pin, 0)
-        self.pi.write(self.ena_pin, 1) #repos
-        self.triggerCallback = self.pi.callback(self.trigger_pin, pigpio.FALLING_EDGE, self.trigger)
+        self.pi.write(self.dir_pin, self.dir_level)
+        self.pi.write(self.pulse_pin, 1 - self.pulse_level)
+        self.pi.write(self.ena_pin, 1 - self.ena_level) #repos
+        if self.trigger_level == 0 :
+            self.triggerCallback = self.pi.callback(self.trigger_pin, pigpio.FALLING_EDGE, self.trigger)
+        else :
+            self.triggerCallback = self.pi.callback(self.trigger_pin, pigpio.RISING_EDGE, self.trigger)
         self.queue = queue
         
+    def on(self) :
+        if self.ena_pin != 0 :
+            self.pi.write(self.ena_pin, self.ena_level)
+        
+    def off(self) :
+        if self.ena_pin != 0 :
+            self.pi.write(self.ena_pin, 1 - self.ena_level)
 
     def trigger(self, gpio,level,  tick ) :
         if self.direction == MOTOR_FORWARD :
             self.frameCounter = self.frameCounter +1
         else :
             self.frameCounter = self.frameCounter - 1
-#Provoque des ennuis            
-#        self.queue.put({'type':HEADER_COUNT,'count': self.frameCounter}) 
         if self.triggered and self.pi.wave_tx_busy() :
             self.pi.wave_tx_stop()
         self.triggerEvent.set()
@@ -66,41 +78,20 @@ class TelecineMotor() :
 #return immediately    
     def advance(self):
         self.triggered = False
-        self.pi.write(self.ena_pin, 0)  #Power on
-        self.pi.write(self.dir_pin, self.direction)
+        self.pi.write(self.dir_pin, self.direction  if self.direction == self.dir_level else 1 - self.direction)  #self.direction = 0 forward
         self.pi.wave_clear()
         chain = []
         x = self.steps_per_rev  & 255
         y = self.steps_per_rev  >> 8
         for s in range(2,int(self.speed),2) :
-            print(s)
             chain += [255, 0, self.wave(s), 255, 1, x, y] #One rev for each
         chain += [255, 0, self.wave(self.speed), 255, 3]  #Loop forever
-        self.pi.wave_chain(chain)  # Transmit chain.
-#Unused    
-    def advanceWithDelay(self, delay):    #with a delay between rev delay in millis No ramping
-        self.triggered = False
-        self.pi.write(self.ena_pin, 0)  #Power on
-        self.pi.write(self.dir_pin, self.direction)
-        self.pi.wave_clear()
-        delayMicros = delay*1000 
-        delayCount = int(delay*1000/50000)
-        delayMicros = delayMicros % 50000
-        x = (self.steps_per_rev)  & 255
-        y = (self.steps_per_rev)  >> 8
-        chain = [255,0]
-        chain += [255, 0, self.wave(self.speed), 255, 1, x, y]  #One rev
-        for i in range (delayCount) :                        
-            chain += [255, 2, 50000 & 255, 50000 >> 8]
-        chain += [255, 2, delayMicros & 255, delayMicros >> 8]
-        chain += [255,3]    
         self.pi.wave_chain(chain)  # Transmit chain.
 
 #Advance count rev, return when finished (no ramping)
     def advanceCounted(self, count=1):
         self.triggered = False
-        self.pi.write(self.ena_pin, 0)  #Power on
-        self.pi.write(self.dir_pin, self.direction)
+        self.pi.write(self.dir_pin, self.direction  if self.direction == self.dir_level else 1 - self.direction)  #self.direction = 0 forward
         self.pi.wave_clear()
         wid = self.wave(self.speed)
         x = (count*self.steps_per_rev)  & 255
@@ -111,38 +102,15 @@ class TelecineMotor() :
      
     def advanceUntilTrigger(self):
         self.triggered = True
-        self.pi.write(self.ena_pin, 0)  #Power on
-        self.pi.write(self.dir_pin, self.direction)
+        self.pi.write(self.dir_pin, self.direction  if self.direction == self.dir_level else 1 - self.direction)  #self.direction = 0 forward
         self.pi.wave_clear()
         chain = [255, 0, self.wave(self.speed), 255, 3]  #Loop forever but triggered
         self.pi.wave_chain(chain)  # Transmit chain.
         self.triggerEvent.wait()
 
-#Not used while not really better        
-    def advanceUntilTriggerWithRamping(self):  
-        self.triggered = True
-        self.pi.write(self.ena_pin, 0)  #Power on
-        self.pi.write(self.dir_pin, self.direction)
-        self.pi.wave_clear()
-        steps = self.steps_per_rev/self.pulley_ratio
-        d = int(steps/10)
-        a = - 4*self.speed/(steps*steps)
-        b = - 2*a * steps/2
-        chain = []
-        lasty = 0
-        for x in range(0, int(steps-d), d) :
-            xx = x + steps/10
-            y = a*xx*xx + b*xx
-            print (x, ' ', y)
-            lasty = y
-            chain += [255,0, self.wave(int(y)), 255, 1, d&255, d >> 8]
-        chain += [255, 0, self.wave(int(y)), 255, 3]  #Loop forever but triggered
-        print(chain)
-        self.pi.wave_chain(chain)  # Transmit chain.
-        self.triggerEvent.wait()
-            
+           
     def close(self):
-        self.pi.write(self.ena_pin, 1)  #Power off
+        self.off()
         self.triggerCallback.cancel()
         self.stop()
         
@@ -167,7 +135,7 @@ if __name__ == '__main__':
         motor.triggerEvent.clear()
         
         for i in range(10) :
-            motor.advanceUntilTriggerWithRamping()
+            motor.advanceUntilTrigger()
             time.sleep(1)
 ##        startTime = time.time()
 ##        motor.captureSpeed = 1

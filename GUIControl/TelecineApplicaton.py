@@ -57,6 +57,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.cameraGroupBox.setEnabled(False)
         self.closeCameraButton.setEnabled(False)
         self.motorStopButton.setEnabled(False)
+        self.motorOffButton.setEnabled(False)
         
 #Lamp
     def setLamp(self):
@@ -66,6 +67,16 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             self.sock.sendObject((SET_LAMP, LAMP_OFF))
         
 #Motor Control
+    def motorOn(self) :
+        self.sock.sendObject((MOTOR_ON,))
+        self.motorControlGroupBox.setEnabled(True)
+        self.motorOnButton.setEnabled(False)
+        self.motorOffButton.setEnabled(True)
+    def motorOff(self) :
+        self.sock.sendObject((MOTOR_OFF,))
+        self.motorControlGroupBox.setEnabled(False)
+        self.motorOnButton.setEnabled(True)
+        self.motorOffButton.setEnabled(False)
     def forwardOne(self):
         self.setMotorSettings({'speed':self.motorSpeedBox.value()})
         self.sock.sendObject((MOTOR_ADVANCE_ONE,MOTOR_FORWARD))
@@ -106,7 +117,11 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             'ena_pin':int(self.enaEdit.text()),\
             'dir_pin':int(self.dirEdit.text()),\
             'pulse_pin':int(self.pulseEdit.text()),\
-            'trigger_pin':int(self.triggerEdit.text())\
+            'trigger_pin':int(self.triggerEdit.text()),\
+            'dir_level': 1 if self.dirLevelCheckBox.isChecked() else 0 ,\
+            'pulse_level': 1 if self.pulseLevelCheckBox.isChecked() else 0, \
+            'ena_level': 1 if self.enaLevelCheckBox.isChecked() else 0, \
+            'trigger_level': 1 if self.triggerLevelCheckBox.isChecked() else 0, \
             }))
         
 #Get and display motor settings
@@ -119,6 +134,10 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.dirEdit.setText(str(settings['dir_pin']))
         self.pulseEdit.setText(str(settings['pulse_pin']))
         self.triggerEdit.setText(str(settings['trigger_pin']))
+        self.enaLevelCheckBox.setChecked(settings['ena_level'] == 1)
+        self.dirLevelCheckBox.setChecked(settings['dir_level'] == 1)
+        self.pulseLevelCheckBox.setChecked(settings['pulse_level'] == 1)
+        self.triggerLevelCheckBox.setChecked(settings['trigger_level'] == 1)
         return settings
 
         
@@ -173,7 +192,9 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         done = self.sock.receiveObject()
         QApplication.restoreOverrideCursor()        
         print(done)
-
+        
+    def equalize(self) :
+        self.imageThread.equalize = self.equalizeCheckBox.isChecked()
 #Capture
 #CAPTURE_BASIC play with ot without motor
 #CAPTURE_ON_FRAME capture frame and advance motor
@@ -380,8 +401,9 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.cameraGroupBox.setEnabled(True)
         self.openCameraButton.setEnabled(True)
         self.calibrateButton.setEnabled(True)
-        self.motorControlGroupBox.setEnabled(True)
+#        self.motorControlGroupBox.setEnabled(True)
         self.motorSettingsGroupBox.setEnabled(True)
+        self.connected = True
 
 
 

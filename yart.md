@@ -35,11 +35,11 @@ La camera V1 semble aussi donner de bons résultats pour certains. Sa résolutio
 
 Pour la camera V2 la résolution maximale est 3280x2464. La question se pose de choisir cette résolution maximale qui ralentit beaucoup la capture ou une résolution plus faible comme la moitié 1640x1232. Mes essais montrent que la résolution maximale amène bien un gain sensible. Ci dessous la même zone en 1640*1232 puis en 3280x2464. Evidemment une haute résolution ralentit considérablement la capture surtout si on utilise le bracketing. En 1640x1632 j'obtiens à peu près 1 image/s et environ trois fois moins en haute résolution !
 
-![halfres](D:\yartgit\images\halfres.jpg)
+![halfres](images\halfres.jpg)
 
 
 
-![fullres](D:\yartgit\images\fullres.jpg)
+![fullres](images\fullres.jpg)
 
 ### Lampe
 

@@ -54,6 +54,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.motorControlGroupBox.setEnabled(False)
         self.cameraSettingsGroupBox.setEnabled(False)
         self.motorSettingsGroupBox.setEnabled(False)
+        self.motorOnGroupBox.setEnabled(False)
         self.cameraGroupBox.setEnabled(False)
         self.closeCameraButton.setEnabled(False)
         self.motorStopButton.setEnabled(False)
@@ -144,11 +145,16 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
 #Camera control
     def openCamera(self):
         mode = int(self.modeBox.value())  #0 automatic
-        hres = self.hresLineEdit.text()
-        vres = self.vresLineEdit.text()
+        hres = 0
+        vres = 0
+        try :
+            hres = int(self.hresLineEdit.text())
+            vres = int(self.vresLineEdit.text())
+        except:
+            pass
         requestedResolution = None
-        if hres and vres :
-            requestedResolution = (int(hres), int(vres))
+        if hres!= 0 and vres!= 0 :
+            requestedResolution = (hres, vres)
         self.sock.sendObject((OPEN_CAMERA, mode, requestedResolution, self.useCalibrationCheckBox.isChecked()))
         self.getCameraSettings()
         maxResolution = self.getCameraSetting('MAX_RESOLUTION')
@@ -156,7 +162,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             self.cameraVersion = 2
         else :
             self.cameraVersion = 1
-        if not (hres and vres) and mode != 0 :
+        if hres== 0 and vres==0 and mode != 0 :
             if self.cameraVersion == 2 :
                 res=V2_RESOLUTIONS[mode-1]
             else :
@@ -226,6 +232,8 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
                                                     'bracket_steps':brackets, \
                                                     'bracket_dark_coefficient':self.darkCoefficientBox.value(),\
                                                     'bracket_light_coefficient':self.lightCoefficientBox.value(),\
+                                                    'shutter_speed_wait':self.shutterSpeedWaitBox.value(),\
+                                                    'shutter_auto_wait':self.shutterAutoWaitBox.value(),\
 #                                                    'use_video_port' : self.videoPortButton.isChecked(),\
                                                     'use_video_port' : True,\
                                                     'capture_method' : method\
@@ -345,11 +353,6 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.sock.sendObject((SET_CAMERA_SETTINGS, {'brightness':self.brightnessBox.value(), 'contrast':self.contrastBox.value(),'saturation':self.saturationBox.value()}))
 
 
-        self.directory = root_directory  + "/%#02d_%#02d" % (tape, clip)
-        if not os.path.exists(self.directory):
-            os.makedirs(self.directory)
-        print(self.directory)
-
 #Experimental not used
     def calibrateHDR(self):
         self.sock.sendObject((CALIBRATE_HDR,25) )
@@ -365,6 +368,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         
     def chooseDirectory(self) :
         self.root_directory = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
+        self.directoryDisplay.setText(self.root_directory)
 
     def displayHeader(self, header) :
         if header['type'] == HEADER_COUNT :
@@ -393,7 +397,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.ip_pi = self.ipLineEdit.text()
         socke.connect((self.ip_pi, 8000))
         self.sock = MessageSocket(socke)
-        self.imageThread = ImageThread()
+        self.imageThread = ImageThread(self.ip_pi)
         self.imageThread.headerSignal.connect(self.displayHeader)
         self.imageThread.sharpnessSignal.connect(self.displaySharpness)
         self.imageThread.start()
@@ -401,6 +405,8 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.cameraGroupBox.setEnabled(True)
         self.openCameraButton.setEnabled(True)
         self.calibrateButton.setEnabled(True)
+        self.motorOnGroupBox.setEnabled(True)
+
 #        self.motorControlGroupBox.setEnabled(True)
         self.motorSettingsGroupBox.setEnabled(True)
         self.connected = True

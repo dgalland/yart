@@ -26,7 +26,7 @@ class ImageThread (QThread):
     histos = False
     images = []
     shutters = []
-    def __init__(self):
+    def __init__(self, ip_pi):
         QThread.__init__(self)
         self.threadID = 1
         self.name = "ImgThread"
@@ -37,6 +37,7 @@ class ImageThread (QThread):
         self.toneMap = cv2.createTonemapReinhard()
         self.reduceFactor = 1;
         self.equalize = False
+        self.ip_pi = ip_pi
     def calcHistogram(self, image) :
         histos = []
         for i in range(3):
@@ -114,7 +115,7 @@ class ImageThread (QThread):
         self.imageSock = None
         try:
             sock = socket.socket()
-            sock.connect(('192.168.0.22', 8000))
+            sock.connect((self.ip_pi, 8000))
             print('ImageThread connected')
             self.imageSock = MessageSocket(sock)
             while True:

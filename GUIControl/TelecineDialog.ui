@@ -1203,7 +1203,7 @@
      </property>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="groupBox_2">
+   <widget class="QGroupBox" name="motorOnGroupBox">
     <property name="geometry">
      <rect>
       <x>520</x>

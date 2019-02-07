@@ -146,6 +146,7 @@ class TelecineCamera(PiCamera) :
                         yield stream
                         stream.seek(0)
                         stream.truncate(0)
+        self.awb_mode = 'auto'
         if self.capture_method == CAPTURE_ON_TRIGGER :
             motor.stop()
 

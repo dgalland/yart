@@ -31,6 +31,16 @@ Il est important de noter que la caméra V2 (V1 ?)  avec un objectif autre que l
 
 La camera V1 semble aussi donner de bons résultats pour certains. Sa résolution est suffisante. Elle est peut être préférable pour être utilisée avec un objectif non standard. Il n'est pas sûr que la camera V2 soit le meilleur choix, c'est un point à élucider. 
 
+### Quelle résolution ?
+
+Pour la camera V2 la résolution maximale est 3280x2464. La question se pose de choisir cette résolution maximale qui ralentit beaucoup la capture ou une résolution plus faible comme la moitié 1640x1232. Mes essais montrent que la résolution maximale amène bien un gain sensible. Ci dessous la même zone en 1640*1232 puis en 3280x2464. Evidemment une haute résolution ralentit considérablement la capture surtout si on utilise le bracketing. En 1640x1632 j'obtiens à peu près 1 image/s et environ trois fois moins en haute résolution !
+
+![halfres](D:\yartgit\images\halfres.jpg)
+
+
+
+![fullres](D:\yartgit\images\fullres.jpg)
+
 ### Lampe
 
 J'ai de bon résultats avec une LED TrueColor Phillips faisceau étroit 3500K. J'ai placé un diffuseur à la surface de la LED.  Il faut ajuster le diffuseur et la distance de la lampe pour avoir une durée d'exposition convenable. Si la caméra fonctionne à 30fps l'exposition maximum est de 33333 micro seconds. Si le bracketing (cf infra) est utilisé il faut que l'exposition auto sur une image normale soit d'environ 2000 à 3000 micro-seconds.
@@ -178,7 +188,7 @@ La littérature est abondante sur le sujet. J'ai fait divers essais et le meille
 
 ###### Mise en œuvre du merge
 
-D'après mon expérience par rapport a l'exposition automatique t, l'exposition sous exposée peut être de 0.1xt et l'exposition sur exposée de 8*t. ces facteurs sont stables sur la durée de la capture.
+D'après mon expérience par rapport a l'exposition automatique t, l'exposition sous exposée peut être de 0.1xt et l'exposition sur exposée de 8*t. ces facteurs sont assez stables sur la durée de la capture.
 
 D'un point de vue programmation la mise en œuvre du bracketing est très délicate, en effet il faut bien avoir l'idée que la caméra n'est pas un appareil photo mais une caméra qui fournit un flux continu d'images.  Donc après avoir changé l'exposition il faut attendre quelques frames (minimum 4 d'après mon expérience) avant d'obtenir la bonne exposition. De même après  être repassé en automatique il faut attendre quelques trames (minimum 7 d'après mon expérience) avant d'avoir la bonne exposition. La capture devient:
 
@@ -318,11 +328,11 @@ La capture peut d'effectuer sans bracket une exposition par image ou bien avec u
 Si un bracket de 3 est choisi il faut ajuster:
 
 - "Dark coefficient" coefficient à appliquer à l'exposition de l'image normale (auto exposition calculée par la caméra) pour obtenir l'image sous-exposée. 0.10 semble être une bonne valeur
-- "Light coefficient" coefficient à appliquer à l'exposition de l'image normale (auto exposition calculée par la caméra) pour obtenir l'image sur-exposée. Entre 8 et 10 semble être une bonne valeur
-- "Shutter speed wait" Nombre de trames à ignorer après le changement d'exposition (minimum 4)
-- "Shutter auto wait" Nombre de trames à ignorer après le passage en auto pour l'image suivante (minimum 7). 
+- "Light coefficient" coefficient à appliquer à l'exposition de l'image normale (auto exposition calculée par la caméra) pour obtenir l'image sur-exposée. 8 semble être une bonne valeur
+- "Shutter speed wait" Nombre de trames à ignorer après le changement d'exposition (minimum 3)
+- "Shutter auto wait" Nombre de trames à ignorer après le passage en auto pour l'image suivante (minimum 5). 
 
-Pour ajuster ces coefficients il faut faire des essais sur une image dans votre film:
+Pour ajuster ces coefficients il faut faire des essais sur une image dans votre film. 
 
 Sans "Merge" mais avec "Save" choisir "Preview" framerate 30fps
 
@@ -335,7 +345,7 @@ Ensuite vous pouvez faire les mêmes essais en "Capture"
 
 - Vérifier également que lorsque le moteur  s'arrête l'image normale n'est pas bougée (blurred) . Sinon il faut augmenter "Shutter auto wait" pour attendre la stabilisation totale après l'avance du moteur.
 
-Au final avec un bracket de 3 et un framerate  camera de 30fps vous devez obtenir un débit d'environ 1 image par seconde.
+Au final avec un bracket de 3 et un framerate  camera de 30fps vous devez obtenir un débit d'environ 1 image par seconde en résolution 1640x1232  et 0.3 image par seconde en résolution maximale 3280*2464 
 
 ### Traitement des images
 
@@ -343,6 +353,7 @@ Il s'effectue sur le PC
 
 - "Histo" affiche l'histogramme de l'image
 - "Sharpness" Evalue et affiche la netteté de l'image pour une bonne mise au point (utiliser "Shot" ou "Play" avec 5fps) . La meilleur mise au point correspond à la valeur maximum de sharpness. L'amorce blanche au début du film permet de bien tester la mise au point.
+- Reduce permet de réduire l'image affichée pendant la capture
 - "Merge"  Détermine l'algorithme de fusion "None"  "Mertens" ou "Debevec"
 - "Save" Sauvegarde les images dans le répertoire choisi. On peut choisir un numéro de bande et un numéro de clip. Pour chaque "Capture" les images sont numérotées à partir de 0
 

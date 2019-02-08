@@ -78,7 +78,8 @@ class TelecineMotor() :
 #return immediately    
     def advance(self):
         self.triggered = False
-        self.pi.write(self.dir_pin, self.direction  if self.direction == self.dir_level else 1 - self.direction)  #self.direction = 0 forward
+        print ('direction:', self.direction, ' Level:', self.dir_level)
+        self.pi.write(self.dir_pin, self.dir_level  if self.direction == self.dir_level else 1 - self.dir_level)  #self.direction = 0 forward
         self.pi.wave_clear()
         chain = []
         x = self.steps_per_rev  & 255
@@ -91,7 +92,7 @@ class TelecineMotor() :
 #Advance count rev, return when finished (no ramping)
     def advanceCounted(self, count=1):
         self.triggered = False
-        self.pi.write(self.dir_pin, self.direction  if self.direction == self.dir_level else 1 - self.direction)  #self.direction = 0 forward
+        self.pi.write(self.dir_pin, self.dir_level  if self.direction == self.dir_level else 1 - self.dir_level)  #self.direction = 0 forward
         self.pi.wave_clear()
         wid = self.wave(self.speed)
         x = (count*self.steps_per_rev)  & 255
@@ -102,7 +103,7 @@ class TelecineMotor() :
      
     def advanceUntilTrigger(self):
         self.triggered = True
-        self.pi.write(self.dir_pin, self.direction  if self.direction == self.dir_level else 1 - self.direction)  #self.direction = 0 forward
+        self.pi.write(self.dir_pin, self.dir_level  if self.direction == self.dir_level else 1 - self.dir_level)  #self.direction = 0 forward
         self.pi.wave_clear()
         chain = [255, 0, self.wave(self.speed), 255, 3]  #Loop forever but triggered
         self.pi.wave_chain(chain)  # Transmit chain.

@@ -99,7 +99,7 @@ class TelecineCamera(PiCamera) :
                 triggerEvent.wait()
             elif self.capture_method == CAPTURE_ON_FRAME :
                 motor.advanceUntilTrigger()
-            self.awb_mode = 'auto'
+#            self.awb_mode = 'auto'
             if self.bracket_steps != 1 :
                 for foo in range(self.shutter_auto_wait) : 
                     yield stream
@@ -137,7 +137,7 @@ class TelecineCamera(PiCamera) :
                     queue.put(copy.deepcopy(header))
                     exposureSpeed =  int(autoExposureSpeed * coef[i]) #Exposure for next shot last is 0 (auto)
                     self.shutter_speed = exposureSpeed
-                    self.awb_mode = 'off'
+ #                   self.awb_mode = 'off'
                     yield stream                        
                     stream.seek(0)
                     queue.put(stream.getvalue())
@@ -146,7 +146,7 @@ class TelecineCamera(PiCamera) :
                         yield stream
                         stream.seek(0)
                         stream.truncate(0)
-        self.awb_mode = 'auto'
+#        self.awb_mode = 'auto'
         if self.capture_method == CAPTURE_ON_TRIGGER :
             motor.stop()
 

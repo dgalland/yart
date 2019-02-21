@@ -199,7 +199,7 @@
      <number>1000</number>
     </property>
     <property name="value">
-     <number>20000</number>
+     <number>0</number>
     </property>
    </widget>
    <widget class="QPushButton" name="setShutterSpeedButton">
@@ -801,7 +801,7 @@
       <number>1</number>
      </property>
      <property name="value">
-      <number>5</number>
+      <number>30</number>
      </property>
     </widget>
    </widget>
@@ -978,9 +978,9 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>20</y>
+     <y>10</y>
      <width>681</width>
-     <height>131</height>
+     <height>141</height>
     </rect>
    </property>
    <property name="title">
@@ -989,8 +989,8 @@
    <widget class="QGroupBox" name="cameraGroupBox">
     <property name="geometry">
      <rect>
-      <x>160</x>
-      <y>10</y>
+      <x>170</x>
+      <y>20</y>
       <width>341</width>
       <height>111</height>
      </rect>
@@ -1049,10 +1049,10 @@
     <widget class="QLabel" name="cameraVersionLabel">
      <property name="geometry">
       <rect>
-       <x>260</x>
+       <x>210</x>
        <y>50</y>
-       <width>71</width>
-       <height>16</height>
+       <width>61</width>
+       <height>21</height>
       </rect>
      </property>
      <property name="frameShape">
@@ -1065,10 +1065,10 @@
     <widget class="QLabel" name="cameraResolutionLabel">
      <property name="geometry">
       <rect>
-       <x>260</x>
+       <x>210</x>
        <y>80</y>
-       <width>71</width>
-       <height>16</height>
+       <width>61</width>
+       <height>21</height>
       </rect>
      </property>
      <property name="frameShape">
@@ -1081,9 +1081,9 @@
     <widget class="QLineEdit" name="hresLineEdit">
      <property name="geometry">
       <rect>
-       <x>160</x>
+       <x>150</x>
        <y>50</y>
-       <width>81</width>
+       <width>51</width>
        <height>20</height>
       </rect>
      </property>
@@ -1091,9 +1091,9 @@
     <widget class="QLineEdit" name="vresLineEdit">
      <property name="geometry">
       <rect>
-       <x>160</x>
+       <x>150</x>
        <y>80</y>
-       <width>81</width>
+       <width>51</width>
        <height>20</height>
       </rect>
      </property>
@@ -1163,6 +1163,32 @@
       <string>Calibrate</string>
      </property>
     </widget>
+    <widget class="QCheckBox" name="hflipCheckBox">
+     <property name="geometry">
+      <rect>
+       <x>290</x>
+       <y>50</y>
+       <width>41</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Hflip</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="vflipCheckBox">
+     <property name="geometry">
+      <rect>
+       <x>290</x>
+       <y>80</y>
+       <width>41</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Hflip</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
@@ -1170,7 +1196,7 @@
       <x>10</x>
       <y>20</y>
       <width>141</width>
-      <height>80</height>
+      <height>111</height>
      </rect>
     </property>
     <property name="title">
@@ -1206,10 +1232,10 @@
    <widget class="QGroupBox" name="motorOnGroupBox">
     <property name="geometry">
      <rect>
-      <x>520</x>
+      <x>550</x>
       <y>20</y>
       <width>120</width>
-      <height>80</height>
+      <height>111</height>
      </rect>
     </property>
     <property name="title">
@@ -1461,6 +1487,19 @@
      <string>To</string>
     </property>
    </widget>
+   <widget class="QCheckBox" name="equalizeCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>80</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>equalize</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QLabel" name="messageLabel">
    <property name="geometry">
@@ -1512,7 +1551,7 @@
      <double>0.100000000000000</double>
     </property>
     <property name="value">
-     <double>1.000000000000000</double>
+     <double>0.100000000000000</double>
     </property>
    </widget>
    <widget class="QDoubleSpinBox" name="lightCoefficientBox">
@@ -1534,7 +1573,7 @@
      <double>0.100000000000000</double>
     </property>
     <property name="value">
-     <double>1.000000000000000</double>
+     <double>8.000000000000000</double>
     </property>
    </widget>
    <widget class="QLabel" name="label_12">
@@ -1592,7 +1631,7 @@
      <number>1</number>
     </property>
     <property name="value">
-     <number>3</number>
+     <number>4</number>
     </property>
    </widget>
    <widget class="QLabel" name="label_24">
@@ -1624,7 +1663,7 @@
      <number>1</number>
     </property>
     <property name="value">
-     <number>6</number>
+     <number>7</number>
     </property>
    </widget>
    <widget class="QLabel" name="label_26">
@@ -2276,8 +2315,8 @@
    <slot>openCamera()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>69</x>
-     <y>185</y>
+     <x>200</x>
+     <y>72</y>
     </hint>
     <hint type="destinationlabel">
      <x>689</x>
@@ -2388,8 +2427,8 @@
    <slot>closeCamera()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>354</x>
-     <y>177</y>
+     <x>364</x>
+     <y>72</y>
     </hint>
     <hint type="destinationlabel">
      <x>680</x>
@@ -2436,8 +2475,8 @@
    <slot>motorOn()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>42</x>
-     <y>186</y>
+     <x>580</x>
+     <y>72</y>
     </hint>
     <hint type="destinationlabel">
      <x>912</x>
@@ -2452,12 +2491,28 @@
    <slot>motorOff()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>130</x>
-     <y>189</y>
+     <x>580</x>
+     <y>102</y>
     </hint>
     <hint type="destinationlabel">
      <x>869</x>
      <y>301</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>equalizeCheckBox</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setEqualize()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>156</x>
+     <y>613</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>802</x>
+     <y>535</y>
     </hint>
    </hints>
   </connection>
@@ -2501,5 +2556,6 @@
   <slot>equalize()</slot>
   <slot>motorOn()</slot>
   <slot>motorOff()</slot>
+  <slot>setEqualize()</slot>
  </slots>
 </ui>

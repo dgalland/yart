@@ -84,8 +84,10 @@ def freeze_camera_settings(camera):
     time.sleep(2)
 
 
-def generate_lens_shading_table_closed_loop(n_iterations=5, images_to_average=5):
+def generate_lens_shading_table_closed_loop(hflip, vflip, n_iterations=5, images_to_average=5):
     camera = picamera.PiCamera()
+    camera.hflip = hflip
+    camera.vflip = vflip
     lens_shading_table = np.zeros(camera._lens_shading_table_shape(), dtype=np.uint8) + 32
     gains = np.ones_like(lens_shading_table, dtype=np.float)
     max_res = camera.MAX_RESOLUTION
@@ -111,6 +113,6 @@ def generate_lens_shading_table_closed_loop(n_iterations=5, images_to_average=5)
 
 
 if __name__ == '__main__':
-    lens_shading_table = generate_lens_shading_table_closed_loop(n_iterations=5)
+    lens_shading_table = generate_lens_shading_table_closed_loop(False,False, n_iterations=5)
     settings = {'lens_shading_table': lens_shading_table}
     np.savez('calibrate.npz',   lens_shading_table = lens_shading_table)

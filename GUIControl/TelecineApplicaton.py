@@ -59,6 +59,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.closeCameraButton.setEnabled(False)
         self.motorStopButton.setEnabled(False)
         self.motorOffButton.setEnabled(False)
+        self.onTriggerButton.setEnabled(False)
         
 #Lamp
     def setLamp(self):
@@ -155,7 +156,8 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         requestedResolution = None
         if hres!= 0 and vres!= 0 :
             requestedResolution = (hres, vres)
-        self.sock.sendObject((OPEN_CAMERA, mode, requestedResolution, self.useCalibrationCheckBox.isChecked()))
+        self.sock.sendObject((OPEN_CAMERA, mode, requestedResolution, self.useCalibrationCheckBox.isChecked(), \
+                             self.hflipCheckBox.isChecked(), self.vflipCheckBox.isChecked()))
         self.getCameraSettings()
         maxResolution = self.getCameraSetting('MAX_RESOLUTION')
         if maxResolution[0] == 3280 :
@@ -194,7 +196,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
     
     def calibrate(self) :
         QApplication.setOverrideCursor(Qt.WaitCursor)
-        self.sock.sendObject((CALIBRATE_CAMERA,))
+        self.sock.sendObject((CALIBRATE_CAMERA,self.hflipCheckBox.isChecked, self.vflipCheckBox.isChecked))
         done = self.sock.receiveObject()
         QApplication.restoreOverrideCursor()        
         print(done)
@@ -224,6 +226,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
 
         self.setMerge()
         self.setSave()
+        self.imageThread.reduceFactor = self.reduceFactorBox.value()
         self.captureStopButton.setEnabled(True)
         self.captureStartButton.setEnabled(False)
         self.takeImageButton.setEnabled(False)
@@ -265,7 +268,8 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         
 #Take one image
     def takeImage(self):
-#        self.sock.sendObject((SET_CAMERA_SETTINGS, {'use_video_port' : self.videoPortButton.isChecked(),})) 
+#        self.sock.sendObject((SET_CAMERA_SETTINGS, {'use_video_port' : self.videoPortButton.isChecked(),}))
+        self.imageThread.reduceFactor = self.reduceFactorBox.value()
         self.sock.sendObject((SET_CAMERA_SETTINGS, {'use_video_port' : True})) 
         self.sock.sendObject((TAKE_IMAGE,))
 
@@ -330,6 +334,10 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
 
     def setReduce(self) :
         self.imageThread.reduceFactor = self.reduceFactorBox.value()
+        
+    def setEqualize(self) :
+        self.imageThread.equalize  = self.equalizeCheckBox.isChecked()
+        print(self.imageThread.equalize)
         
     def setAutoExposure(self):
         if self.autoExposureCheckBox.isChecked() :

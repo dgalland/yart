@@ -38,6 +38,8 @@ class ImageThread (QThread):
         self.reduceFactor = 1;
         self.equalize = False
         self.ip_pi = ip_pi
+        self.hflip = False
+        self.vflip = False
     def calcHistogram(self, image) :
         histos = []
         for i in range(3):
@@ -63,10 +65,11 @@ class ImageThread (QThread):
         image[:hh,:ww] = resized
             
     def processImage(self, header, jpeg):
+#        print(header)
         bracket = header['bracket']
         count = header['count']
         jpeg = np.frombuffer(jpeg, np.uint8,count = len(jpeg)) 
-        image = cv2.imdecode(jpeg, 1)   #Jpeg decode
+        image = cv2.imdecode(jpeg, 1)   #Jpeg decoded
         if self.merge != MERGE_NONE and bracket != 0 : #Merge
             self.images.append(image)
             self.shutters.append(header['shutter'])
@@ -79,13 +82,17 @@ class ImageThread (QThread):
                     image = self.mergeDebevec.process(self.images, np.asarray(self.shutters,dtype=np.float32)/1000000.)
                     image = self.toneMap.process(image)
                 image = np.clip(image*255, 0, 255).astype('uint8')
-                if False : #Not really concluding
+                if self.equalize :
+#                    lookUpTable = np.empty((1,256), np.uint8)
+#                    gamma = 1/1.5
+#                    for i in range(256):
+#                        lookUpTable[0,i] = np.clip(pow(i / 255.0, gamma) * 255.0, 0, 255)
+#                    eq_V = cv2.LUT(V, lookUpTable)
                     H, S, V = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2HSV))
-                    eq_V = cv2.equalizeHist(V)
+                    low, high = np.percentile(V, (1, 99))
+                    eq_V = np.interp(V, (low,high), (V.min(), V.max())).astype(np.uint8)
+#                    eq_V = cv2.equalizeHist(V)
                     image = cv2.cvtColor(cv2.merge([H, S, eq_V]), cv2.COLOR_HSV2BGR)
-#                    yuv = cv2.cvtColor(image,cv2.COLOR_BGR2YUV)
-#                    yuv[:,:,0] = cv2.equalizeHist(yuv[:,:,0])
-#                    image = cv2.cvtColor(yuv, cv2.COLOR_YUV2BGR)
                 if self.saveOn :
                     cv2.imwrite(self.directory + "/image_%#05d.jpg" % count, image)
                 self.images.clear()

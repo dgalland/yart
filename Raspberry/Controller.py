@@ -69,6 +69,7 @@ class TelecineCamera(PiCamera) :
         self.bracket_dark_coefficient = 1.
         self.bracket_light_coefficient = 1.
         self.capture_method =CAPTURE_ON_FRAME
+        self.capturing = False
 
 
 #BASIC repeat: frame capture and send
@@ -151,6 +152,7 @@ class TelecineCamera(PiCamera) :
             motor.stop()
 
     def captureSequence(self) :
+        self.capturing = True
         self.frameCounter = 0
         startTime = time.time()
         self.capture_sequence(self.captureGenerator(), format="jpeg", use_video_port=self.use_video_port)
@@ -159,11 +161,16 @@ class TelecineCamera(PiCamera) :
         msg = "Capture terminated    Count %i    fps %f \n"%(self.frameCounter , fps)
         header = {'type':HEADER_MESSAGE, 'msg':msg}
         queue.put(header)
+        while queue.qsize() > 1 :
+            time.sleep(1)
+        self.capturing=False
+
         
         
     def captureImage(self) :
+        while self.capturing :
+            time.sleep(1)
         stream = BytesIO()
-        print(self.use_video_port)
         camera.capture(stream, format="jpeg", quality=90, use_video_port=self.use_video_port)
         stream.seek(0)
         image = stream.getvalue()
@@ -203,7 +210,7 @@ class SendImageThread(Thread):
                 imageSock.close()
         print('SendImageThread terminated')
            
-def openCamera(mode, resolution, useCalibration) :
+def openCamera(mode, resolution, useCalibration,hflip,vflip) :
     cam = None
     if useCalibration :
         try :
@@ -224,6 +231,8 @@ def openCamera(mode, resolution, useCalibration) :
             pass
     except :
         pass
+    cam.hflip = hflip
+    cam.vflip = vflip
 #Start capture Thread
     exitFlag = False
     captureImageThread = CaptureImageThread()
@@ -238,10 +247,10 @@ def closeCamera() :
     camera.close()
     camera = None
 
-def calibrateCamera() :
+def calibrateCamera(hflip, vflip) :
     if camera != None :
         closeCamera
-    lens_shading_table = generate_lens_shading_table_closed_loop(n_iterations=5)
+    lens_shading_table = generate_lens_shading_table_closed_loop(n_iterations=5, hflip=hflip, vflip=vflip)
     np.savez('calibrate.npz',   lens_shading_table = lens_shading_table)
 
    
@@ -328,11 +337,11 @@ try:
 ##        elif command == CALIBRATE_HDR :
 ##            camera.calibrateHDR(request[1])
         elif command == OPEN_CAMERA :
-            camera = openCamera(request[1],request[2], request[3])
+            camera = openCamera(request[1],request[2], request[3], request[4], request[5]) #mode, resolution, usecalibration, hflip, vflip
         elif command == CLOSE_CAMERA :
              closeCamera()
         elif command == CALIBRATE_CAMERA :
-            calibrateCamera()
+            calibrateCamera(request[1],request[2])  #hflip vflip
             commandSock.sendObject('Calibrate done')
         elif command == MOTOR_ON :
             motor.on()

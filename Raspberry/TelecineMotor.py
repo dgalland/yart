@@ -40,10 +40,14 @@ class TelecineMotor() :
         self.pi.write(self.dir_pin, self.dir_level)
         self.pi.write(self.pulse_pin, 1 - self.pulse_level)
         self.pi.write(self.ena_pin, 1 - self.ena_level) #repos
-        if self.trigger_level == 0 :
-            self.triggerCallback = self.pi.callback(self.trigger_pin, pigpio.FALLING_EDGE, self.trigger)
-        else :
-            self.triggerCallback = self.pi.callback(self.trigger_pin, pigpio.RISING_EDGE, self.trigger)
+        if self.trigger_pin != 0 :
+            if self.trigger_level == 0 :
+                self.triggerCallback = self.pi.callback(self.trigger_pin, pigpio.FALLING_EDGE, self.trigger)
+                self.pi.set_pull_up_down(self.trigger_pin, pigpio.PUD_UP)
+            else :
+                self.triggerCallback = self.pi.callback(self.trigger_pin, pigpio.RISING_EDGE, self.trigger)
+                self.pi.set_pull_up_down(self.trigger_pin, pigpio.PUD_DOWN)
+
         self.queue = queue
         
     def on(self) :
@@ -78,8 +82,7 @@ class TelecineMotor() :
 #return immediately    
     def advance(self):
         self.triggered = False
-        print ('direction:', self.direction, ' Level:', self.dir_level)
-        self.pi.write(self.dir_pin, self.dir_level  if self.direction == self.dir_level else 1 - self.dir_level)  #self.direction = 0 forward
+        self.pi.write(self.dir_pin, self.dir_level  if self.direction == self.dir_level else 1 - self.direction)  #self.direction = 0 forward
         self.pi.wave_clear()
         chain = []
         x = self.steps_per_rev  & 255
@@ -88,11 +91,13 @@ class TelecineMotor() :
             chain += [255, 0, self.wave(s), 255, 1, x, y] #One rev for each
         chain += [255, 0, self.wave(self.speed), 255, 3]  #Loop forever
         self.pi.wave_chain(chain)  # Transmit chain.
+##        self.pi.wave_chain(chain)  # Transmit ramping chain
+##        self.pi.wave_send_repeat(self.wave(self.speed))
 
 #Advance count rev, return when finished (no ramping)
     def advanceCounted(self, count=1):
         self.triggered = False
-        self.pi.write(self.dir_pin, self.dir_level  if self.direction == self.dir_level else 1 - self.dir_level)  #self.direction = 0 forward
+        self.pi.write(self.dir_pin, self.dir_level  if self.direction == self.dir_level else 1 - self.direction)  #self.direction = 0 forward
         self.pi.wave_clear()
         wid = self.wave(self.speed)
         x = (count*self.steps_per_rev)  & 255
@@ -102,56 +107,60 @@ class TelecineMotor() :
         time.sleep(self.pi.wave_get_micros()*count*self.steps_per_rev/1000000.)      
      
     def advanceUntilTrigger(self):
-        self.triggered = True
-        self.pi.write(self.dir_pin, self.dir_level  if self.direction == self.dir_level else 1 - self.dir_level)  #self.direction = 0 forward
-        self.pi.wave_clear()
-        chain = [255, 0, self.wave(self.speed), 255, 3]  #Loop forever but triggered
-        self.pi.wave_chain(chain)  # Transmit chain.
-        self.triggerEvent.wait()
+        if self.trigger_pin != 0 :
+            self.triggered = True
+            self.pi.write(self.dir_pin, self.dir_level  if self.direction == self.dir_level else 1 - self.direction)  #self.direction = 0 forward
+            self.pi.wave_clear()
+            chain = [255, 0, self.wave(self.speed), 255, 3]  #Loop forever but triggered
+            self.pi.wave_chain(chain)  # Transmit chain.
+            self.triggerEvent.wait()
+        else :
+            self.advanceCounted()
 
            
     def close(self):
-        self.off()
-        self.triggerCallback.cancel()
         self.stop()
+        self.triggerCallback.cancel()
+        self.off()
         
     def stop(self) :
-        self.triggerFlag = False
+        print('Stop')
+        self.pi.wave_clear()
         self.pi.wave_tx_stop()
 
-if __name__ == '__main__':
-    motor = None
-    pi = None
-    queue = Queue()    
-    try:
-        pi = pigpio.pi()
-
-        if not pi.connected:
-            print('Not connected')
-            exit()
-        motor = TelecineMotor(pi, queue)
-        motor.speed = 8
-        motor.direction = 0
-        motor.triggerEvent = Event()
-        motor.triggerEvent.clear()
-        
-        for i in range(10) :
-            motor.advanceUntilTrigger()
-            time.sleep(1)
-##        startTime = time.time()
-##        motor.captureSpeed = 1
-##        motor.advanceWithDelayOnTrigger(1)
-##        time.sleep(100)
+##if __name__ == '__main__':
+##    motor = None
+##    pi = None
+##    queue = Queue()    
+##    try:
+##        pi = pigpio.pi()
 ##
-        motor.speed = 5
-        for i in range(10) :
-            motor.advanceUntilTrigger()  #0 forward 1 backward
-            time.sleep(1)
-
-    finally:
-        print('finally')
-        if motor != None :
-            motor.stop()
-            motor.close()
-        if pi != None:
-            pi.stop()
+##        if not pi.connected:
+##            print('Not connected')
+##            exit()
+##        motor = TelecineMotor(pi, queue)
+##        motor.speed = 8
+##        motor.direction = 0
+##        motor.triggerEvent = Event()
+##        motor.triggerEvent.clear()
+##        
+##        for i in range(10) :
+##            motor.advanceUntilTrigger()
+##            time.sleep(1)
+####        startTime = time.time()
+####        motor.captureSpeed = 1
+####        motor.advanceWithDelayOnTrigger(1)
+####        time.sleep(100)
+####
+##        motor.speed = 5
+##        for i in range(10) :
+##            motor.advanceUntilTrigger()  #0 forward 1 backward
+##            time.sleep(1)
+##
+##    finally:
+##        print('finally')
+##        if motor != None :
+##            motor.stop()
+##            motor.close()
+##        if pi != None:
+##            pi.stop()

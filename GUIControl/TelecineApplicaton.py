@@ -40,6 +40,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.setupUi(self)
         self.sock = None
         self.connected = False
+        self.paused = False
         self.saveTofile = False
         self.directory = ''
         self.imageThread = None
@@ -48,6 +49,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.cameraVersion = ''
         self.root_directory = 'images'
         self.captureStopButton.setEnabled(False)
+        self.capturePauseButton.setEnabled(False)
         self.cameraControlGroupBox.setEnabled(False)
         self.bracketControlGroupBox.setEnabled(False)
         self.frameProcessingGroupBox.setEnabled(False)
@@ -59,7 +61,9 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.closeCameraButton.setEnabled(False)
         self.motorStopButton.setEnabled(False)
         self.motorOffButton.setEnabled(False)
-        self.onTriggerButton.setEnabled(False)
+        self.onTriggerButton.setEnabled(True)
+        self.autoPauseCheckBox.setEnabled(False)
+
         
 #Lamp
     def setLamp(self):
@@ -116,6 +120,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
     def setMotorInitSettings(self) :
         self.sock.sendObject((SET_MOTOR_SETTINGS, {\
             'steps_per_rev':self.stepsPerRevBox.value(),\
+            'pulley_ratio':self.pulleyRatioBox.value(),\
             'ena_pin':int(self.enaEdit.text()),\
             'dir_pin':int(self.dirEdit.text()),\
             'pulse_pin':int(self.pulseEdit.text()),\
@@ -123,9 +128,11 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             'dir_level': 1 if self.dirLevelCheckBox.isChecked() else 0 ,\
             'pulse_level': 1 if self.pulseLevelCheckBox.isChecked() else 0, \
             'ena_level': 1 if self.enaLevelCheckBox.isChecked() else 0, \
-            'trigger_level': 1 if self.triggerLevelCheckBox.isChecked() else 0, \
+            'trigger_level': 1 if self.triggerLevelCheckBox.isChecked() else 0 \
             }))
-        
+
+
+
 #Get and display motor settings
     def getMotorSettings(self) :
         self.sock.sendObject((GET_MOTOR_SETTINGS,))
@@ -196,7 +203,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
     
     def calibrate(self) :
         QApplication.setOverrideCursor(Qt.WaitCursor)
-        self.sock.sendObject((CALIBRATE_CAMERA,self.hflipCheckBox.isChecked, self.vflipCheckBox.isChecked))
+        self.sock.sendObject((CALIBRATE_CAMERA,self.hflipCheckBox.isChecked(), self.vflipCheckBox.isChecked()))
         done = self.sock.receiveObject()
         QApplication.restoreOverrideCursor()        
         print(done)
@@ -229,7 +236,12 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.imageThread.reduceFactor = self.reduceFactorBox.value()
         self.captureStopButton.setEnabled(True)
         self.captureStartButton.setEnabled(False)
+        self.capturePauseButton.setEnabled(True)
         self.takeImageButton.setEnabled(False)
+        self.autoPauseCheckBox.setEnabled(True)
+        self.autoPauseCheckBox.setChecked(False)
+        self.initGroupBox.setEnabled(False)
+
         self.sock.sendObject((SET_CAMERA_SETTINGS, {\
                                                     'framerate':frameRate,\
                                                     'bracket_steps':brackets, \
@@ -239,9 +251,10 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
                                                     'shutter_auto_wait':self.shutterAutoWaitBox.value(),\
 #                                                    'use_video_port' : self.videoPortButton.isChecked(),\
                                                     'use_video_port' : True,\
-                                                    'capture_method' : method\
-                                                    })) 
-
+                                                    'capture_method' : method,\
+                                                    'pause_pin':int(self.pauseEdit.text()),\
+                                                    'pause_level': 1 if self.pauseLevelCheckBox.isChecked() else 0
+        }))
         self.sock.sendObject((START_CAPTURE,))
 
     def setMerge(self) :
@@ -261,11 +274,28 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
     def captureStop(self) :
         self.captureStopButton.setEnabled(False)
         self.captureStartButton.setEnabled(True)
-        self.captureStartButton.setEnabled(True)
         self.takeImageButton.setEnabled(True)
+        self.capturePauseButton.setEnabled(False)
         self.motorControlGroupBox.setEnabled(True)
+        self.autoPauseCheckBox.setEnabled(False)
+        self.initGroupBox.setEnabled(True)
         self.sock.sendObject((STOP_CAPTURE,))
         
+#Pausing capture        
+    def capturePause(self) :
+        self.sock.sendObject((PAUSE_CAPTURE,))
+        if self.paused :
+            self.capturePauseButton.setText('Pause')
+            self.captureStopButton.setEnabled(True)
+        else :
+            self.capturePauseButton.setText('Restart')
+            self.captureStopButton.setEnabled(False)
+        self.paused = not self.paused
+
+
+    def setAutoPause(self):
+        self.sock.sendObject((SET_CAMERA_SETTINGS, {'auto_pause': self.autoPauseCheckBox.isChecked()}))
+
 #Take one image
     def takeImage(self):
 #        self.sock.sendObject((SET_CAMERA_SETTINGS, {'use_video_port' : self.videoPortButton.isChecked(),}))
@@ -299,6 +329,9 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.onFrameButton.setChecked(settings['capture_method'] == CAPTURE_ON_FRAME)
         self.shutterSpeedWaitBox.setValue(settings['shutter_speed_wait'])
         self.shutterAutoWaitBox.setValue(settings['shutter_auto_wait'])
+        self.pauseEdit.setText(str(settings['pause_pin']))
+        self.pauseLevelCheckBox.setChecked(settings['pause_level'] == 1)
+        self.autoPauseCheckBox.setChecked(settings['auto_pause'])
         return settings
 
 #Get one camera setting

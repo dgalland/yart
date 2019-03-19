@@ -111,7 +111,7 @@ class ImageThread (QThread):
             newShape = (int(image.shape[1]/self.reduceFactor),int(image.shape[0]/self.reduceFactor))
             image = cv2.resize(image, dsize=newShape, interpolation=cv2.INTER_CUBIC)            
         cv2.imshow("PiCamera", image)
-        key = cv2.waitKey(1)
+        cv2.waitKey(1)
 
     def saveToFile(self, saveFlag, directory) :
         self.saveOn = saveFlag

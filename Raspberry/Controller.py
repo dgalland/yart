@@ -23,7 +23,7 @@ from TelecineMotor import *
 
 initSettings = ("sensor_mode",)
 controlSettings = ("awb_mode","awb_gains","shutter_speed","analog_gain","digital_gain","brightness","contrast","saturation", "framerate","exposure_mode","iso", "exposure_compensation")
-addedSettings = ("bracket_steps","use_video_port", "bracket_dark_coefficient", "bracket_light_coefficient","capture_method", "shutter_speed_wait", "shutter_auto_wait")
+addedSettings = ("bracket_steps","use_video_port", "bracket_dark_coefficient", "bracket_light_coefficient","capture_method", "shutter_speed_wait", "shutter_auto_wait","pause_pin","pause_level","auto_pause")
 motorSettings = ("speed","pulley_ratio","steps_per_rev","ena_pin","dir_pin","pulse_pin","trigger_pin","capture_speed","play_speed","ena_level","dir_level","pulse_level","trigger_level")
 
 commandSock = None
@@ -32,10 +32,14 @@ listenSock = None
 camera = None
 queue = None
 captureEvent = None
+restartEvent = None
 motor = None
 pi = None
 triggerEvent= None
 exitFlag = False
+
+sendImageThread = None
+captureImageThread = None
 
 def getSetting(object, key):
     setting = getattr(object, key)
@@ -69,8 +73,26 @@ class TelecineCamera(PiCamera) :
         self.bracket_dark_coefficient = 1.
         self.bracket_light_coefficient = 1.
         self.capture_method =CAPTURE_ON_FRAME
+        self.pause_pin=25
+        self.pause_level=1
+        self.auto_pause = False
         self.capturing = False
+        self.pausing = False
+        pi.set_mode(self.pause_pin, pigpio.INPUT)
 
+        if self.pause_level == 0 :
+            pi.set_pull_up_down(self.pause_pin, pigpio.PUD_UP)
+        else :
+            pi.set_pull_up_down(self.pause_pin, pigpio.PUD_DOWN)
+        pi.set_glitch_filter(self.pause_pin, 300000)
+        self.triggerCallback = pi.callback(self.pause_pin, pigpio.EITHER_EDGE, self.pause)
+        
+    def pause(self, gpio,level,  tick ) :
+        if self.auto_pause :
+            if self.pause_level == level :
+                restartEvent.clear()
+            else :
+                restartEvent.set()
 
 #BASIC repeat: frame capture and send
 #ON_FRAME repeat: frame capture and send motor advance until trigger
@@ -96,6 +118,12 @@ class TelecineCamera(PiCamera) :
             motor.direction = MOTOR_FORWARD     
             motor.advance()
         while captureEvent.isSet():
+            if not restartEvent.isSet() :
+                msgheader = {'type':HEADER_MESSAGE, 'msg': 'Pausing capture'}
+                queue.put(msgheader)
+                restartEvent.wait()
+                msgheader = {'type':HEADER_MESSAGE, 'msg': 'Resuming capture'}
+                queue.put(msgheader)
             if self.capture_method == CAPTURE_ON_TRIGGER :
                 triggerEvent.wait()
             elif self.capture_method == CAPTURE_ON_FRAME :
@@ -107,10 +135,10 @@ class TelecineCamera(PiCamera) :
                     stream.seek(0)
                     stream.truncate(0)
 #Wait if queue is full          
-            if queue.qsize() > 50 :
+            if queue.qsize() > 20 :
                 if self.capture_method == CAPTURE_ON_TRIGGER :
                     motor.stop()
-                print('Warning queue > 50')
+                print('Warning queue > 20')
                 while queue.qsize() > 1 :
                       time.sleep(1)
                 if self.capture_method == CAPTURE_ON_TRIGGER :
@@ -205,6 +233,9 @@ class SendImageThread(Thread):
                         break;
                 else :
                     imageSock.sendMsg(object)
+            while queue.qsize() > 1 :
+                object = queue.get()
+                imageSock.sendObject(object)
         finally :
             if imageSock != None:
                 imageSock.close()
@@ -217,6 +248,7 @@ def openCamera(mode, resolution, useCalibration,hflip,vflip) :
             lst = np.load("calibrate.npz")
             cam = TelecineCamera(sensor_mode = mode, lens_shading_table = lst['lens_shading_table'])
         except Exception as ex:
+            print(ex)
             pass
     if cam == None :
         cam = TelecineCamera(sensor_mode = mode)
@@ -243,7 +275,7 @@ def openCamera(mode, resolution, useCalibration,hflip,vflip) :
 def closeCamera() :
     global camera
     exitFlag = True
-    saveSettings()
+    saveCameraSettings()
     camera.close()
     camera = None
 
@@ -254,11 +286,13 @@ def calibrateCamera(hflip, vflip) :
     np.savez('calibrate.npz',   lens_shading_table = lens_shading_table)
 
    
-def saveSettings() :
+def saveCameraSettings() :
     if camera != None :
         np.savez('camera.npz', init = getSettings(camera, initSettings) , \
              control=getSettings(camera, controlSettings), \
              added=getSettings(camera, addedSettings))
+
+def saveMotorSettings() :
     if motor != None :        
         np.savez('motor.npz', motor=getSettings(motor, motorSettings))
 try:
@@ -295,13 +329,15 @@ try:
 
 #Capture image Thread
     captureEvent = Event()
+    restartEvent = Event()
+    restartEvent.set()
     
     while True:
         request = commandSock.receiveObject()
         if request == None :
             break
         command = request[0]
-        print('Command:', command)
+        print('Command:%s\n' % hex(command)) #Thread safe print with NL !
         if command == TAKE_IMAGE :
             camera.captureImage()
         elif command == GET_CAMERA_SETTINGS:
@@ -318,7 +354,8 @@ try:
         elif command == SET_MOTOR_SETTINGS:
             setSettings(motor, request[1])
         elif command == SAVE_SETTINGS :
-            saveSettings()
+            saveCameraSettings()
+            saveMotorSettings()
         elif command == START_CAPTURE:
             captureEvent.set()
         elif command == STOP_CAPTURE:
@@ -346,17 +383,30 @@ try:
         elif command == MOTOR_ON :
             motor.on()
         elif command == MOTOR_OFF :
+            saveMotorSettings()
             motor.off()
+        elif command == PAUSE_CAPTURE :
+            if restartEvent.isSet() :
+                restartEvent.clear()   #pause
+            else :
+                restartEvent.set()     #Restart
         else :
             pass            
        
 finally:
-    exitFlag = True
-    if captureEvent != None :
-        captureEvent.clear() #stop capture
-    if queue != None :
+    if captureImageThread != None :
+        exitFlag = True  #Stop Capture Thread
+        if restartEvent != None :
+            if not restartEvent.isSet() :
+                retstartEvent.set()  #Restart capture generator if puased
+        if captureEvent != None :
+            captureEvent.clear() #stop capture generator
+        captureImageThread.join()
+    if sendImageThread != None:
         queue.put({'type':HEADER_STOP}) #Stop sending thread
+        sendImageThread.join()
     if motor != None :
+        saveMotorSettings()
         motor.close()
     if pi != None:
         pi.stop()

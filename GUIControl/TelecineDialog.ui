@@ -581,7 +581,7 @@
     <rect>
      <x>20</x>
      <y>230</y>
-     <width>571</width>
+     <width>701</width>
      <height>161</height>
     </rect>
    </property>
@@ -648,9 +648,9 @@
    <widget class="QGroupBox" name="groupBox_5">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>10</x>
       <y>60</y>
-      <width>461</width>
+      <width>581</width>
       <height>80</height>
      </rect>
     </property>
@@ -738,7 +738,7 @@
       </rect>
      </property>
      <property name="maximum">
-      <number>30</number>
+      <number>50</number>
      </property>
      <property name="singleStep">
       <number>1</number>
@@ -795,7 +795,7 @@
       </rect>
      </property>
      <property name="maximum">
-      <number>30</number>
+      <number>50</number>
      </property>
      <property name="singleStep">
       <number>1</number>
@@ -804,6 +804,74 @@
       <number>30</number>
      </property>
     </widget>
+    <widget class="QLabel" name="label_33">
+     <property name="geometry">
+      <rect>
+       <x>410</x>
+       <y>40</y>
+       <width>47</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>PIN</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="pauseEdit">
+     <property name="geometry">
+      <rect>
+       <x>450</x>
+       <y>40</y>
+       <width>31</width>
+       <height>16</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="pauseLevelCheckBox">
+     <property name="geometry">
+      <rect>
+       <x>450</x>
+       <y>60</y>
+       <width>41</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>High</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="autoPauseCheckBox">
+     <property name="geometry">
+      <rect>
+       <x>410</x>
+       <y>20</y>
+       <width>91</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Auto pause</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QPushButton" name="capturePauseButton">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>20</y>
+      <width>61</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>61</width>
+      <height>16777215</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>Pause</string>
+    </property>
    </widget>
   </widget>
   <widget class="QGroupBox" name="motorControlGroupBox">
@@ -974,7 +1042,7 @@
     </property>
    </widget>
   </widget>
-  <widget class="QGroupBox" name="groupBox_7">
+  <widget class="QGroupBox" name="initGroupBox">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -1186,7 +1254,7 @@
       </rect>
      </property>
      <property name="text">
-      <string>Hflip</string>
+      <string>Vflip</string>
      </property>
     </widget>
    </widget>
@@ -1753,7 +1821,7 @@
     <rect>
      <x>20</x>
      <y>630</y>
-     <width>631</width>
+     <width>691</width>
      <height>81</height>
     </rect>
    </property>
@@ -1912,8 +1980,8 @@
    <widget class="QPushButton" name="setMotorButton">
     <property name="geometry">
      <rect>
-      <x>510</x>
-      <y>20</y>
+      <x>520</x>
+      <y>10</y>
       <width>75</width>
       <height>23</height>
      </rect>
@@ -2516,6 +2584,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>capturePauseButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>capturePause()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>330</x>
+     <y>261</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>791</x>
+     <y>321</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autoPauseCheckBox</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setAutoPause()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>477</x>
+     <y>318</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>797</x>
+     <y>367</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>takeImage()</slot>
@@ -2557,5 +2657,7 @@
   <slot>motorOn()</slot>
   <slot>motorOff()</slot>
   <slot>setEqualize()</slot>
+  <slot>capturePause()</slot>
+  <slot>setAutoPause()</slot>
  </slots>
 </ui>

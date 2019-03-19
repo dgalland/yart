@@ -1,5 +1,3 @@
-**Attention version préliminaire, pour partager les concepts et mon expérience. Le projet fonctionne pour moi mais nécessite encore des améliorations et de la fiabilité**
-
 # Yet Another Raspberry Pi Telecine
 
 En premier lieu je dois remercier Joe Herman pour son projet https://github.com/jphfilm/rpi-film-capture. Mon projet n'est pas un fork car toute la partie logicielle a été réécrite. Cependant toute la partie matérielle reprend les idées de Joe.
@@ -33,7 +31,7 @@ La camera V1 semble aussi donner de bons résultats pour certains. Sa résolutio
 
 ### Quelle résolution ?
 
-Pour la camera V2 la résolution maximale est 3280x2464. La question se pose de choisir cette résolution maximale qui ralentit beaucoup la capture ou une résolution plus faible comme la moitié 1640x1232. Mes essais montrent que la résolution maximale amène bien un gain sensible. Ci dessous la même zone en 1640*1232 puis en 3280x2464. Evidemment une haute résolution ralentit considérablement la capture surtout si on utilise le bracketing. En 1640x1632 j'obtiens à peu près 1 image/s et environ trois fois moins en haute résolution !
+Pour la camera V2 la résolution maximale est 3280x2464. La question se pose de choisir cette résolution maximale qui ralentit beaucoup la capture (3 fois plus lente) ou une résolution plus faible comme la moitié 1640x1232. Mes essais montrent que la résolution maximale amène bien un gain sensible. Ci dessous la même zone en 1640*1232 puis en 3280x2464. Evidemment une haute résolution ralentit considérablement la capture surtout si on utilise le bracketing. En 1640x1632 avec bracket j'obtiens à peu près 1s par image et environ trois fois moins en haute résolution 3s par image
 
 ![halfres](images/halfres.jpg)
 
@@ -56,8 +54,6 @@ Si possible agrandir au maximum ou supprimer la fenêtre de projection pour capt
 Le moteur pas à pas est un moteur NEMA 17 alimenté en 24v. Comme contrôleur j'ai choisi un TB6600 qui présente certains avantages, les hauts voltages sont bien séparés des broches du Pi (moins dangereux pour le Pi !), les broches sont protégées par des coupleurs optiques et le micro-stepping et l'intensité sont contrôlables par des switchs 
 
 Le moteur entraine l'axe du projecteur par des poulies GT, avec un ratio de 1:1
-
-Un moteur pas à pas fonctionne en général à 200 pulses par tour. Utiliser le micro-stepping par exemple à 800 pulses par tour peut diminuer les vibrations
 
 Maintenant quelques images:
 
@@ -87,7 +83,7 @@ Le mécanisme des sockets est utilisé pour la communication réseau. Une classe
 - Envoi et réception de string
 - Envoi et réception d'un objet python quelconque (dictionnary, tuple, ...)
 
-Ainsi on peut envoyer ou recevoir sur ce socket des objets Python, commande et ses paramètres, réponse, dictionnaire d'attributs, header de frame avec des informations, ...
+Ainsi on peut aisément envoyer ou recevoir sur ce socket toute sorte d'objets Python, commande et ses paramètres, réponse, dictionnaire d'attributs, header de frame avec des informations, image JPEG ou tableau numpy
 
 Deux sockets sont utilisés, un socket bidirectionnel pour envoyer des commandes et recevoir des réponses et un socket unidirectionnel pour recevoir les frames et des headers d'information.
 
@@ -102,19 +98,21 @@ On utilise la librairie pigpio qui permet de générer les pulses PWM par hardwa
 Câblage du moteur
 
 Deux broches sont absolument nécessaires PUL/STEP et DIR
-Unr broche supplémentaire ENA ou RESET peut être utilisée pour mettre le moteur ON/OFF
+Unr broche supplémentaire ENA ou RESET peut être utilisée pour mettre le moteur ON/OFF. En fait il n'y a pas d'inconvénient à le laisser sous tension si ce n'est que son couple empêche d'avancer le projecteur manuellement.
 
-TB6600
+Contrôleur TB6600
 
 ENA- PUL- DIR- to GND
 ENA+ DIR+ PUL+ To Pi GPIO 
 Si ENA+ HIGH le moteur est Off Line 
 
-DRV8825
+Contrôleur DRV8825
 
 STEP DIR and SLEEP to Pi GPIO
-RESET non utilisé connecté sur Pi VDD 3.3V
+RESET non utilisé à connecter sur Pi VDD 3.3V
 Si SLEEP est HIGH le moteur est On Line
+
+Un moteur pas à pas fonctionne en général à 200 pulses par tour. Utiliser le micro-stepping par exemple à 800 pulses par tour peut diminuer les vibrations
 
 ### Camera	
 
@@ -132,13 +130,17 @@ et après calibration !
 
 Il semble que ceci soit moins nécessaire avec la camera V1 (5MP) ?
 
-La capture s'effectue en résolution 1640x1232 en JPEG sur le port video avec un framerate de 30fps
+La capture s'effectue en JPEG sur le port video avec un framerate de 30fps
 
 Comme expliqué dans la documentation picamera on utilise la méthode la plus rapide `capture_sequence` avec un générateur. 
 
 https://picamera.readthedocs.io/en/release-1.13/
 
 En théorie dans le générateur deux méthodes de capture sont possibles
+
+#### Capture "On frame"
+
+Le moteur est asservi à la capture
 
 ```
 Tant que captureEvent
@@ -147,21 +149,23 @@ Tant que captureEvent
 	Envoyer la frame sur le réseau
 ```
 
-ou bien 
+#### Capture "On trigger"
+
+La capture est asservie au moteur
 
 ```
-Lancer le moteur à une certaine vitesse
+Démarrer le moteur à une certaine vitesse
 Tant que captureEvent
 	Attendre le trigger
 	Capturer la frame
 	Envoyer la frame sur le réseau
 ```
 
-Dans la première méthode le moteur avance de façon discontinue, frame par frame, dans la seconde il tourne à vitesse constate, le trigger déclenche la capture. 	J'ai choisi pour l'instant le première plus sécurisante.
+Dans la première méthode le moteur avance de façon discontinue, frame par frame, dans la seconde il tourne à vitesse constate, le trigger déclenche la capture. 	
 
 ### Paramètres de la caméra, Bracketing, Merge, HDR
 
-En premier lieu, il faut souligner que la librairie picamera fait un excellent travail pour la qualité de l'image. <u>L'exposition et la balance des blancs automatiques sont très bien calculées</u>, il est difficile et donc pas nécessaire de faire mieux manuellement.
+En premier lieu, il faut souligner que la librairie picamera fait un excellent travail pour la qualité de l'image. <u>L'exposition et la balance des blancs automatiques sont très bien calculées</u>, il est difficile et donc pas nécessaire de faire mieux manuellement. Donc laisser la caméra en automatique
 
 Cependant la camera est limitée dans sa dynamique, si on augmente l'exposition pour éclaircir les sombres, il n'y a plus de détails dans les clairs et inversement. Il est pratiquement impossible d'obtenir une image qui reflète correctement toutes les luminosités de la scène.
 
@@ -180,9 +184,11 @@ Comme exemple, ci-dessous la même image avec 25 expositions également réparti
 
 ![result (2460 x 1540)](images/result.jpg)
 
-Autre exemple, l'image sous-exposée,  l'image avec l'exposition automatique, l'image sur-exposée puis l'image merge Mertens et l'image HDR. L'image Mertens est un peu artificielle car elle ne rend pas compte de la luminosité réelle de la scène, les sombres sont exagérément accentués. On constate également que le merge Debevec réduit le grain.
+Autre exemple, l'image sous-exposée,  l'image avec l'exposition automatique, l'image sur-exposée puis l'image merge Mertens et l'image HDR. L'image Mertens est un peu artificielle car elle ne rend pas compte de la luminosité réelle de la scène, les sombres sont exagérément accentués. On constate également que le merge Debevec réduit le grain par contre elle manque de contraste ce qu pourra être amélioré au post-traitement.
 
 ![merge](images/merge.jpg)
+
+​                                                              Bracket de 3 Merge Mertens et Merge Debevec
 
 ###### Note sur les algorithmes de fusion HDR et de Tone Mapping
 
@@ -190,7 +196,7 @@ La littérature est abondante sur le sujet. J'ai fait divers essais et le meille
 
 ###### Mise en œuvre du merge
 
-D'après mon expérience par rapport a l'exposition automatique t, l'exposition sous exposée peut être de 0.1xt et l'exposition sur exposée de 8*t. ces facteurs sont assez stables sur la durée de la capture.
+D'après mon expérience par rapport a l'exposition automatique calculée par la caméra t, l'exposition sous exposée peut être de 0.1xt et l'exposition sur exposée de 8*t. ces facteurs sont assez stables sur la durée de la capture.
 
 D'un point de vue programmation la mise en œuvre du bracketing est très délicate, en effet il faut bien avoir l'idée que la caméra n'est pas un appareil photo mais une caméra qui fournit un flux continu d'images.  Donc après avoir changé l'exposition il faut attendre quelques frames (minimum 4 d'après mon expérience) avant d'obtenir la bonne exposition. De même après  être repassé en automatique il faut attendre quelques trames (minimum 7 d'après mon expérience) avant d'avoir la bonne exposition. La capture devient:
 
@@ -206,7 +212,7 @@ Tant que captureEvent
 	Repasser en exposition automatique
 ```
 
-Tout ceci diminue considérablement la vitesse de capture, avec la résolution 1640x1232 elle ne dépasse plus 1fps.
+Tout ceci diminue considérablement la vitesse de capture, avec la résolution 1640x1232 elle ne dépasse plus 1s par trame et en résolution 3280x2664 3s par trame
 
 ### GUI on the PC
 
@@ -233,11 +239,9 @@ Ici aussi on pourrait avoir une thread de réception et une thread de traitement
 
 Il est intéressant de noter que le réseau n'est pas un facteur limitant, avec la résolution 1640x1232 et une capture à 1fps, le débit réseau est d'environ 20mb/s. L'interface réseau du Raspberry est indiquée comme 1Gb/s mais en réalité elle utilise le bus USB donc plus lente.
 
-### Post traitement
-
-Les images fusionnées sont écrites individuellement dans des fichiers JPEG. En fin de capture ces images sont fusionnées en un fichier MJPEG (avec ffmpeg). La restauration s'effectuera ultérieurement par exemple avec les scripts avisynth de videofred.
-
 ## Installation and setup
+
+L'application nécessite python 3 sur le PC et sur le Pi
 
 Sur le PC Windows
 
@@ -253,10 +257,9 @@ Si on utilise l'IDE Thonny, il est préférable de l'installer dans Python lui-m
 
 Sur le Pi raspian:
 
+- Python 3.7
 - numpy
-
 - pigpio
-
 - picamera (version expérimentale)
 
 ## Usage
@@ -271,7 +274,7 @@ Ci-dessous l'image de l'interface de l'application sur le PC
 
 - Sur le Raspberry exécuter le démon  pigpiod : sudo pigpiod
 
-- Sur le Raspberry dans le répertoire Respberry exécuter: python Controller.py
+- Sur le Raspberry dans le répertoire Raspberry exécuter: python3 Controller.py
 
 - Sur le PC saisir l'adresse IP du Raspberry et cliquer "Connect"
 
@@ -294,7 +297,7 @@ Pour calibrer il faut capturer une image <u>uniformément blanche</u> (pas de ca
 
 ### Contrôle du moteur
 
-En premier lieu paramétrer le nombre de steps par révolution, le ratio des poulies Moteur/Projecteur  et les numéros de pins. Pour chaque pin choisir le niveau HIGH ou LOW.
+En premier lieu paramétrer le nombre de steps par révolution, le ratio des poulies Moteur/Projecteur  et les numéros de pins. Pour chaque pin choisir le niveau du signal HIGH ou LOW.
 
 La pin ON contrôle le moteur ON/OFF
 
@@ -319,9 +322,15 @@ On peut ajuster les paramètres de la caméra, cependant les meilleurs résultat
 
 ### Capture
 
-- Shot: Capture une image (sans bracket)
+Shot: Capture une image (sans bracket)
+
 - Preview: Capture sans moteur, utile pour tester la mise au point, les paramètres de la caméra et le bracket
-- Capture: Capture en avançant le moteur. Utiliser la méthode OnFrame (On Trigger n'est pas bien testé)
+- Capture: Capture en avançant le moteur. 
+
+"On Frame" Le moteur avance jusqu'au trigger, stoppe puis capture
+"On trigger" Le moteur avance de façon continue à une certaine vitesse, la capture est déclenchée par le trigger
+
+La méthode "On frame" est plus fiable surtout si le bracket est utilisé.
 
 ### Bracketing et fusion
 
@@ -331,8 +340,8 @@ Si un bracket de 3 est choisi il faut ajuster:
 
 - "Dark coefficient" coefficient à appliquer à l'exposition de l'image normale (auto exposition calculée par la caméra) pour obtenir l'image sous-exposée. 0.10 semble être une bonne valeur
 - "Light coefficient" coefficient à appliquer à l'exposition de l'image normale (auto exposition calculée par la caméra) pour obtenir l'image sur-exposée. 8 semble être une bonne valeur
-- "Shutter speed wait" Nombre de trames à ignorer après le changement d'exposition (minimum 3)
-- "Shutter auto wait" Nombre de trames à ignorer après le passage en auto pour l'image suivante (minimum 5). 
+- "Shutter speed wait" Nombre de trames à ignorer après le changement d'exposition (minimum 4)
+- "Shutter auto wait" Nombre de trames à ignorer après le passage en auto pour l'image suivante (minimum 7). 
 
 Pour ajuster ces coefficients il faut faire des essais sur une image dans votre film. 
 
@@ -347,7 +356,7 @@ Ensuite vous pouvez faire les mêmes essais en "Capture"
 
 - Vérifier également que lorsque le moteur  s'arrête l'image normale n'est pas bougée (blurred) . Sinon il faut augmenter "Shutter auto wait" pour attendre la stabilisation totale après l'avance du moteur.
 
-Au final avec un bracket de 3 et un framerate  camera de 30fps vous devez obtenir un débit d'environ 1 image par seconde en résolution 1640x1232  et 0.3 image par seconde en résolution maximale 3280*2464 
+Au final avec un bracket de 3 et un framerate  camera de 30fps vous devez obtenir un débit d'environ 1 seconde par image en résolution 1640x1232  et 3 secondes par image en résolution maximale 3280*2464 
 
 ### Traitement des images
 
@@ -355,7 +364,7 @@ Il s'effectue sur le PC
 
 - "Histo" affiche l'histogramme de l'image
 - "Sharpness" Evalue et affiche la netteté de l'image pour une bonne mise au point (utiliser "Shot" ou "Play" avec 5fps) . La meilleur mise au point correspond à la valeur maximum de sharpness. L'amorce blanche au début du film permet de bien tester la mise au point.
-- Reduce permet de réduire l'image affichée pendant la capture
+- Reduce permet de réduire l'image affichée
 - "Merge"  Détermine l'algorithme de fusion "None"  "Mertens" ou "Debevec"
 - "Save" Sauvegarde les images dans le répertoire choisi. On peut choisir un numéro de bande et un numéro de clip. Pour chaque "Capture" les images sont numérotées à partir de 0
 

@@ -478,7 +478,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             self.sock.close()
             self.cameraGroupBox.setEnabled(False)
             self.cameraControlGroupBox.setEnabled(False)
-             self.frameProcessingGroupBox.setEnabled(False)
+            self.frameProcessingGroupBox.setEnabled(False)
             self.motorControlGroupBox.setEnabled(False)
             self.cameraSettingsGroupBox.setEnabled(False)
             self.motorSettingsGroupBox.setEnabled(False)

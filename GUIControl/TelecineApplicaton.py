@@ -204,7 +204,6 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
     def closeCamera(self) :
         self.sock.sendObject((CLOSE_CAMERA,))
         self.cameraControlGroupBox.setEnabled(False)
-        self.bracketControlGroupBox.setEnabled(False)
         self.frameProcessingGroupBox.setEnabled(False)
         self.cameraSettingsGroupBox.setEnabled(False)
         self.closeCameraButton.setEnabled(False)

@@ -129,11 +129,11 @@ class TelecineCamera(PiCamera) :
             elif self.capture_method == CAPTURE_ON_FRAME :
                 motor.advanceUntilTrigger()
 #            self.awb_mode = 'auto'
-            if self.bracket_steps != 1 :
-                for foo in range(self.shutter_auto_wait) : 
-                    yield stream
-                    stream.seek(0)
-                    stream.truncate(0)
+#            if self.bracket_steps != 1 :
+            for foo in range(self.shutter_auto_wait) : 
+                yield stream
+                stream.seek(0)
+                stream.truncate(0)
 #Wait if queue is full          
             if queue.qsize() > 20 :
                 if self.capture_method == CAPTURE_ON_TRIGGER :
@@ -370,7 +370,7 @@ try:
             motor.advanceCounted()
         elif command == MOTOR_STOP :
             motor.stop()
-            motor.advanceUntilTrigger()
+#            motor.advanceUntilTrigger()
 ##        elif command == CALIBRATE_HDR :
 ##            camera.calibrateHDR(request[1])
         elif command == OPEN_CAMERA :
@@ -380,6 +380,8 @@ try:
         elif command == CALIBRATE_CAMERA :
             calibrateCamera(request[1],request[2])  #hflip vflip
             commandSock.sendObject('Calibrate done')
+        elif command == MOTOR_ON_TRIGGER :
+            motor.advanceUntilTrigger()
         elif command == MOTOR_ON :
             motor.on()
         elif command == MOTOR_OFF :

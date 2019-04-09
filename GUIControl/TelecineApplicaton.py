@@ -18,7 +18,7 @@ sys.path.append('../Common')
 from Constants import *
 from MessageSocket import *
 
-localSettings = ('ip_pi', 'root_directory')
+localSettings = ('ip_pi', 'root_directory','hflip', 'vflip', 'mode')
 
 #Generic methods to set/get object attributes from a dictionary
 def getSettings(object, keys):
@@ -46,12 +46,14 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.imageThread = None
         self.connectButton.setStyleSheet("background-color: red")
         self.ip_pi = ''
+        self.hflip = False
+        self.vflip = False
+        self.mode = 2
         self.cameraVersion = ''
         self.root_directory = 'images'
         self.captureStopButton.setEnabled(False)
         self.capturePauseButton.setEnabled(False)
         self.cameraControlGroupBox.setEnabled(False)
-        self.bracketControlGroupBox.setEnabled(False)
         self.frameProcessingGroupBox.setEnabled(False)
         self.motorControlGroupBox.setEnabled(False)
         self.cameraSettingsGroupBox.setEnabled(False)
@@ -97,6 +99,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.backwardOneButton.setEnabled(False)
         self.forwardButton.setEnabled(False)
         self.backwardButton.setEnabled(False)
+        self.motorOnTriggerButton.setEnabled(False)
     def backward(self):
         self.setMotorSettings({'speed':self.motorSpeedBox.value()})
         self.sock.sendObject((MOTOR_ADVANCE, MOTOR_BACKWARD))
@@ -105,6 +108,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.backwardOneButton.setEnabled(False)
         self.forwardButton.setEnabled(False)
         self.backwardButton.setEnabled(False)
+        self.motorOnTriggerButton.setEnabled(False)
     def motorStop(self):
         self.sock.sendObject((MOTOR_STOP,))
         self.motorStopButton.setEnabled(False)
@@ -112,6 +116,11 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.backwardOneButton.setEnabled(True)
         self.forwardButton.setEnabled(True)
         self.backwardButton.setEnabled(True)
+        self.motorOnTriggerButton.setEnabled(True)
+
+    def motorOnTrigger(self):
+        self.setMotorSettings({'speed':self.motorSpeedBox.value()})
+        self.sock.sendObject((MOTOR_ON_TRIGGER,))
 
 
     def setMotorSettings(self, settings) :
@@ -152,7 +161,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         
 #Camera control
     def openCamera(self):
-        mode = int(self.modeBox.value())  #0 automatic
+        self.mode = int(self.modeBox.value())  #0 automatic
         hres = 0
         vres = 0
         try :
@@ -163,26 +172,27 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         requestedResolution = None
         if hres!= 0 and vres!= 0 :
             requestedResolution = (hres, vres)
-        self.sock.sendObject((OPEN_CAMERA, mode, requestedResolution, self.useCalibrationCheckBox.isChecked(), \
-                             self.hflipCheckBox.isChecked(), self.vflipCheckBox.isChecked()))
+        self.hflip = self.hflipCheckBox.isChecked()
+        self.vflip = self.vflipCheckBox.isChecked()
+        self.sock.sendObject((OPEN_CAMERA, self.mode, requestedResolution, self.useCalibrationCheckBox.isChecked(), \
+                             self.hflip, self.vflip))
         self.getCameraSettings()
         maxResolution = self.getCameraSetting('MAX_RESOLUTION')
         if maxResolution[0] == 3280 :
             self.cameraVersion = 2
         else :
             self.cameraVersion = 1
-        if hres== 0 and vres==0 and mode != 0 :
+        if hres== 0 and vres==0 and self.mode != 0 :
             if self.cameraVersion == 2 :
-                res=V2_RESOLUTIONS[mode-1]
+                res=V2_RESOLUTIONS[self.mode-1]
             else :
-                res=V1_RESOLUTIONS[mode-1]
+                res=V1_RESOLUTIONS[self.mode-1]
             self.sock.sendObject((SET_CAMERA_SETTINGS, {'resolution':res}))
         self.cameraVersionLabel.setText('Picamera V' + str(self.cameraVersion))
         self.resolution = self.getCameraSetting('resolution')
         self.hresLineEdit.setText(str(self.resolution[0]))
         self.vresLineEdit.setText(str(self.resolution[1]))
         self.cameraControlGroupBox.setEnabled(True)
-        self.bracketControlGroupBox.setEnabled(True)
         self.frameProcessingGroupBox.setEnabled(True)
         self.cameraSettingsGroupBox.setEnabled(True)
         self.closeCameraButton.setEnabled(True)
@@ -310,13 +320,15 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.redGainBox.setValue(float(settings['awb_gains'][0])*100.)
         self.blueGainBox.setValue(float(settings['awb_gains'][1])*100.)
         self.awbModeBox.setCurrentIndex(self.awbModeBox.findText(settings['awb_mode']))
-        self.shutterSpeedBox.setValue(int(settings['shutter_speed']))
+        shutterSpeed = int(settings['shutter_speed'])
+        self.shutterSpeedBox.setValue(shutterSpeed)
+        self.autoExposureCheckBox.setChecked(shutterSpeed == 0)
         self.framerateBox.setValue(int(settings['framerate']))
         exposureSpeed = self.getCameraSetting('exposure_speed')
         self.exposureSpeedLabel.setText(str(exposureSpeed))
         self.analogGainLabel.setText(str(float(settings['analog_gain'])))
         self.digitalGainLabel.setText(str(float(settings['digital_gain'])))
-        self.exposureModeBox.setCurrentIndex(self.awbModeBox.findText(settings['exposure_mode']))
+        self.exposureModeBox.setCurrentIndex(self.exposureModeBox.findText(settings['exposure_mode']))
         self.brightnessBox.setValue(settings['brightness'])
         self.contrastBox.setValue(settings['contrast'])
         self.contrastBox.setValue(settings['saturation'])
@@ -342,7 +354,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
     def saveSettings(self):
         self.sock.sendObject((SAVE_SETTINGS,))
 
-    def setGains(self) :
+    def setColors(self) :
         blue = self.blueGainBox.value()
         red = self.redGainBox.value()
         gains = (red/100., blue/100.)
@@ -392,6 +404,11 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             
     def setCorrections(self):
         self.sock.sendObject((SET_CAMERA_SETTINGS, {'brightness':self.brightnessBox.value(), 'contrast':self.contrastBox.value(),'saturation':self.saturationBox.value()}))
+
+    def setGains(self):
+        mode = str(self.exposureModeBox.currentText())
+        settings = {'exposure_mode':mode,}
+        self.sock.sendObject((SET_CAMERA_SETTINGS, settings))
 
 
 #Experimental not used
@@ -461,8 +478,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             self.sock.close()
             self.cameraGroupBox.setEnabled(False)
             self.cameraControlGroupBox.setEnabled(False)
-            self.bracketControlGroupBox.setEnabled(False)
-            self.frameProcessingGroupBox.setEnabled(False)
+             self.frameProcessingGroupBox.setEnabled(False)
             self.motorControlGroupBox.setEnabled(False)
             self.cameraSettingsGroupBox.setEnabled(False)
             self.motorSettingsGroupBox.setEnabled(False)
@@ -474,8 +490,11 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         try:
             npz = np.load("local.npz")
             setSettings(self, npz['local'][()])
-            commandDialog.ipLineEdit.setText(self.ip_pi)
-            commandDialog.directoryDisplay.setText(self.root_directory)
+            self.ipLineEdit.setText(self.ip_pi)
+            self.directoryDisplay.setText(self.root_directory)
+            self.hflipCheckBox.setChecked(self.hflip)
+            self.vflipCheckBox.setChecked(self.vflip)
+            self.modeBox.setValue(self.mode)
         except Exception as e:
             print(e)
         

@@ -99,10 +99,14 @@ class TelecineMotor() :
         self.triggered = False
         self.pi.write(self.dir_pin, 0 if self.direction == self.dir_level else 1)  #self.direction = 0 forward
         self.pi.wave_clear()
-        wid = self.wave(self.speed)
-        x = (count*self.steps_per_rev)  & 255
-        y = (count*self.steps_per_rev)  >> 8  #to to pulley_ratio !
-        chain = [255, 0, wid, 255, 1, x, y] 
+        chain = []
+        start = int(self.steps_per_rev/2)
+        x = start  & 255
+        y = start  >> 8  
+        chain += [255, 0, self.wave(self.speed/2), 255, 1, x, y] #half rev at speed/2
+        x = (count*self.steps_per_rev-start)  & 255
+        y = (count*self.steps_per_rev-start)  >> 8  #to to pulley_ratio !
+        chain += [255, 0, self.wave(self.speed), 255, 1, x, y] 
         self.pi.wave_chain(chain)  # Transmit chain.
         time.sleep(self.pi.wave_get_micros()*count*self.steps_per_rev/1000000.)      
      
@@ -111,7 +115,13 @@ class TelecineMotor() :
             self.triggered = True
             self.pi.write(self.dir_pin, 0 if self.direction == self.dir_level else 1)  #self.direction = 0 forward
             self.pi.wave_clear()
-            chain = [255, 0, self.wave(self.speed), 255, 3]  #Loop forever but triggered
+##            chain = [255, 0, self.wave(self.speed), 255, 3]  #Loop forever but triggered without ramping
+            chain = []
+            x = (int(self.steps_per_rev/8))  & 255   
+            y = (int(self.steps_per_rev/8))  >> 8  
+            chain += [255, 0, self.wave(self.speed/2), 255, 1, x, y] #speed/2 for 1/8 rev
+            chain += [255, 0, self.wave(self.speed), 255, 3]  #Loop forever but triggered
+
             self.pi.wave_chain(chain)  # Transmit chain.
             self.triggerEvent.wait()
         else :

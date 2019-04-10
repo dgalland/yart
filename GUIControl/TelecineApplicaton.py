@@ -333,7 +333,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.contrastBox.setValue(settings['saturation'])
         self.isoBox.setValue(settings['iso'])
         self.exposureCompensationBox.setValue(settings['exposure_compensation'])
-        self.bracketCheckBox.setChecked(settings['bracket_steps'] != 0)
+        self.bracketCheckBox.setChecked(settings['bracket_steps'] != 1)
         self.lightCoefficientBox.setValue(settings['bracket_light_coefficient'])
         self.darkCoefficientBox.setValue(settings['bracket_dark_coefficient'])
 #        self.videoPortButton.setChecked(settings['use_video_port'])
@@ -363,6 +363,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
     
     def setShutterSpeed(self):
          self.sock.sendObject((SET_CAMERA_SETTINGS, {'shutter_speed':self.shutterSpeedBox.value(), 'exposure_compensation':self.exposureCompensationBox.value()}))
+                 
 
     def setIso(self):
          self.sock.sendObject((SET_CAMERA_SETTINGS, {'iso':self.isoBox.value()}))
@@ -389,9 +390,9 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             self.shutterSpeedBox.setValue(0)
         else :
             exposureSpeed = self.getCameraSetting('exposure_speed')
-            self.exposureSpeedLabel.setText(str(exposureSpeed/1000))  # ms display
+            self.exposureSpeedLabel.setText(str(exposureSpeed))  # ms display
             self.sock.sendObject((SET_CAMERA_SETTINGS, {'shutter_speed':exposureSpeed}))
-            self.shutterSpeedBox.setValue(exposureSpeed/1000)
+            self.shutterSpeedBox.setValue(exposureSpeed)
             
     def setAutoGetSettings(self):
         if self.autoGetSettingsCheckBox.isChecked() :

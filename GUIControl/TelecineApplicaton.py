@@ -211,10 +211,12 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.calibrateButton.setEnabled(True)
     
     def calibrate(self) :
+        self.messageLabel.setText('Calibrating please wait')
         QApplication.setOverrideCursor(Qt.WaitCursor)
         self.sock.sendObject((CALIBRATE_CAMERA,self.hflipCheckBox.isChecked(), self.vflipCheckBox.isChecked()))
         done = self.sock.receiveObject()
-        QApplication.restoreOverrideCursor()        
+        QApplication.restoreOverrideCursor()
+        self.messageLabel.setText(done)
         print(done)
         
     def equalize(self) :

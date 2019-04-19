@@ -245,11 +245,15 @@ def openCamera(mode, resolution, useCalibration,hflip,vflip) :
     cam = None
     if useCalibration :
         try :
-            lst = np.load("calibrate.npz")
+            lst = np.load("calibrate_test.npz")
             cam = TelecineCamera(sensor_mode = mode, lens_shading_table = lst['lens_shading_table'])
         except Exception as ex:
-            print(ex)
-            pass
+            try :
+                lst = np.load("calibrate.npz")
+                cam = TelecineCamera(sensor_mode = mode, lens_shading_table = lst['lens_shading_table'])
+            except Exception as ex:
+                print(ex)
+                pass
     if cam == None :
         cam = TelecineCamera(sensor_mode = mode)
     if resolution != None :
@@ -282,8 +286,12 @@ def closeCamera() :
 def calibrateCamera(hflip, vflip) :
     if camera != None :
         closeCamera
+##    header = {'type':HEADER_MESSAGE, 'msg':'Calibrating please wait'}
+##    queue.put(header)
     lens_shading_table = generate_lens_shading_table_closed_loop(n_iterations=5, hflip=hflip, vflip=vflip)
     np.savez('calibrate.npz',   lens_shading_table = lens_shading_table)
+##    header = {'type':HEADER_MESSAGE, 'msg':'Calibrate done'}
+##    queue.put(header)
 
    
 def saveCameraSettings() :

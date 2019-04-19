@@ -3,6 +3,9 @@ import picamera
 import numpy as np
 import sys
 import time
+from fractions import Fraction 
+import cv2
+
 
 def lens_shading_correction_from_rgb(rgb_array, binsize=64):
     """Calculate a correction to a lens shading table from an RGB image.
@@ -28,9 +31,11 @@ def lens_shading_correction_from_rgb(rgb_array, binsize=64):
         # half the size of the full image - remember the Bayer pattern...  This
         # should give results very close to 6by9's solution, albeit considerably 
         # less computationally efficient!
-        padded_image_channel = np.pad(image_channel, 
-                                      [(0, lw*binsize - iw), (0, lh*binsize - ih)],
-                                      mode="edge") # Pad image to the right and bottom
+        dw = lw*binsize - iw
+        dh = lh*binsize - ih
+#        image_channel[iw-1:iw:1,:] = image_channel[iw-2:iw-1:,:]
+        image_channel[iw-8:iw:1,:] = np.mean(image_channel[iw-16:iw-8:,:],axis=0)
+        padded_image_channel = np.pad(image_channel, [(0, dw), (0, dh)], mode='edge') # Pad image to the right and bottom
         assert padded_image_channel.shape == (lw*binsize, lh*binsize), "padding problem"
         # Next, fill the shading table (except edge pixels).  Please excuse the
         # for loop - I know it's not fast but this code needn't be!
@@ -39,7 +44,7 @@ def lens_shading_correction_from_rgb(rgb_array, binsize=64):
         # horizontally, but not vertically.
         for dx in np.arange(box) - box//2:
             for dy in np.arange(box) - box//2:
-                ls_channel[:,:] += padded_image_channel[binsize//2+dx::binsize,binsize//2+dy::binsize]
+                ls_channel[:,:] += padded_image_channel[binsize//2+dx::binsize,binsize//2+dy::binsize]   
         ls_channel /= box**2
         # Everything is normalised relative to the centre value.  I follow 6by9's
         # example and average the central 64 pixels in each channel.
@@ -56,6 +61,7 @@ def lens_shading_correction_from_rgb(rgb_array, binsize=64):
     # lens shading - that's 1/lens_shading_table_float as we currently have it.
     lens_shading[2,...] = lens_shading[1,...] # Duplicate the green channels
     gains = 1.0/lens_shading # 32 is unity gain
+    print('Max:', np.max(gains), ' Min:', np.min(gains))
     return gains
 
 def gains_to_lst(gains):
@@ -75,44 +81,112 @@ def get_rgb_image(camera, resize):
         return output.array
 
 def freeze_camera_settings(camera):
-    time.sleep(4)
+    camera.awb_mode = "auto"
+    camera.exposure_mode = "auto"
+    time.sleep(5)
     camera.shutter_speed = camera.exposure_speed
-    camera.exposure_mode = "off"
+#    camera.exposure_mode = "off"
     g = camera.awb_gains
     camera.awb_mode = "off"
     camera.awb_gains = g
-    time.sleep(2)
+    print('Gains:', camera.awb_gains,' Shutter:', camera.exposure_speed)
+    time.sleep(5)
 
 
 def generate_lens_shading_table_closed_loop(hflip, vflip, n_iterations=5, images_to_average=5):
-    camera = picamera.PiCamera()
-    camera.hflip = hflip
-    camera.vflip = vflip
+
+    camera = picamera.PiCamera(sensor_mode=2)
     lens_shading_table = np.zeros(camera._lens_shading_table_shape(), dtype=np.uint8) + 32
     gains = np.ones_like(lens_shading_table, dtype=np.float)
     max_res = camera.MAX_RESOLUTION
-    print( max_res)
+    if max_res[0] == 3280 :
+        calibrate_res = (max_res[0]//2, max_res[1]//2)
+        binSize = 32
+        version = 2
+    else :
+        version = 1
+        binSize = 64
+        calibrate_res = max_res
+
+    time.sleep(2)
+    camera.capture('before01.jpg')
     camera.close()
-    camera = picamera.PiCamera(lens_shading_table=lens_shading_table,resolution=max_res)
-#    camera.start_preview(resolution=(1080*4/3, 1080))
+    
+    camera = picamera.PiCamera(sensor_mode=2,lens_shading_table=lens_shading_table, resolution=calibrate_res)
+    if version == 1 :
+        camera.hflip = True
+        camera.vflip = True
+    time.sleep(2)
+    camera.capture('before02.jpg')
     freeze_camera_settings(camera)
+    camera.capture('before03.jpg')
+
     for i in range(n_iterations):
         print("Optimising lens shading, pass {}/{}".format(i+1, n_iterations))
-        images = [] 
-        for j in range(images_to_average):
-            images.append(get_rgb_image(camera, (max_res[0]//2, max_res[1]//2)))
-        rgb_image = np.mean(images, axis=0, dtype=np.float)
-        incremental_gains = lens_shading_correction_from_rgb(rgb_image, 64//2)
+        rgb_image  = get_rgb_image(camera, calibrate_res).astype(dtype=np.float)
+        for j in range(images_to_average - 1):
+            rgb_image = rgb_image + get_rgb_image(camera, calibrate_res)
+        rgb_image = rgb_image / images_to_average
+        incremental_gains = lens_shading_correction_from_rgb(rgb_image, binSize)
         gains *= incremental_gains#**0.8
         # Apply this change (actually apply a bit less than the change)
         camera.lens_shading_table = gains_to_lst(gains*32)
         time.sleep(2)
-    result = camera.lens_shading_table
+##    camera.capture('after01.jpg')
+##    rgb_image  = get_rgb_image(camera, calibrate_res)
+##    channel_means = np.mean(np.mean(rgb_image, axis=0, dtype=np.float), axis=0)
+##    old_gains = camera.awb_gains
+##    print(channel_means[0])
+##    print(channel_means[1])
+##    print(channel_means[2])
+##    camera.awb_gains = (channel_means[1]/channel_means[0] * old_gains[0], channel_means[1]/channel_means[2]*old_gains[1])
+##    time.sleep(2)
+##    print('Old gains:', old_gains)
+##    print('New gains:', camera.awb_gains)
+##    camera.capture('after02.jpg')
+##    
+##    gains = np.ones_like(lens_shading_table, dtype=np.float)
+##    lens_shading_table = np.zeros(camera._lens_shading_table_shape(), dtype=np.uint8) + 32
+##    for i in range(n_iterations):
+##        print("Optimising lens shading, pass {}/{}".format(i+1, n_iterations))
+##        rgb_image  = get_rgb_image(camera, calibrate_res).astype(dtype=np.float)
+##        for j in range(images_to_average - 1):
+##            rgb_image = rgb_image + get_rgb_image(camera, calibrate_res)
+##        rgb_image = rgb_image / images_to_average
+##        incremental_gains = lens_shading_correction_from_rgb(rgb_image, binSize)
+##        gains *= incremental_gains#**0.8
+##        # Apply this change (actually apply a bit less than the change)
+##        camera.lens_shading_table = gains_to_lst(gains*32)
+##        time.sleep(2)
+##    camera.capture('after03.jpg')
+    
+    
+    
+    
+    lens_shading_table = camera.lens_shading_table
     camera.close()
-    return result
+    return lens_shading_table
 
 
 if __name__ == '__main__':
     lens_shading_table = generate_lens_shading_table_closed_loop(False,False, n_iterations=5)
-    settings = {'lens_shading_table': lens_shading_table}
     np.savez('calibrate.npz',   lens_shading_table = lens_shading_table)
+    
+    camera = picamera.PiCamera(lens_shading_table=lens_shading_table)
+    camera.resolution = camera.MAX_RESOLUTION
+    time.sleep(2)
+    print('reopen gains:', camera.awb_gains)
+    camera.hflip=False
+    camera.vflip=False
+    time.sleep(1)
+    camera.capture('after_f_f.jpg')
+    camera.hflip=True
+    time.sleep(1)
+    camera.capture('after_t_f.jpg')
+    camera.vflip=True
+    time.sleep(1)
+    camera.capture('after_t_t.jpg')
+    camera.hflip=False
+    camera.vflip=True
+    time.sleep(1)
+    camera.capture('after_f_t.jpg')

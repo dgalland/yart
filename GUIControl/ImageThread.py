@@ -102,6 +102,11 @@ class ImageThread (QThread):
                 file = open(self.directory + "/image_%#05d_%#02d.jpg" % (header['count'], header['bracket']),'wb')
                 file.write(jpeg)
                 file.close()
+#                if True :
+#                    b,g,r = cv2.split(image)
+#                    cv2.imwrite(self.directory + "/image_%#05d_%#02d_b.jpg" % (header['count'], header['bracket']),b)
+#                    cv2.imwrite(self.directory + "/image_%#05d_%#02d_g.jpg" % (header['count'], header['bracket']),g)
+#                    cv2.imwrite(self.directory + "/image_%#05d_%#02d_r.jpg" % (header['count'], header['bracket']),r)
             if self.sharpness :
                 sharpness = cv2.Laplacian(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), cv2.CV_64F).var()
                 cv2.putText(image, str(sharpness), (200,200), cv2.FONT_HERSHEY_SIMPLEX,3,(255,255,255),2)

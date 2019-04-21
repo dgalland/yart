@@ -4,10 +4,8 @@ import numpy as np
 import sys
 import time
 from fractions import Fraction 
-import cv2
 
-
-def lens_shading_correction_from_rgb(rgb_array, binsize=64):
+def lens_shading_correction_from_rgb(rgb_array, binsize, version):
     """Calculate a correction to a lens shading table from an RGB image.
     
     Returns:
@@ -33,9 +31,12 @@ def lens_shading_correction_from_rgb(rgb_array, binsize=64):
         # less computationally efficient!
         dw = lw*binsize - iw
         dh = lh*binsize - ih
-#        image_channel[iw-1:iw:1,:] = image_channel[iw-2:iw-1:,:]
-        image_channel[iw-8:iw:1,:] = np.mean(image_channel[iw-16:iw-8:,:],axis=0)
-        padded_image_channel = np.pad(image_channel, [(0, dw), (0, dh)], mode='edge') # Pad image to the right and bottom
+        if version == 2 :
+#            image_channel[iw-8:iw:1,:] = np.mean(image_channel[iw-16:iw-8:,:],axis=0)  #bottom  adjust verify !
+            padded_image_channel = np.pad(image_channel, [(0, dw), (0, dh)], mode='edge') # Pad image to the right and bottom
+        else :
+#            image_channel[iw-8:iw:1,:] = np.mean(image_channel[iw-16:iw-8:,:],axis=0)
+            padded_image_channel = np.pad(image_channel, [(dw, 0), (dh, 0)], mode='edge') # Pad image top left
         assert padded_image_channel.shape == (lw*binsize, lh*binsize), "padding problem"
         # Next, fill the shading table (except edge pixels).  Please excuse the
         # for loop - I know it's not fast but this code needn't be!
@@ -127,42 +128,12 @@ def generate_lens_shading_table_closed_loop(hflip, vflip, n_iterations=5, images
         for j in range(images_to_average - 1):
             rgb_image = rgb_image + get_rgb_image(camera, calibrate_res)
         rgb_image = rgb_image / images_to_average
-        incremental_gains = lens_shading_correction_from_rgb(rgb_image, binSize)
+        incremental_gains = lens_shading_correction_from_rgb(rgb_image, binSize, version)
         gains *= incremental_gains#**0.8
         # Apply this change (actually apply a bit less than the change)
         camera.lens_shading_table = gains_to_lst(gains*32)
         time.sleep(2)
-##    camera.capture('after01.jpg')
-##    rgb_image  = get_rgb_image(camera, calibrate_res)
-##    channel_means = np.mean(np.mean(rgb_image, axis=0, dtype=np.float), axis=0)
-##    old_gains = camera.awb_gains
-##    print(channel_means[0])
-##    print(channel_means[1])
-##    print(channel_means[2])
-##    camera.awb_gains = (channel_means[1]/channel_means[0] * old_gains[0], channel_means[1]/channel_means[2]*old_gains[1])
-##    time.sleep(2)
-##    print('Old gains:', old_gains)
-##    print('New gains:', camera.awb_gains)
-##    camera.capture('after02.jpg')
-##    
-##    gains = np.ones_like(lens_shading_table, dtype=np.float)
-##    lens_shading_table = np.zeros(camera._lens_shading_table_shape(), dtype=np.uint8) + 32
-##    for i in range(n_iterations):
-##        print("Optimising lens shading, pass {}/{}".format(i+1, n_iterations))
-##        rgb_image  = get_rgb_image(camera, calibrate_res).astype(dtype=np.float)
-##        for j in range(images_to_average - 1):
-##            rgb_image = rgb_image + get_rgb_image(camera, calibrate_res)
-##        rgb_image = rgb_image / images_to_average
-##        incremental_gains = lens_shading_correction_from_rgb(rgb_image, binSize)
-##        gains *= incremental_gains#**0.8
-##        # Apply this change (actually apply a bit less than the change)
-##        camera.lens_shading_table = gains_to_lst(gains*32)
-##        time.sleep(2)
-##    camera.capture('after03.jpg')
-    
-    
-    
-    
+   
     lens_shading_table = camera.lens_shading_table
     camera.close()
     return lens_shading_table

@@ -638,6 +638,19 @@
      <string>Get Settings</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="whiteBalanceButton">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>20</y>
+      <width>41</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>WB</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QGroupBox" name="cameraControlGroupBox">
    <property name="geometry">
@@ -1811,7 +1824,7 @@
    <widget class="QCheckBox" name="equalizeCheckBox">
     <property name="geometry">
      <rect>
-      <x>360</x>
+      <x>260</x>
       <y>80</y>
       <width>71</width>
       <height>20</height>
@@ -1839,7 +1852,7 @@
      <rect>
       <x>60</x>
       <y>80</y>
-      <width>82</width>
+      <width>81</width>
       <height>17</height>
      </rect>
     </property>
@@ -1874,6 +1887,41 @@
     </property>
     <property name="text">
      <string>Debevec</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="claheCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>80</y>
+      <width>71</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Clahe</string>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="clipLimitBox">
+    <property name="geometry">
+     <rect>
+      <x>390</x>
+      <y>80</y>
+      <width>51</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <double>1.000000000000000</double>
+    </property>
+    <property name="maximum">
+     <double>5.000000000000000</double>
+    </property>
+    <property name="singleStep">
+     <double>0.500000000000000</double>
+    </property>
+    <property name="value">
+     <double>1.000000000000000</double>
     </property>
    </widget>
   </widget>
@@ -2596,8 +2644,8 @@
    <slot>setEqualize()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>46</x>
-     <y>533</y>
+     <x>280</x>
+     <y>499</y>
     </hint>
     <hint type="destinationlabel">
      <x>664</x>
@@ -2661,7 +2709,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>140</x>
-     <y>436</y>
+     <y>480</y>
     </hint>
     <hint type="destinationlabel">
      <x>664</x>
@@ -2733,6 +2781,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>whiteBalanceButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setWhiteBalance()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>59</x>
+     <y>686</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>661</x>
+     <y>781</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>claheCheckBox</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setClahe()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>391</x>
+     <y>481</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>659</x>
+     <y>805</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>takeImage()</slot>
@@ -2779,5 +2859,7 @@
   <slot>setColors()</slot>
   <slot>slot1()</slot>
   <slot>motorOnTrigger()</slot>
+  <slot>setWhiteBalance()</slot>
+  <slot>setClahe()</slot>
  </slots>
 </ui>

@@ -35,8 +35,11 @@ class ImageThread (QThread):
         self.mergeMertens = cv2.createMergeMertens()
         self.mergeDebevec = cv2.createMergeDebevec()
         self.toneMap = cv2.createTonemapReinhard()
+        self.claheProc = cv2.createCLAHE(clipLimit=1, tileGridSize=(8,8))
+        self.clipLimit = 1.
         self.reduceFactor = 1;
         self.equalize = False
+        self.clahe = False
         self.ip_pi = ip_pi
         self.hflip = False
         self.vflip = False
@@ -83,15 +86,14 @@ class ImageThread (QThread):
                     image = self.toneMap.process(image)
                 image = np.clip(image*255, 0, 255).astype('uint8')
                 if self.equalize :
-#                    lookUpTable = np.empty((1,256), np.uint8)
-#                    gamma = 1/1.5
-#                    for i in range(256):
-#                        lookUpTable[0,i] = np.clip(pow(i / 255.0, gamma) * 255.0, 0, 255)
-#                    eq_V = cv2.LUT(V, lookUpTable)
                     H, S, V = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2HSV))
                     low, high = np.percentile(V, (1, 99))
                     eq_V = np.interp(V, (low,high), (V.min(), V.max())).astype(np.uint8)
-#                    eq_V = cv2.equalizeHist(V)
+                    image = cv2.cvtColor(cv2.merge([H, S, eq_V]), cv2.COLOR_HSV2BGR)
+                if self.clahe :
+                    H, S, V = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2HSV))
+                    self.claheProc.setClipLimit(self.clipLimit)
+                    eq_V = self.claheProc.apply(V)
                     image = cv2.cvtColor(cv2.merge([H, S, eq_V]), cv2.COLOR_HSV2BGR)
                 if self.saveOn :
                     cv2.imwrite(self.directory + "/image_%#05d.jpg" % count, image)

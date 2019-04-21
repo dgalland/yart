@@ -10,6 +10,8 @@ from fractions import Fraction
 
 import numpy as np
 from picamera import PiCamera
+from picamera import array
+
 import pigpio
 
 from recalibrate import *
@@ -205,6 +207,23 @@ class TelecineCamera(PiCamera) :
         header = {'type':HEADER_IMAGE, 'count':motor.frameCounter, 'bracket':0, 'shutter':self.exposure_speed}
         queue.put(header)
         queue.put(image)
+    
+    def get_rgb_image(self):
+        with picamera.array.PiRGBArray(camera) as output:
+            camera.capture(output, format='rgb', resize=camera.resolution, use_video_port=True)
+            return output.array
+
+    def whiteBalance(self) :
+        rgb_image  = self.get_rgb_image()
+        rgb_image  = self.get_rgb_image()
+        print(np.max(rgb_image))
+        channel_means = np.mean(np.mean(rgb_image, axis=0, dtype=np.float), axis=0)
+        print(channel_means[0])
+        print(channel_means[1])
+        print(channel_means[2])
+        old_gains = camera.awb_gains
+        return (channel_means[1]/channel_means[0] * old_gains[0], channel_means[1]/channel_means[2]*old_gains[1])
+
 #end Camera class
         
 class CaptureImageThread(Thread):
@@ -394,6 +413,10 @@ try:
             motor.on()
         elif command == MOTOR_OFF :
             saveMotorSettings()
+            motor.off()
+        elif command == WHITE_BALANCE :
+            gains = camera.whiteBalance()
+            commandSock.sendObject(gains)
             motor.off()
         elif command == PAUSE_CAPTURE :
             if restartEvent.isSet() :

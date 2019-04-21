@@ -218,9 +218,23 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         QApplication.restoreOverrideCursor()
         self.messageLabel.setText(done)
         print(done)
-        
-    def equalize(self) :
+
+    def setWhiteBalance(self)  :      
+        self.sock.sendObject((WHITE_BALANCE,))
+        gains = self.sock.receiveObject()
+        self.redGainBox.setValue(float(gains[0])*100.)
+        self.blueGainBox.setValue(float(gains[1])*100.)
+
+    def setEqualize(self) :
+        self.claheCheckBox.setChecked(False)
+        self.imageThread.clahe = False
         self.imageThread.equalize = self.equalizeCheckBox.isChecked()
+
+    def setClahe(self) :
+        self.equalizeCheckBox.setChecked(False)
+        self.imageThread.equalize = False
+        self.imageThread.clahe = self.claheCheckBox.isChecked()
+        self.imageThread.clipLimit = self.clipLimitBox.value()
 #Capture
 #CAPTURE_BASIC play with ot without motor
 #CAPTURE_ON_FRAME capture frame and advance motor
@@ -382,9 +396,6 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
     def setReduce(self) :
         self.imageThread.reduceFactor = self.reduceFactorBox.value()
         
-    def setEqualize(self) :
-        self.imageThread.equalize  = self.equalizeCheckBox.isChecked()
-        print(self.imageThread.equalize)
         
     def setAutoExposure(self):
         if self.autoExposureCheckBox.isChecked() :

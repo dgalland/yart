@@ -12,7 +12,7 @@ Raspberry Modèle B+
 
 J'utilise une camera Raspberry V2 8MP NoIR Arducam avec monture CS. Il faut noter:
 
-- Un filtre infra-rouge n'est pas vraiment nécessaire pour une application Telecine, donc une camera NoIR convient.
+- ~~Un filtre infra-rouge n'est pas vraiment nécessaire pour une application Telecine, donc une camera NoIR convien~~t. Correction 21/04 Un filtre IR est absolument nécessaire
 - Une caméra avec une monture CS ou M12 permet de choisir un objectif adapté. 
 
 La taille de l'image 8mm est de 4,5mmx3mm, celle du capteur IMX219 3,68x2,67mm. Le grandissement n'est pas très différent de 1. Donc la distance du centre de l'objectif à l'image et du centre de l'objectif au capteur sont à peu près deux fois la distance focale. La distance de l'image au capteur à peu près quatre fois la distance focale. C'est pourquoi j'ai choisi un objectif de 35mm. Dans mon cas il faut 30mm de bagues d'extension CS. La caméra est montée à l'emplacement de la lampe du projecteur. Une table millimétrique permet une mise au point précise. Ci dessous le calcul optique:
@@ -23,25 +23,36 @@ La taille de l'image 8mm est de 4,5mmx3mm, celle du capteur IMX219 3,68x2,67mm. 
 
 L'objectif de la camera Raspberry est collé et non adéquat pour la macrophotographie, c'est pourquoi j'ai choisi un autre objectif. Il semble aussi possible de décoller et régler cet objectif et de lui ajouter une lentille additionnelle.
 
-Il est important de noter que la caméra V2 (V1 ?)  avec un objectif autre que l'objectif standard nécessite absolument une calibration de l'objectif (cf ci dessous)
+### Camera V1 ou V2 ? Calibration
 
-### Camera V1 ou V2 ?
+Utilisées avec un objectif non stock, les caméras V1 et V2 nécessitent une correction de calibration ( mais elles se comportent tout à fait différemment.
 
-La camera V1 semble aussi donner de bons résultats pour certains. Sa résolution est suffisante. Elle est peut être préférable pour être utilisée avec un objectif non standard. Il n'est pas sûr que la camera V2 soit le meilleur choix, c'est un point à élucider. 
+- La caméra V1 nécessite peu de calibration, seul un rond central est moins lumineux.
+- La caméra V2 présente une dérive des couleurs à l'extérieur du rond central
 
-### Quelle résolution ?
+Après calibration l'image est correcte dans les deux cas mais pour la V2 même avec une calibration soignée certaines images présentent un rond central plus jaune.
 
-Pour la camera V2 la résolution maximale est 3280x2464. La question se pose de choisir cette résolution maximale qui ralentit beaucoup la capture (3 fois plus lente) ou une résolution plus faible comme la moitié 1640x1232. Mes essais montrent que la résolution maximale amène bien un gain sensible. Ci dessous la même zone en 1640*1232 puis en 3280x2464. Evidemment une haute résolution ralentit considérablement la capture surtout si on utilise le bracketing. En 1640x1632 avec bracket j'obtiens à peu près 1s par image et environ trois fois moins en haute résolution 3s par image
+Ci-dessous :
+Image blanche non calibrée et calibrée
+Image non calibrée et calibrée (noter la dérive centrale pour la V2)
 
-![halfres](images/halfres.jpg)
+Pour la V1
+
+![V1](images/V1.jpg)
 
 
 
-![fullres](images/fullres.jpg)
+Pour la V2
+
+![V2](images/V2.jpg)
+
+
+
+La caméra V1 semble un meilleur choix
 
 ### Lampe, Diffuseur
 
-J'ai de bon résultats avec une LED TrueColor Phillips faisceau étroit 3500K. Il faut faire des expériences avec des diffuseurs, un diffuseur à la surface de la LED réduit l'intensité lumineuse. Un diffuseur proche du film  apporte un certain flou, ce flou peut-être intéressant pour diminuer l'effet des rayures ou des craquelures du film mais au prix d'une perte de netteté donc il doit être assez léger.
+J'ai de bon résultats avec une LED TrueColor Phillips faisceau étroit 4000K. Il faut faire des expériences avec des diffuseurs, un diffuseur à la surface de la LED réduit l'intensité lumineuse. Un diffuseur proche du film  apporte un certain flou, ce flou peut-être intéressant pour diminuer l'effet des rayures ou des craquelures du film mais au prix d'une perte de netteté donc il doit être assez léger.
 
  J'ai aussi placé un diffuseur à la surface de la LED.  Il faut ajuster le diffuseur et la distance de la lampe pour avoir une durée d'exposition convenable. Si la caméra fonctionne à 30fps l'exposition maximum est de 33333 micro seconds. Si le bracketing (cf infra) est utilisé il faut que l'exposition auto sur une image normale soit d'environ 2000 à 3000 micro-seconds.
 
@@ -120,17 +131,7 @@ Bien entendu on utilise la librairie Python picamera. Cependant comme indiqué p
 
 https://github.com/rwb27/openflexure_microscope_software
 
-Voilà l'image d'une feuille blanche avant calibration
-
-![lens-before](images/lens-before.jpg)
-
-et après calibration !
-
-![lens-after](/images/lens-after.jpg)
-
-Il semble que ceci soit moins nécessaire avec la camera V1 (5MP) ?
-
-La capture s'effectue en JPEG sur le port video avec un framerate de 30fps
+La capture s'effectue en JPEG sur le port video 
 
 Comme expliqué dans la documentation picamera on utilise la méthode la plus rapide `capture_sequence` avec un générateur. 
 
@@ -184,7 +185,7 @@ Comme exemple, ci-dessous la même image avec 25 expositions également réparti
 
 ![result (2460 x 1540)](images/result.jpg)
 
-Autre exemple, l'image sous-exposée,  l'image avec l'exposition automatique, l'image sur-exposée puis l'image merge Mertens et l'image HDR. L'image Mertens est un peu artificielle car elle ne rend pas compte de la luminosité réelle de la scène, les sombres sont exagérément accentués. On constate également que le merge Debevec réduit le grain par contre elle manque de contraste ce qu pourra être amélioré au post-traitement.
+Autre exemple, l'image sous-exposée,  l'image avec l'exposition automatique, l'image sur-exposée puis l'image merge Mertens et l'image HDR. L'image Mertens est un peu artificielle car elle ne rend pas compte de la luminosité réelle de la scène, les sombres sont exagérément accentués. On constate également que le merge Debevec réduit le grain par contre elle manque de contraste ce qui pourra être amélioré au post-traitement.
 
 ![merge](images/merge.jpg)
 

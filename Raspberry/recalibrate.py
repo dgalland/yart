@@ -149,13 +149,27 @@ if __name__ == '__main__':
 ##    bgr = get_bgr_image(camera, camera.MAX_RESOLUTION)
 ##    cv2.imwrite('before_bgr.jpg', bgr)
     camera.close()
-    exit(0)
-    lens_shading_table = generate_lens_shading_table_closed_loop(False,False, n_iterations=5)
+    lens_shading_table = generate_lens_shading_table_closed_loop(False,False, n_iterations=2)
     np.savez('calibrate.npz',   lens_shading_table = lens_shading_table)
     
     camera = picamera.PiCamera(lens_shading_table=lens_shading_table)
     camera.resolution = camera.MAX_RESOLUTION
     time.sleep(2)
+
+
+##    bgr = get_bgr_image(camera, camera.MAX_RESOLUTION)
+##    cv2.imwrite('after_bgr.jpg', bgr)
+##    print(np.mean(lens_shading_table))
+##    table = (lens_shading_table *8.).astype(np.uint8)
+##    b = table[0,:,:]
+##    g1 = table[1,:,:]
+##    g2 = table[2,:,:]
+##    r = table[3,:,:]
+##    cv2.imwrite('lens_b.jpg', b)
+##    cv2.imwrite('lens_g1.jpg', g1)
+##    cv2.imwrite('lens_g2.jpg', g2)
+##    cv2.imwrite('lens_r.jpg', r)
+    
     print('After Shutter:', camera.exposure_speed, ' Gains:', camera.awb_gains)
     camera.hflip=False
     camera.vflip=False
@@ -171,3 +185,5 @@ if __name__ == '__main__':
     camera.vflip=True
     time.sleep(1)
     camera.capture('after_f_t.jpg',use_video_port=True)
+    
+    

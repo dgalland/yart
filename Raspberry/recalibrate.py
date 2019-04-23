@@ -3,7 +3,8 @@ import picamera
 import numpy as np
 import sys
 import time
-from fractions import Fraction 
+from fractions import Fraction
+#import cv2
 
 def lens_shading_correction_from_rgb(rgb_array, binsize, version):
     """Calculate a correction to a lens shading table from an RGB image.
@@ -81,6 +82,11 @@ def get_rgb_image(camera, resize):
         camera.capture(output, format='rgb', resize=resize, use_video_port=True)
         return output.array
 
+def get_bgr_image(camera, resize):
+    with picamera.array.PiRGBArray(camera, size=resize) as output:
+        camera.capture(output, format='bgr', resize=resize, use_video_port=True)
+        return output.array
+
 def freeze_camera_settings(camera):
     camera.awb_mode = "auto"
     camera.exposure_mode = "auto"
@@ -108,19 +114,14 @@ def generate_lens_shading_table_closed_loop(hflip, vflip, n_iterations=5, images
         version = 1
         binSize = 64
         calibrate_res = max_res
-
     time.sleep(2)
-    camera.capture('before01.jpg')
     camera.close()
     
     camera = picamera.PiCamera(sensor_mode=2,lens_shading_table=lens_shading_table, resolution=calibrate_res)
     if version == 1 :
         camera.hflip = True
         camera.vflip = True
-    time.sleep(2)
-    camera.capture('before02.jpg')
     freeze_camera_settings(camera)
-    camera.capture('before03.jpg')
 
     for i in range(n_iterations):
         print("Optimising lens shading, pass {}/{}".format(i+1, n_iterations))
@@ -140,24 +141,33 @@ def generate_lens_shading_table_closed_loop(hflip, vflip, n_iterations=5, images
 
 
 if __name__ == '__main__':
+    camera = picamera.PiCamera(sensor_mode=2)
+    camera.resolution = camera.MAX_RESOLUTION
+    time.sleep(2)
+    print('Before Shutter:', camera.exposure_speed, ' Gains:', camera.awb_gains)
+    camera.capture('before.jpg', use_video_port=True)
+##    bgr = get_bgr_image(camera, camera.MAX_RESOLUTION)
+##    cv2.imwrite('before_bgr.jpg', bgr)
+    camera.close()
+    exit(0)
     lens_shading_table = generate_lens_shading_table_closed_loop(False,False, n_iterations=5)
     np.savez('calibrate.npz',   lens_shading_table = lens_shading_table)
     
     camera = picamera.PiCamera(lens_shading_table=lens_shading_table)
     camera.resolution = camera.MAX_RESOLUTION
     time.sleep(2)
-    print('reopen gains:', camera.awb_gains)
+    print('After Shutter:', camera.exposure_speed, ' Gains:', camera.awb_gains)
     camera.hflip=False
     camera.vflip=False
     time.sleep(1)
-    camera.capture('after_f_f.jpg')
+    camera.capture('after_f_f.jpg',use_video_port=True)
     camera.hflip=True
     time.sleep(1)
-    camera.capture('after_t_f.jpg')
+    camera.capture('after_t_f.jpg',use_video_port=True)
     camera.vflip=True
     time.sleep(1)
-    camera.capture('after_t_t.jpg')
+    camera.capture('after_t_t.jpg',use_video_port=True)
     camera.hflip=False
     camera.vflip=True
     time.sleep(1)
-    camera.capture('after_f_t.jpg')
+    camera.capture('after_f_t.jpg',use_video_port=True)

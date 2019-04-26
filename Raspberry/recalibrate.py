@@ -96,7 +96,7 @@ def freeze_camera_settings(camera):
     g = camera.awb_gains
     camera.awb_mode = "off"
     camera.awb_gains = g
-    print('Gains:', camera.awb_gains,' Shutter:', camera.exposure_speed)
+    print('After freeze gains:', camera.awb_gains,' Shutter:', camera.exposure_speed)
     time.sleep(5)
 
 
@@ -143,18 +143,18 @@ def generate_lens_shading_table_closed_loop(hflip, vflip, n_iterations=5, images
 if __name__ == '__main__':
     camera = picamera.PiCamera(sensor_mode=2)
     camera.resolution = camera.MAX_RESOLUTION
-    time.sleep(2)
-    print('Before Shutter:', camera.exposure_speed, ' Gains:', camera.awb_gains)
+    time.sleep(5)
+    print('Before calibration shutter:', camera.exposure_speed, ' Gains:', camera.awb_gains)
     camera.capture('before.jpg', use_video_port=True)
 ##    bgr = get_bgr_image(camera, camera.MAX_RESOLUTION)
 ##    cv2.imwrite('before_bgr.jpg', bgr)
     camera.close()
-    lens_shading_table = generate_lens_shading_table_closed_loop(False,False, n_iterations=2)
+    lens_shading_table = generate_lens_shading_table_closed_loop(False,False, n_iterations=5)
     np.savez('calibrate.npz',   lens_shading_table = lens_shading_table)
     
     camera = picamera.PiCamera(lens_shading_table=lens_shading_table)
     camera.resolution = camera.MAX_RESOLUTION
-    time.sleep(2)
+    time.sleep(5)
 
 
 ##    bgr = get_bgr_image(camera, camera.MAX_RESOLUTION)
@@ -170,20 +170,32 @@ if __name__ == '__main__':
 ##    cv2.imwrite('lens_g2.jpg', g2)
 ##    cv2.imwrite('lens_r.jpg', r)
     
-    print('After Shutter:', camera.exposure_speed, ' Gains:', camera.awb_gains)
-    camera.hflip=False
-    camera.vflip=False
-    time.sleep(1)
-    camera.capture('after_f_f.jpg',use_video_port=True)
-    camera.hflip=True
-    time.sleep(1)
-    camera.capture('after_t_f.jpg',use_video_port=True)
-    camera.vflip=True
-    time.sleep(1)
-    camera.capture('after_t_t.jpg',use_video_port=True)
-    camera.hflip=False
-    camera.vflip=True
-    time.sleep(1)
-    camera.capture('after_f_t.jpg',use_video_port=True)
+    print('After calibration shutter:', camera.exposure_speed, ' Gains:', camera.awb_gains)
+    camera.capture('after_01.jpg',use_video_port=True)
+
+    image = get_rgb_image(camera, camera.resolution)
+    old_gains = camera.awb_gains
+    channel_means = np.mean(np.mean(image, axis=0, dtype=np.float), axis=0)
+    camera.awb_mode = 'off'
+    camera.awb_gains = (channel_means[1]/channel_means[0] * old_gains[0], channel_means[1]/channel_means[2]*old_gains[1])
+    time.sleep(5)
+    print('After fixing gains shutter:', camera.exposure_speed, ' Gains:', camera.awb_gains)
+    camera.capture('after_02.jpg',use_video_port=True)
+    
+
+##    camera.hflip=False
+##    camera.vflip=False
+##    time.sleep(1)
+##    camera.capture('after_f_f.jpg',use_video_port=True)
+##    camera.hflip=True
+##    time.sleep(1)
+##    camera.capture('after_t_f.jpg',use_video_port=True)
+##    camera.vflip=True
+##    time.sleep(1)
+##    camera.capture('after_t_t.jpg',use_video_port=True)
+##    camera.hflip=False
+##    camera.vflip=True
+##    time.sleep(1)
+##    camera.capture('after_f_t.jpg',use_video_port=True)
     
     

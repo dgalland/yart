@@ -55,8 +55,13 @@ Puis avec calibration:
 
 ![WhiteCalibrated](images/WhiteCalibrated.jpg)
 
-On peut penser que la calibration est réussie mais ce n'est pas le cas !  Ci dessous les images prises avec des filtre RGB et des histogrammes de la répartition des couleurs suivant les axes de l'image.
+
+
+On peut penser que la calibration est réussie mais ce n'est pas le cas ! 
+Ci dessous les images prises avec des filtre RGB et des histogrammes de la répartition des couleurs suivant les axes de l'image.
 (Attention il n'est pas certain que mes filtres soient exactement les couleurs primaires monochromatiques)
+
+
 
 ![Red](images/Red.jpg)
 

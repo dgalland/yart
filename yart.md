@@ -49,24 +49,24 @@ Cf. <https://www.raspberrypi.org/forums/viewtopic.php?t=190586>
 
 Ci dessous une image uniformément blanche capturée avec la V2 sans calibration:
 
-![WhiteFlat](images\WhiteFlat.jpg)
+![WhiteFlat](images/WhiteFlat.jpg)
 
 Puis avec calibration:
 
-![WhiteCalibrated](images\WhiteCalibrated.jpg)
+![WhiteCalibrated](images/WhiteCalibrated.jpg)
 
 On peut penser que la calibration est réussie mais ce n'est pas le cas !  Ci dessous les images prises avec des filtre RGB et des histogrammes de la répartition des couleurs suivant les axes de l'image.
 (Attention il n'est pas certain que mes filtres soient exactement les couleurs primaires monochromatiques)
 
-![Red](images\Red.jpg)
+![Red](images/Red.jpg)
 
-![Green](images\Green.jpg)
+![Green](images/Green.jpg)
 
 ![Blue](images/Blue.jpg)
 
 Le résultat est très mauvais, surtout pour le rouge, combiné avec le vert et le bleu cela peut donner pour certaines images un rond central plus jaune.  Ci-dessous un exemple réel calibré/non calibré:
 
-![v2](images\v2.jpg)
+![v2](images/v2.jpg)
 
 
 La zone jaune est bien visible au centre de l'image calibrée
@@ -77,27 +77,27 @@ Reprenons maintenant cette étude avec la V1.
 
 Image Blanche non calibrée
 
-![WhiteNoneV1](images\WhiteNoneV1.jpg)
+![WhiteNoneV1](images/WhiteNoneV1.jpg)
 
 Image blanche calibrée
 
-![WhiteCalibratedV1](images\WhiteCalibratedV1.jpg)
+![WhiteCalibratedV1](images/WhiteCalibratedV1.jpg)
 
 Filtre rouge:
 
-![RedV1](images\RedV1.jpg)
+![RedV1](images/RedV1.jpg)
 
 Filtre vert
 
-![GreenV1](images\GreenV1.jpg)
+![GreenV1](images/GreenV1.jpg)
 
 Filtre bleu
 
-![BlueV1](images\BlueV1.jpg)
+![BlueV1](images/BlueV1.jpg)
 
 Et une image réelle non calibrée/calibrée
 
-![v1](images\v1.jpg)
+![v1](images/v1.jpg)
 
 En conclusion la camera V1 semble vraiment un meilleur choix
 

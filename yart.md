@@ -10,45 +10,104 @@ Raspberry Modèle B+
 
 ### Caméra et optique
 
-J'utilise une camera Raspberry V2 8MP NoIR Arducam avec monture CS. Il faut noter:
+Il faut faire les choix suivants:
 
-- ~~Un filtre infra-rouge n'est pas vraiment nécessaire pour une application Telecine, donc une camera NoIR convien~~t. Correction 21/04 Un filtre IR est absolument nécessaire
-- Une caméra avec une monture CS ou M12 permet de choisir un objectif adapté. 
+- Picamera V1 ou V2
+- Avec l'objectif d'origine ou un objectif adapté
+- Montage direct ou reverse
 
-La taille de l'image 8mm est de 4,5mmx3mm, celle du capteur IMX219 3,68x2,67mm. Le grandissement n'est pas très différent de 1. Donc la distance du centre de l'objectif à l'image et du centre de l'objectif au capteur sont à peu près deux fois la distance focale. La distance de l'image au capteur à peu près quatre fois la distance focale. C'est pourquoi j'ai choisi un objectif de 35mm. Dans mon cas il faut 30mm de bagues d'extension CS. La caméra est montée à l'emplacement de la lampe du projecteur. Une table millimétrique permet une mise au point précise. Ci dessous le calcul optique:
+Noter que le filtre IR est indispensable.
+
+La camera V1 utilise un capteur Omnivision 5647 5MP de taille 3.76 × 2.74 mm, de résolution maximale 2592x1944 et de distance focale3,6 mm  et la camera V2 un capteur SONY IMX219 de taille 3,68x2,76mm de résolution maximale 3280*2644 et de distance focale 3,04mm.
+
+Cf. <https://www.raspberrypi.org/documentation/hardware/camera/>
+
+La taille d'une image 8mm est de  4,5mmx3,3mm et celle d'une image Super 8 5,79x4,01mm. En première approximation le grossissement n'est pas très différent de 1.  Dans ce cas la distance du centre de l'objectif à l'image et du centre de l'objectif au capteur sont à peu près deux fois la distance focale. La distance de totale l'image au capteur à peu près quatre fois la distance focale. On est dans le domaine de la photographie macro.
+
+Deux solutions sont alors possibles:
+
+- Conserver l'objectif d'origine de la picamera l'ajuster au maximum et lui ajouter une lentille maco
+- Une camera avec une monture M12 ou CS et un objectif de plus grande focale
+
+Je n'ai pas étudié ni fait le calcul optique pour la première solution.
+
+Pour la seconde solution et  une camera Raspberry V2 8MP Arducam avec monture CS et un objectif de 35mm le calcul optique montre:
 
 - Image film 8mm 4,5x3,3 mm Capteur IMX219 3,68x2,76mm Grossissement 0,81 
+
+- 30mm de bagues d'extension
 - Distance bague de l'objectif/Capteur 46mm Distance Face avant de l'objectif/Image 61mm
 - Distance totale Image/capteur 141 mm
 
-L'objectif de la camera Raspberry est collé et non adéquat pour la macrophotographie, c'est pourquoi j'ai choisi un autre objectif. Il semble aussi possible de décoller et régler cet objectif et de lui ajouter une lentille additionnelle.
+Voir l'image du montage ci-dessous
 
 ### Camera V1 ou V2 ? Calibration
 
-Utilisées avec un objectif non stock, les caméras V1 et V2 nécessitent une correction de calibration ( mais elles se comportent tout à fait différemment.
+Malheureusement utiliser un objectif non stock avec les caméras V1 et V2 entraine un vignettage et une dérive de couleur sur les bords de l'image que l'on doit corriger en calibrant la camera et en construisant une "lens shading table" qui contient des gains pour les différentes couleurs de façon à obtenir une image uniforme.
 
-- La caméra V1 nécessite peu de calibration, seul un rond central est moins lumineux.
-- La caméra V2 présente une dérive des couleurs à l'extérieur du rond central
+Cf. <https://www.raspberrypi.org/forums/viewtopic.php?t=190586>
 
-Après calibration l'image est correcte dans les deux cas mais pour la V2 même avec une calibration soignée certaines images présentent un rond central plus jaune.
+Ci dessous une image uniformément blanche capturée avec la V2 sans calibration:
 
-Ci-dessous :
-Image blanche non calibrée et calibrée
-Image non calibrée et calibrée (noter la dérive centrale pour la V2)
+![WhiteFlat](images\WhiteFlat.jpg)
 
-Pour la V1
+Puis avec calibration:
 
-![V1](images/V1.jpg)
+![WhiteCalibrated](images\WhiteCalibrated.jpg)
+
+On peut penser que la calibration est réussie mais ce n'est pas le cas !  Ci dessous les images prises avec des filtre RGB et des histogrammes de la répartition des couleurs suivant les axes de l'image.
+(Attention il n'est pas certain que mes filtres soient exactement les couleurs primaires monochromatiques)
+
+![Red](images\Red.jpg)
+
+![Green](images\Green.jpg)
+
+![Blue](images/Blue.jpg)
+
+Le résultat est très mauvais, surtout pour le rouge, combiné avec le vert et le bleu cela peut donner pour certaines images un rond central plus jaune.  Ci-dessous un exemple réel calibré/non calibré:
+
+![v2](images\v2.jpg)
 
 
+La zone jaune est bien visible au centre de l'image calibrée
 
-Pour la V2
+En conclusion, il semble difficile d'obtenir une bonne calibration pour la V2 avec un objectif non stock.
 
-![V2](images/V2.jpg)
+Reprenons maintenant cette étude avec la V1.
 
+Image Blanche non calibrée
 
+![WhiteNoneV1](images\WhiteNoneV1.jpg)
 
-La caméra V1 semble un meilleur choix
+Image blanche calibrée
+
+![WhiteCalibratedV1](images\WhiteCalibratedV1.jpg)
+
+Filtre rouge:
+
+![RedV1](images\RedV1.jpg)
+
+Filtre vert
+
+![GreenV1](images\GreenV1.jpg)
+
+Filtre bleu
+
+![BlueV1](images\BlueV1.jpg)
+
+Et une image réelle non calibrée/calibrée
+
+![v1](images\v1.jpg)
+
+En conclusion la camera V1 semble vraiment un meilleur choix
+
+### Balance des blancs et gains
+
+La balance des blancs et les gains rouge et bleu interfèrent avec la calibration. Il semble qu'il est préférable de régler les gains au mieux sur l'image blanche calibrée et de conserver ces réglages par la suite.
+
+### Résolution
+
+La capture en résolution maximum est plus lente mais il semble que cela apporte un léger mieux.
 
 ### Lampe, Diffuseur
 
@@ -127,7 +186,7 @@ Un moteur pas à pas fonctionne en général à 200 pulses par tour. Utiliser le
 
 ### Camera	
 
-Bien entendu on utilise la librairie Python picamera. Cependant comme indiqué plus haut la camera V2 avec un objectif non d'origine produit une image très mauvaise. Il est absolument nécessaire de calibrer l'objectif en construisant une table de correction `lens_shading_table`. Cette modification n'est pas encore comprise dans la version actuelle de la librairie, il faut donc  installer et utiliser une version spéciale de la librairie., On pourra se référer au projet:
+Bien entendu on utilise la librairie Python picamera. Cependant comme indiqué plus haut les camera avec un objectif non d'origine produisent une image très mauvaise. Il est absolument nécessaire de calibrer l'objectif en construisant une table de correction `lens_shading_table`. Cette modification n'est pas encore comprise dans la version actuelle de la librairie, il faut donc  installer et utiliser une version spéciale de la librairie., On pourra se référer au projet:
 
 https://github.com/rwb27/openflexure_microscope_software
 

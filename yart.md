@@ -488,9 +488,11 @@ Ce procédé évite de placer un diffuseur trop près de l'image, un tel diffuse
 ### Expériences utilisateurs
 
 Le montage de Alain Raynaud
-Camera V1 en mode 4
-Objectif 35mmCapture sans bracket en mode trigger
-AWB off après réglage des gains rouge et bleu
+
+- Camera V1 en mode 4
+- Objectif 35mm 
+- Capture sans bracket en mode trigger
+- AWB off après réglage des gains rouge et bleu
 
 ​	![P1050447](images/P1050447.JPG)	
 ​		![P1050449](images/P1050449.JPG)

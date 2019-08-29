@@ -6,7 +6,9 @@ En premier lieu je dois remercier Joe Herman pour son projet https://github.com/
 
 ### Raspberry
 
-Raspberry Modèle B+
+Raspberry PI 3 Modèle B+
+
+Question du Raspberry P4: Les opérations d'entrée sortie, capture de l'image et envoi sur le réseau sont le facteur bloquant pour la performance et exécutées dans des threads séparées. L'application ne demande pas beaucoup de puissance CPU. Le Raspberry PI4 plus puissant n'apportera pas un gain significatif. Noter quand même que le PI4 a une meilleure performance réseau car l' interface réseau est indépendante  du bus USB.
 
 ### Caméra et optique
 
@@ -31,7 +33,7 @@ Deux solutions sont alors possibles:
 
 Je n'ai pas étudié ni fait le calcul optique pour la première solution.
 
-Pour la seconde solution et  une camera Raspberry V2 8MP Arducam avec monture CS et un objectif de 35mm le calcul optique montre:
+Pour la seconde solution est une camera Raspberry V2 8MP Arducam avec monture CS et un objectif de 35mm le calcul optique montre:
 
 - Image film 8mm 4,5x3,3 mm Capteur IMX219 3,68x2,76mm Grossissement 0,81 
 
@@ -100,7 +102,9 @@ Filtre bleu
 
 ![BlueV1](images/BlueV1.jpg)
 
-Et une image réelle non calibrée/calibrée
+Et pour une image réelle
+Haut: Non calibré/calibré
+Bas:Merge/Merge égalisée voir ci-dessous pour le merge
 
 ![v1](images/v1.jpg)
 
@@ -346,19 +350,25 @@ Ci-dessous l'image de l'interface de l'application sur le PC
 
 ### Ouvrir la camera
 
-Le plus simple est de choisir un sensor_mode prédéfini 
+Le plus simple est de choisir un sensor_mode prédéfini , le mode 2 en résolution maximale
 
 https://picamera.readthedocs.io/en/release-1.13/fov.html#sensor-modes
 
 La résolution sera alors la résolution par défaut de ce mode. On peut aussi spécifier la résolution désirée.
 
-On peut ouvrir la caméra avec ou sans calibration, ce qui permet de constater la différence.
+Modes d'ouverture de la camera:
 
-### Calibrer la caméra
+- None: Sans table de lens shading
+- Flat: Avec une table de lens-shading uniforme
+- Calibrated: Avec une table de lens shading calculée comme ci-dessous
+
+### Analyse de l'objectif et calibration
+
+Pour analyser et calibrer l'objectif il faut capturer une image <u>uniformément blanche</u> (pas de cadre noir par exemple). Personnellement  je place un diffuseur blanc devant la fenêtre du film et je mets la caméra un peu hors focus.
+
+Le bouton "Analyse" calcule un histogramme de répartition des couleurs le long des axes de l'image. Si la camera est ouverte sans table il permet de mettre en évidence le phénomène. Après calibration l'histogramme doit être plus plat et l'on peut ajuster les gains rouge et bleu pour obtenir une image neutre. Il est conseillé de noter et conserver ces gains pour toute la suite.
 
 Le bouton "Calibrate" exécute le programme de calibration repris du projet openflexure cité ci-dessus. Il crée un fichier calibrate.npz qui contient la lens_shading_table et qui sera utilisé à la prochaine ouverture de la caméra.
-
-Pour calibrer il faut capturer une image <u>uniformément blanche</u> (pas de cadre noir par exemple). Personnellement  je place un diffuseur blanc devant la fenêtre du film et je mets la caméra un peu hors focus
 
 ### Contrôle du moteur
 
@@ -383,9 +393,11 @@ Le moteur peut tourner en avant ou en arrière à une certaine vitesse ou par im
 
 ### Paramètres de la caméra
 
-On peut ajuster les paramètres de la caméra, cependant les meilleurs résultats sont obtenus en laissant les paramètres automatiques, color auto (automatic white balance) et shutter_speed  0 (automatic exposure). 
+Color: Il est conseillé de conserver "off" avec les gains calculés lors de la calibration
 
-### Capture
+Shutter: Conseillé de laisser 0  "automatic exposure" . On peut jouer sur compensation (comme une ouveture du diaphragme)
+
+### Contrôle de la caméra
 
 Shot: Capture une image (sans bracket)
 
@@ -428,7 +440,7 @@ Au final avec un bracket de 3 et un framerate  camera de 30fps vous devez obteni
 Il s'effectue sur le PC
 
 - "Histo" affiche l'histogramme de l'image
-- "Sharpness" Evalue et affiche la netteté de l'image pour une bonne mise au point (utiliser "Shot" ou "Play" avec 5fps) . La meilleur mise au point correspond à la valeur maximum de sharpness. L'amorce blanche au début du film permet de bien tester la mise au point.
+- "Sharpness" Evalue et affiche la netteté de l'image pour une bonne mise au point (utiliser "Shot" ou "Play" avec 5fps) . La meilleur mise au point correspond à la valeur maximum de sharpness. 
 - Reduce permet de réduire l'image affichée
 - "Merge"  Détermine l'algorithme de fusion "None"  "Mertens" ou "Debevec"
 - "Save" Sauvegarde les images dans le répertoire choisi. On peut choisir un numéro de bande et un numéro de clip. Pour chaque "Capture" les images sont numérotées à partir de 0
@@ -453,26 +465,34 @@ Encodage direct en sortie du script en AVC ou HEVC avec MeGui
 
 Ou bien sûr tout autre éditeur Video
 
+### Nettoyage des films Wetgate
 
+Pour le nettoyage des films le mieux sont les lingettes microfibre pour les lunettes.
 
+Les avis sont partagés sur le solvant à utiliser, produit spécifique onéreux, essence type C, ... Pour ma part j'utilise Shellsol D40, désaromatisé donc un peu moins toxique.
 
+Dans un premier temps on peut nettoyer le film dans un passage à la visionneuse.
 
+Pour les craquelures et  rayures, j'ai mis en œuvre un wetgate simplifié (une idée initiale de videofred et des suggestions de Alain Raynaud)
 
+![20190829_200131](images/20190829_200131.jpg) 
 
+La lingette microfibre est imbibée d'un mélange 50/50 Shellsol D40 et huile de paraffine, me pas mettre trop de produit, quelques gouttes suffisent.
 
+Lé résultat est spectaculaire:
 
+![wetgate](images/wetgate.jpg)
 
+Ce procédé évite de placer un diffuseur trop près de l'image, un tel diffuseur diminue bien les craquelures et rayures mais au prix d'une sensible perte de netteté.
 
+### Expériences utilisateurs
 
+Le montage de Alain Raynaud
+Camera V1 en mode 4
+Objectif 35mmCapture sans bracket en mode trigger
+AWB off après réglage des gains rouge et bleu
 
+​	![P1050447](images/P1050447.JPG)	
+​		![P1050449](images/P1050449.JPG)
 
-
-
-
-
-
-​	
-​	
-​	
-​	
-​		
+![P1050448](images/P1050448.JPG)

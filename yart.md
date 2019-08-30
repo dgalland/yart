@@ -234,8 +234,6 @@ Dans la première méthode le moteur avance de façon discontinue, frame par fra
 
 ### Paramètres de la caméra, Bracketing, Merge, HDR
 
-**Attention: Ce paragraphe est rédigé pour la V2, cela semble moins important pour la V1 ?**
-
 La camera est limitée dans sa dynamique, si on augmente l'exposition pour éclaircir les sombres, il n'y a plus de détails dans les clairs et inversement. Il est pratiquement impossible d'obtenir une image qui reflète correctement toutes les luminosités de la scène.
 
 C'est pourquoi il est absolument nécessaire de reprendre l'idée de Joe et de capturer chaque image avec différentes expositions (bracketing), une sous-exposée pour obtenir les clairs, une surexposée pour obtenir les sombres et une normale, avant de les fusionner. Ce traitement sera fait coté PC avec la librairie openCV.
@@ -259,13 +257,7 @@ Autre exemple, l'image sous-exposée,  l'image avec l'exposition automatique, l'
 
 ​                                                              Bracket de 3 Merge Mertens et Merge Debevec
 
-###### Note sur les algorithmes de fusion HDR et de Tone Mapping
-
-La littérature est abondante sur le sujet. J'ai fait divers essais et le meilleur résultat est obtenu avec un MergeDebevec et un ToneMap Durand. Normalement le merge Debevec devrait prendre en compte la courbe de réponse de la caméra mais cela ne donne pas de bons résultats. Je suspecte que les images JPEG reçues de la caméra ne sont pas la vraie réponse du capteur mais sont traitées, en particulier ajustées en gamma. Le merge utilisé dans l'application prend en compte une réponse linéaire. 
-
 ###### Mise en œuvre du merge
-
-D'après mon expérience par rapport a l'exposition automatique calculée par la caméra t, l'exposition sous exposée peut être de 0.1xt et l'exposition sur exposée de 8*t. ces facteurs sont assez stables sur la durée de la capture.
 
 D'un point de vue programmation la mise en œuvre du bracketing est très délicate, en effet il faut bien avoir l'idée que la caméra n'est pas un appareil photo mais une caméra qui fournit un flux continu d'images.  Donc après avoir changé l'exposition il faut attendre quelques frames (minimum 4 d'après mon expérience) avant d'obtenir la bonne exposition. De même après  être repassé en automatique il faut attendre quelques trames (minimum 7 d'après mon expérience) avant d'avoir la bonne exposition. La capture devient:
 
@@ -281,7 +273,9 @@ Tant que captureEvent
 	Repasser en exposition automatique
 ```
 
-Tout ceci diminue considérablement la vitesse de capture, avec la résolution 1640x1232 elle ne dépasse plus 1s par trame et en résolution 3280x2664 3s par trame
+Tout ceci diminue considérablement la vitesse de capture, avec la résolution 1640x1232 elle ne dépasse plus 1s par trame et en résolution 3280x2664 3s par trame.
+
+Pour la mise en œuvre du merge dans l'application voir  ci-dessous
 
 ### GUI on the PC
 
@@ -415,23 +409,31 @@ La capture peut d'effectuer sans bracket une exposition par image ou bien avec u
 
 Si un bracket de 3 est choisi il faut ajuster:
 
-- "Dark coefficient" coefficient à appliquer à l'exposition de l'image normale (auto exposition calculée par la caméra) pour obtenir l'image sous-exposée. 0.10 semble être une bonne valeur
-- "Light coefficient" coefficient à appliquer à l'exposition de l'image normale (auto exposition calculée par la caméra) pour obtenir l'image sur-exposée. 8 semble être une bonne valeur
-- "Shutter speed wait" Nombre de trames à ignorer après le changement d'exposition (minimum 4)
-- "Shutter auto wait" Nombre de trames à ignorer après le passage en auto pour l'image suivante (minimum 7). 
+- "Dark coefficient" coefficient à appliquer à l'exposition de l'image normale (auto exposition calculée par la caméra) pour obtenir l'image sous-exposée. 
+- "Light coefficient" coefficient à appliquer à l'exposition de l'image normale (auto exposition calculée par la caméra) pour obtenir l'image sur-exposée. 
+- "Wait between" Nombre de trames à ignorer après le changement d'exposition (minimum 4)
+- "Wait before" Nombre de trames à ignorer après le passage en auto pour l'image suivante (minimum 8). 
 
 Pour ajuster ces coefficients il faut faire des essais sur une image dans votre film. 
 
 Sans "Merge" mais avec "Save" choisir "Preview" framerate 30fps
 
-- Vous devez bien voir dans le répertoire de sauvegarde les trois images dans l'ordre (sous-exposée, sur-exposée, normale) sinon il faut augmenter "Shutter speed wait" pour laisser le temps à la caméra d'ajuster l'exposition.
+- Vous devez bien voir dans la fenêtre de visualisation et dans le répertoire de sauvegarde les trois images dans l'ordre (sous-exposée, sur-exposée, normale) sinon il faut augmenter "Shutter speed wait" pour laisser le temps à la caméra d'ajuster l'exposition.
 - De plus l'exposition auto de la trame normale doit être stable, sinon il faut augmenter "Shutter auto wait" pour laisser le temps à la caméra de revenir en exposition automatique.
 
-Avec "Merge" vous pouvez ensuite constater l'effet de la fusion
+Avec merge "Mertens" ou Debevec vous pouvez ensuite constater l'effet de la fusion
+
+Le réglage des coefficients "dark" et "light" est assez délicat. L'image sombre sous exposée va assombrir les blancs et éviter les blancs "brulés". Elle doit être presque noire sauf sur les blancs très fort sinon elle assombrira toute l'image. L'image claire surexposée va éclaircir les ombres, elle doit être assez blanche. 
+
+Le merge "Debevec " est le plus difficile à ajuster, il donne une image qui manque de contraste qui devra être égalisée au post-traitement. Il a aussi pour effet de réduire le grain.
+
+Le merge "Mertens" est plus facile à ajuster. Il semble préférable
+
+Dans mes premiers essais avec la V2 j'avais choisis le merge Debevec Dark=0.1 et Light=8.
+
+Avec la V1 le merge Mertens Dark=0.02 et Light=5 m'a donné de meilleurs résultats.
 
 Ensuite vous pouvez faire les mêmes essais en "Capture"
-
-- Vérifier également que lorsque le moteur  s'arrête l'image normale n'est pas bougée (blurred) . Sinon il faut augmenter "Shutter auto wait" pour attendre la stabilisation totale après l'avance du moteur.
 
 Au final avec un bracket de 3 et un framerate  camera de 30fps vous devez obtenir un débit d'environ 1 seconde par image en résolution 1640x1232  et 3 secondes par image en résolution maximale 3280*2464 
 

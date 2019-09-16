@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>662</width>
-    <height>824</height>
+    <width>803</width>
+    <height>972</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>600</y>
+     <y>630</y>
      <width>631</width>
      <height>171</height>
     </rect>
@@ -638,25 +638,12 @@
      <string>Get Settings</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="whiteBalanceButton">
-    <property name="geometry">
-     <rect>
-      <x>470</x>
-      <y>20</y>
-      <width>41</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>WB</string>
-    </property>
-   </widget>
   </widget>
   <widget class="QGroupBox" name="cameraControlGroupBox">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>220</y>
+     <y>250</y>
      <width>631</width>
      <height>171</height>
     </rect>
@@ -1015,10 +1002,10 @@
       </rect>
      </property>
      <property name="minimum">
-      <double>0.100000000000000</double>
+      <double>0.000000000000000</double>
      </property>
      <property name="maximum">
-      <double>1.000000000000000</double>
+      <double>2.000000000000000</double>
      </property>
      <property name="singleStep">
       <double>0.100000000000000</double>
@@ -1132,7 +1119,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>160</y>
+     <y>190</y>
      <width>631</width>
      <height>51</height>
     </rect>
@@ -1302,9 +1289,9 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>10</y>
+     <y>20</y>
      <width>631</width>
-     <height>141</height>
+     <height>161</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -1319,9 +1306,9 @@
     <property name="geometry">
      <rect>
       <x>140</x>
-      <y>20</y>
+      <y>10</y>
       <width>341</width>
-      <height>111</height>
+      <height>141</height>
      </rect>
     </property>
     <property name="title">
@@ -1330,8 +1317,8 @@
     <widget class="QLabel" name="label_16">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>50</y>
+       <x>100</x>
+       <y>20</y>
        <width>47</width>
        <height>13</height>
       </rect>
@@ -1343,8 +1330,8 @@
     <widget class="QSpinBox" name="modeBox">
      <property name="geometry">
       <rect>
-       <x>60</x>
-       <y>50</y>
+       <x>150</x>
+       <y>20</y>
        <width>42</width>
        <height>22</height>
       </rect>
@@ -1357,22 +1344,6 @@
      </property>
      <property name="value">
       <number>4</number>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="useCalibrationCheckBox">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>80</y>
-       <width>91</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Use calibration</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
      </property>
     </widget>
     <widget class="QLabel" name="cameraVersionLabel">
@@ -1469,7 +1440,7 @@
     <widget class="QPushButton" name="closeCameraButton">
      <property name="geometry">
       <rect>
-       <x>100</x>
+       <x>250</x>
        <y>20</y>
        <width>75</width>
        <height>23</height>
@@ -1477,19 +1448,6 @@
      </property>
      <property name="text">
       <string>Close</string>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="calibrateButton">
-     <property name="geometry">
-      <rect>
-       <x>190</x>
-       <y>20</y>
-       <width>75</width>
-       <height>23</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Calibrate</string>
      </property>
     </widget>
     <widget class="QCheckBox" name="hflipCheckBox">
@@ -1518,6 +1476,61 @@
       <string>Vflip</string>
      </property>
     </widget>
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>101</width>
+       <height>81</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Calibration</string>
+     </property>
+     <widget class="QRadioButton" name="calibrateNoneButton">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>82</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>None</string>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="calibrateFlatButton">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>40</y>
+        <width>82</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Flat</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="calibrateTableButton">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>82</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Calibrated</string>
+      </property>
+     </widget>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
@@ -1525,7 +1538,7 @@
       <x>10</x>
       <y>20</y>
       <width>121</width>
-      <height>111</height>
+      <height>121</height>
      </rect>
     </property>
     <property name="title">
@@ -1602,7 +1615,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>400</y>
+     <y>430</y>
      <width>631</width>
      <height>101</height>
     </rect>
@@ -1821,19 +1834,6 @@
      <string>To</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="equalizeCheckBox">
-    <property name="geometry">
-     <rect>
-      <x>260</x>
-      <y>80</y>
-      <width>71</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>equalize</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_35">
     <property name="geometry">
      <rect>
@@ -1889,47 +1889,12 @@
      <string>Debevec</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="claheCheckBox">
-    <property name="geometry">
-     <rect>
-      <x>330</x>
-      <y>80</y>
-      <width>71</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Clahe</string>
-    </property>
-   </widget>
-   <widget class="QDoubleSpinBox" name="clipLimitBox">
-    <property name="geometry">
-     <rect>
-      <x>390</x>
-      <y>80</y>
-      <width>51</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="minimum">
-     <double>1.000000000000000</double>
-    </property>
-    <property name="maximum">
-     <double>5.000000000000000</double>
-    </property>
-    <property name="singleStep">
-     <double>0.500000000000000</double>
-    </property>
-    <property name="value">
-     <double>1.000000000000000</double>
-    </property>
-   </widget>
   </widget>
   <widget class="QLabel" name="messageLabel">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>780</y>
+     <y>870</y>
      <width>631</width>
      <height>31</height>
     </rect>
@@ -1948,7 +1913,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>510</y>
+     <y>540</y>
      <width>631</width>
      <height>81</height>
     </rect>
@@ -2186,6 +2151,64 @@
     </property>
    </widget>
   </widget>
+  <widget class="QGroupBox" name="lensAnalyseGroupBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>810</y>
+     <width>631</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QGroupBox {
+    border: 1px solid black;
+}
+</string>
+   </property>
+   <property name="title">
+    <string>Lens analyse</string>
+   </property>
+   <widget class="QPushButton" name="lensAnalyseButton">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Analyse</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="calibrateButton">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>20</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Calibrate</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="whiteBalanceButton">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>20</y>
+      <width>41</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>WB</string>
+    </property>
+   </widget>
+  </widget>
  </widget>
  <resources/>
  <connections>
@@ -2197,7 +2220,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>100</x>
-     <y>262</y>
+     <y>292</y>
     </hint>
     <hint type="destinationlabel">
      <x>399</x>
@@ -2213,7 +2236,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>270</x>
-     <y>262</y>
+     <y>292</y>
     </hint>
     <hint type="destinationlabel">
      <x>399</x>
@@ -2261,7 +2284,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>305</x>
-     <y>700</y>
+     <y>696</y>
     </hint>
     <hint type="destinationlabel">
      <x>620</x>
@@ -2277,10 +2300,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>240</x>
-     <y>240</y>
+     <y>230</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>177</y>
     </hint>
    </hints>
@@ -2293,10 +2316,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>310</x>
-     <y>240</y>
+     <y>230</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>248</y>
     </hint>
    </hints>
@@ -2309,10 +2332,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>90</x>
-     <y>240</y>
+     <y>230</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>314</y>
     </hint>
    </hints>
@@ -2325,10 +2348,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>160</x>
-     <y>240</y>
+     <y>230</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>367</y>
     </hint>
    </hints>
@@ -2341,10 +2364,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>230</x>
-     <y>240</y>
+     <y>230</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>424</y>
     </hint>
    </hints>
@@ -2360,7 +2383,7 @@
      <y>760</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>428</y>
     </hint>
    </hints>
@@ -2373,10 +2396,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>90</x>
-     <y>489</y>
+     <y>469</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>71</y>
     </hint>
    </hints>
@@ -2392,7 +2415,7 @@
      <y>790</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>519</y>
     </hint>
    </hints>
@@ -2408,7 +2431,7 @@
      <y>670</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>582</y>
     </hint>
    </hints>
@@ -2421,10 +2444,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>113</x>
-     <y>492</y>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>655</y>
     </hint>
    </hints>
@@ -2437,10 +2460,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>490</x>
-     <y>519</y>
+     <y>499</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>472</y>
     </hint>
    </hints>
@@ -2453,10 +2476,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>490</x>
-     <y>499</y>
+     <y>479</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>455</y>
     </hint>
    </hints>
@@ -2469,10 +2492,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>107</x>
-     <y>51</y>
+     <y>61</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>173</y>
     </hint>
    </hints>
@@ -2485,7 +2508,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>89</x>
-     <y>700</y>
+     <y>696</y>
     </hint>
     <hint type="destinationlabel">
      <x>618</x>
@@ -2504,7 +2527,7 @@
      <y>72</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>305</y>
     </hint>
    </hints>
@@ -2517,10 +2540,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>540</x>
-     <y>602</y>
+     <y>582</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>752</y>
     </hint>
    </hints>
@@ -2533,10 +2556,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>190</x>
-     <y>262</y>
+     <y>292</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>435</y>
     </hint>
    </hints>
@@ -2549,10 +2572,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>403</x>
-     <y>492</y>
+     <y>472</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>570</y>
     </hint>
    </hints>
@@ -2564,11 +2587,11 @@
    <slot>closeCamera()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>334</x>
+     <x>484</x>
      <y>72</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>320</y>
     </hint>
    </hints>
@@ -2581,10 +2604,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>568</x>
-     <y>539</y>
+     <y>519</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>590</y>
     </hint>
    </hints>
@@ -2596,11 +2619,11 @@
    <slot>calibrate()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>415</x>
-     <y>63</y>
+     <x>175</x>
+     <y>873</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>217</y>
     </hint>
    </hints>
@@ -2616,7 +2639,7 @@
      <y>72</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>239</y>
     </hint>
    </hints>
@@ -2632,24 +2655,8 @@
      <y>102</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>301</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>equalizeCheckBox</sender>
-   <signal>stateChanged(int)</signal>
-   <receiver>TelecineDialog</receiver>
-   <slot>setEqualize()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>280</x>
-     <y>499</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>664</x>
-     <y>535</y>
     </hint>
    </hints>
   </connection>
@@ -2661,10 +2668,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>330</x>
-     <y>261</y>
+     <y>291</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>321</y>
     </hint>
    </hints>
@@ -2677,10 +2684,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>547</x>
-     <y>298</y>
+     <y>328</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>367</y>
     </hint>
    </hints>
@@ -2693,10 +2700,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>291</x>
-     <y>436</y>
+     <y>510</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>383</y>
     </hint>
    </hints>
@@ -2709,10 +2716,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>140</x>
-     <y>480</y>
+     <y>510</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>265</y>
     </hint>
    </hints>
@@ -2724,11 +2731,11 @@
    <slot>setMerge()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>230</x>
-     <y>436</y>
+     <x>221</x>
+     <y>510</y>
     </hint>
     <hint type="destinationlabel">
-     <x>664</x>
+     <x>661</x>
      <y>388</y>
     </hint>
    </hints>
@@ -2741,10 +2748,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>583</x>
-     <y>736</y>
+     <y>732</y>
     </hint>
     <hint type="destinationlabel">
-     <x>662</x>
+     <x>661</x>
      <y>712</y>
     </hint>
    </hints>
@@ -2757,10 +2764,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>582</x>
-     <y>683</y>
+     <y>672</y>
     </hint>
     <hint type="destinationlabel">
-     <x>668</x>
+     <x>661</x>
      <y>689</y>
     </hint>
    </hints>
@@ -2773,10 +2780,10 @@
    <hints>
     <hint type="sourcelabel">
      <x>387</x>
-     <y>195</y>
+     <y>225</y>
     </hint>
     <hint type="destinationlabel">
-     <x>662</x>
+     <x>661</x>
      <y>137</y>
     </hint>
    </hints>
@@ -2788,8 +2795,8 @@
    <slot>setWhiteBalance()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>59</x>
-     <y>686</y>
+     <x>490</x>
+     <y>672</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -2798,18 +2805,18 @@
    </hints>
   </connection>
   <connection>
-   <sender>claheCheckBox</sender>
-   <signal>stateChanged(int)</signal>
+   <sender>lensAnalyseButton</sender>
+   <signal>clicked()</signal>
    <receiver>TelecineDialog</receiver>
-   <slot>setClahe()</slot>
+   <slot>lensAnalyse()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>391</x>
-     <y>481</y>
+     <x>76</x>
+     <y>872</y>
     </hint>
     <hint type="destinationlabel">
-     <x>659</x>
-     <y>805</y>
+     <x>377</x>
+     <y>923</y>
     </hint>
    </hints>
   </connection>
@@ -2861,5 +2868,8 @@
   <slot>motorOnTrigger()</slot>
   <slot>setWhiteBalance()</slot>
   <slot>setClahe()</slot>
+  <slot>getBGR()</slot>
+  <slot>getBayer()</slot>
+  <slot>lensAnalyse()</slot>
  </slots>
 </ui>

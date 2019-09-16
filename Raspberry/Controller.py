@@ -207,11 +207,32 @@ class TelecineCamera(PiCamera) :
         header = {'type':HEADER_IMAGE, 'count':motor.frameCounter, 'bracket':0, 'shutter':self.exposure_speed}
         queue.put(header)
         queue.put(image)
-    
+
+    def captureBgr(self, type) :
+        header = {'type':type, 'shutter':self.exposure_speed, 'gains':self.awb_gains}
+        queue.put(header)
+        image = self.get_bgr_image()
+#        image = self.get_bgr_mean(5)
+        queue.put(image)
+        print('sended')
+
+
     def get_rgb_image(self):
         with picamera.array.PiRGBArray(camera) as output:
             camera.capture(output, format='rgb', resize=camera.resolution, use_video_port=True)
             return output.array
+
+    def get_bgr_image(self):
+        with picamera.array.PiRGBArray(self) as output:
+            self.capture(output, format='bgr', resize=self.resolution, use_video_port=True)
+            return output.array
+        
+    def get_bgr_mean(self, num) :
+        bgr_image  = self.get_bgr_image().astype(dtype=np.float)
+        for j in range(num-1):
+            bgr_image = bgr_image + self.get_bgr_image()
+        bgr_image = bgr_image / num
+        return bgr_image
 
     def whiteBalance(self) :
         rgb_image  = self.get_rgb_image()
@@ -223,6 +244,15 @@ class TelecineCamera(PiCamera) :
         print(channel_means[2])
         old_gains = camera.awb_gains
         return (channel_means[1]/channel_means[0] * old_gains[0], channel_means[1]/channel_means[2]*old_gains[1])
+
+def lensAnalyze() :
+    image = camera.get_bgr_image()
+    header = {'type':HEADER_ANALYZE, 'shutter':camera.exposure_speed}
+    queue.put(header)
+#        image = self.get_bgr_mean(5)
+    queue.put(image)
+    print('sended')
+    camera.close()
 
 #end Camera class
         
@@ -250,8 +280,10 @@ class SendImageThread(Thread):
                     imageSock.sendObject(object)
                     if object['type'] == HEADER_STOP :
                         break;
+                elif isinstance(object, np.ndarray) :
+                    imageSock.sendArray(object)
                 else :
-                    imageSock.sendMsg(object)
+                    imageSock.sendMsg(object) #Image buffer
             while queue.qsize() > 1 :
                 object = queue.get()
                 imageSock.sendObject(object)
@@ -260,9 +292,9 @@ class SendImageThread(Thread):
                 imageSock.close()
         print('SendImageThread terminated')
            
-def openCamera(mode, resolution, useCalibration,hflip,vflip) :
+def openCamera(mode, resolution, calibrationMode, hflip,vflip) :
     cam = None
-    if useCalibration :
+    if calibrationMode ==  CALIBRATION_TABLE:
         try :
             lst = np.load("calibrate_test.npz")
             cam = TelecineCamera(sensor_mode = mode, lens_shading_table = lst['lens_shading_table'])
@@ -273,6 +305,7 @@ def openCamera(mode, resolution, useCalibration,hflip,vflip) :
             except Exception as ex:
                 print(ex)
                 pass
+
     if cam == None :
         cam = TelecineCamera(sensor_mode = mode)
     if resolution != None :
@@ -288,6 +321,10 @@ def openCamera(mode, resolution, useCalibration,hflip,vflip) :
         pass
     cam.hflip = hflip
     cam.vflip = vflip
+    if calibrationMode == CALIBRATION_FLAT :
+        lens_shading_table = np.zeros(cam._lens_shading_table_shape(), dtype=np.uint8) + 32
+        cam.lens_shading_table = lens_shading_table
+
 #Start capture Thread
     exitFlag = False
     captureImageThread = CaptureImageThread()
@@ -312,6 +349,8 @@ def calibrateCamera(hflip, vflip) :
 ##    header = {'type':HEADER_MESSAGE, 'msg':'Calibrate done'}
 ##    queue.put(header)
 
+
+    
    
 def saveCameraSettings() :
     if camera != None :
@@ -367,6 +406,10 @@ try:
         print('Command:%s\n' % hex(command)) #Thread safe print with NL !
         if command == TAKE_IMAGE :
             camera.captureImage()
+        elif command == TAKE_BGR:
+            camera.captureBgr(request[1])
+        elif command == LENS_ANALYZE:
+            lensAnalyze()
         elif command == GET_CAMERA_SETTINGS:
             settings = getSettings(camera, initSettings+controlSettings+addedSettings)
             commandSock.sendObject(settings)
@@ -401,7 +444,7 @@ try:
 ##        elif command == CALIBRATE_HDR :
 ##            camera.calibrateHDR(request[1])
         elif command == OPEN_CAMERA :
-            camera = openCamera(request[1],request[2], request[3], request[4], request[5]) #mode, resolution, usecalibration, hflip, vflip
+            camera = openCamera(request[1],request[2], request[3], request[4], request[5]) #mode, resolution, calibrationMode, hflip, vflip
         elif command == CLOSE_CAMERA :
              closeCamera()
         elif command == CALIBRATE_CAMERA :

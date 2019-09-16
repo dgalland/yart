@@ -32,7 +32,7 @@ class ImageThread (QThread):
         self.name = "ImgThread"
         self.window = None
         self.saveOn = False
-        self.mergeMertens = cv2.createMergeMertens()
+        self.mergeMertens = cv2.createMergeMertens(0.,0.,1.)
         self.mergeDebevec = cv2.createMergeDebevec()
         self.toneMap = cv2.createTonemapReinhard()
         self.claheProc = cv2.createCLAHE(clipLimit=1, tileGridSize=(8,8))
@@ -120,6 +120,43 @@ class ImageThread (QThread):
         cv2.imshow("PiCamera", image)
         cv2.waitKey(1)
 
+    def lensAnalyze(self, header) :
+        image = self.imageSock.receiveArray()  #bgr
+        print('Max:', np.max(image[:,:,0]),'Min:', np.min(image[:,:,0]),'Mean:', np.mean(image[:,:,0])) 
+        print('Max:', np.max(image[:,:,1]),'Min:', np.min(image[:,:,1]),'Mean:', np.mean(image[:,:,1])) 
+        print('Max:', np.max(image[:,:,2]),'Min:', np.min(image[:,:,2]),'Mean:', np.mean(image[:,:,2])) 
+#        np.savez('image.npz',   image = image)
+#        cv2.imwrite('image.jpg', image)
+#        cv2.imshow("PiCamera", image)
+#        cv2.waitKey(1)
+        
+        x = image.shape[0]/image.shape[1]
+        diag = np.empty((image.shape[1],3))
+        print(diag.shape)
+        for i in range(image.shape[1]) :  #3280
+            j = int(i * x)
+            diag[i,:] = image[j,i,:]
+            
+        colors = ('b','g','r')
+        figure = plt.figure(figsize=(10,3))
+        axe = figure.add_subplot(1,3,1)
+        axe.title.set_text('Horizontal')
+        for i,col in enumerate(colors):
+            axe.plot(image[image.shape[0]//2,:,i],color = col)  #Horizontal
+        axe = figure.add_subplot(1,3,2)
+        axe.title.set_text('Vertical')
+        for i,col in enumerate(colors):
+            axe.plot(image[:,image.shape[1]//2,i],color = col)  #Vertical
+        axe = figure.add_subplot(1,3,3)
+        axe.title.set_text('Diagonal')
+        for i,col in enumerate(colors):
+            axe.plot(diag[:, i],color = col) #Diagonal
+#        figure.subplots_adjust(top=0.85)
+        plt.show()
+
+
+
+
     def saveToFile(self, saveFlag, directory) :
         self.saveOn = saveFlag
         self.directory = directory
@@ -147,6 +184,10 @@ class ImageThread (QThread):
                 if  typ == HEADER_IMAGE :
                     image = self.imageSock.receiveMsg()
                     self.processImage(header, image)
+                elif typ == HEADER_BGR :
+                    self.processBgr()
+                elif typ == HEADER_ANALYZE :
+                    self.lensAnalyze(header)
 #                if  typ == HEADER_HDR :
 #                    image = self.imageSock.receiveMsg()
 #                    self.processHdrImage(header, image)

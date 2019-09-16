@@ -174,8 +174,13 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             requestedResolution = (hres, vres)
         self.hflip = self.hflipCheckBox.isChecked()
         self.vflip = self.vflipCheckBox.isChecked()
-        self.sock.sendObject((OPEN_CAMERA, self.mode, requestedResolution, self.useCalibrationCheckBox.isChecked(), \
-                             self.hflip, self.vflip))
+        calibrationMode = CALIBRATION_NONE
+        if self.calibrateFlatButton.isChecked() :
+            calibrationMode = CALIBRATION_FLAT
+        elif self.calibrateTableButton.isChecked() :
+            calibrationMode = CALIBRATION_TABLE
+        self.sock.sendObject((OPEN_CAMERA, self.mode, requestedResolution, \
+                             calibrationMode, self.hflip, self.vflip))
         self.getCameraSettings()
         maxResolution = self.getCameraSetting('MAX_RESOLUTION')
         if maxResolution[0] == 3280 :
@@ -428,6 +433,12 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
     def calibrateHDR(self):
         self.sock.sendObject((CALIBRATE_HDR,25) )
         
+    def lensAnalyse(self):
+        self.sock.sendObject((TAKE_BGR,HEADER_ANALYZE) )
+
+    def getBayer(self):
+        self.sock.sendObject((TAKE_BAYER,) )
+
     def setSave(self) :
         self.imageThread.saveToFile(self.saveCheckBox.isChecked(), self.directory)
 

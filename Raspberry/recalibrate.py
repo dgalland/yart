@@ -16,13 +16,14 @@ def lens_shading_correction_from_rgb(rgb_array, binsize, version):
     full_resolution = rgb_array.shape[:2]
     table_resolution = [(r // binsize) + 1 for r in full_resolution]
     lens_shading = np.zeros([4] + table_resolution, dtype=np.float)
-    
+    mean = np.mean(rgb_array)
     for i in range(3):
         # We simplify life by dealing with only one channel at a time.
         image_channel = rgb_array[:,:,i]
         iw, ih = image_channel.shape
         ls_channel = lens_shading[int(i*1.6),:,:] # NB there are *two* green channels
         lw, lh = ls_channel.shape
+        print("ls_channel.shape ", ls_channel.shape)
         # The lens shading table is rounded **up** in size to 1/64th of the size of
         # the image.  Rather than handle edge images separately, I'm just going to
         # pad the image by copying edge pixels, so that it is exactly 32 times the
@@ -32,11 +33,12 @@ def lens_shading_correction_from_rgb(rgb_array, binsize, version):
         # less computationally efficient!
         dw = lw*binsize - iw
         dh = lh*binsize - ih
+        print("iw:",iw, "ih:",ih, "dw:",dw, "dh:", dh);
         if version == 2 :
 #            image_channel[iw-8:iw:1,:] = np.mean(image_channel[iw-16:iw-8:,:],axis=0)  #bottom  adjust verify !
             padded_image_channel = np.pad(image_channel, [(0, dw), (0, dh)], mode='edge') # Pad image to the right and bottom
         else :
-#            image_channel[iw-8:iw:1,:] = np.mean(image_channel[iw-16:iw-8:,:],axis=0)
+##            image_channel[iw:iw+8:,:] = np.mean(image_channel[iw+8:iw+16:,:],axis=0)
             padded_image_channel = np.pad(image_channel, [(dw, 0), (dh, 0)], mode='edge') # Pad image top left
         assert padded_image_channel.shape == (lw*binsize, lh*binsize), "padding problem"
         # Next, fill the shading table (except edge pixels).  Please excuse the
@@ -51,7 +53,11 @@ def lens_shading_correction_from_rgb(rgb_array, binsize, version):
         # Everything is normalised relative to the centre value.  I follow 6by9's
         # example and average the central 64 pixels in each channel.
         channel_centre = np.mean(image_channel[iw//2-4:iw//2+4, ih//2-4:ih//2+4])
-        ls_channel /= channel_centre
+#        ls_channel /= channel_centre
+        ls_channel /= np.max(ls_channel)  #un essai mais moins bon
+#        ls_channel /= np.mean(ls_channel)  #un autre essai 
+#        ls_channel /= mean  #un autre essai 
+#        ls_channel /= 255.  #un autre essai 
         print("channel {} centre brightness {}".format(i, channel_centre))
         # NB the central pixel should now be *approximately* 1.0 (may not be exactly
         # due to different averaging widths between the normalisation & shading table)
@@ -96,14 +102,16 @@ def freeze_camera_settings(camera):
     g = camera.awb_gains
     camera.awb_mode = "off"
     camera.awb_gains = g
-    print('After freeze gains:', camera.awb_gains,' Shutter:', camera.exposure_speed)
+#    camera.awb_gains = (1.3, 2.3)
     time.sleep(5)
+    print('After freeze gains:', camera.awb_gains,' Shutter:', camera.exposure_speed)
 
 
 def generate_lens_shading_table_closed_loop(hflip, vflip, n_iterations=5, images_to_average=5):
 
     camera = picamera.PiCamera(sensor_mode=2)
     lens_shading_table = np.zeros(camera._lens_shading_table_shape(), dtype=np.uint8) + 32
+    print("Lens_shading shape", camera._lens_shading_table_shape())
     gains = np.ones_like(lens_shading_table, dtype=np.float)
     max_res = camera.MAX_RESOLUTION
     if max_res[0] == 3280 :
@@ -114,7 +122,6 @@ def generate_lens_shading_table_closed_loop(hflip, vflip, n_iterations=5, images
         version = 1
         binSize = 64
         calibrate_res = max_res
-    time.sleep(2)
     camera.close()
     
     camera = picamera.PiCamera(sensor_mode=2,lens_shading_table=lens_shading_table, resolution=calibrate_res)
@@ -145,11 +152,20 @@ if __name__ == '__main__':
     camera.resolution = camera.MAX_RESOLUTION
     time.sleep(5)
     print('Before calibration shutter:', camera.exposure_speed, ' Gains:', camera.awb_gains)
-    camera.capture('before.jpg', use_video_port=True)
-##    bgr = get_bgr_image(camera, camera.MAX_RESOLUTION)
-##    cv2.imwrite('before_bgr.jpg', bgr)
+    camera.capture('before_01.jpg', use_video_port=True)
+    lens_shading_table = np.zeros(camera._lens_shading_table_shape(), dtype=np.uint8) + 32
+    print(camera.lens_shading_table)
     camera.close()
+
+    camera = picamera.PiCamera(sensor_mode=2,lens_shading_table = lens_shading_table)
+    camera.resolution = camera.MAX_RESOLUTION
+    time.sleep(5)
+    print('With flat table shutter:', camera.exposure_speed, ' Gains:', camera.awb_gains)
+    camera.capture('before_02.jpg', use_video_port=True)
+    camera.close()
+
     lens_shading_table = generate_lens_shading_table_closed_loop(False,False, n_iterations=5)
+    
     np.savez('calibrate.npz',   lens_shading_table = lens_shading_table)
     
     camera = picamera.PiCamera(lens_shading_table=lens_shading_table)

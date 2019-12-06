@@ -8,7 +8,7 @@ En premier lieu je dois remercier Joe Herman pour son projet https://github.com/
 
 Raspberry PI 3 Modèle B+
 
-Question du Raspberry P4: Les opérations d'entrée sortie, capture de l'image et envoi sur le réseau sont le facteur bloquant pour la performance et exécutées dans des threads séparées. L'application ne demande pas beaucoup de puissance CPU. Le Raspberry PI4 plus puissant n'apportera pas un gain significatif. Noter quand même que le PI4 a une meilleure performance réseau car l' interface réseau est indépendante  du bus USB.
+Question du Raspberry P4: Dans cette application, les opérations d'entrée sortie, capture de l'image et envoi sur le réseau sont le facteur bloquant pour la performance et exécutées dans des threads séparées. L'application ne demande pas beaucoup de puissance CPU. Le Raspberry PI4 plus puissant n'apportera pas un gain significatif. Noter quand même que le PI4 a une meilleure performance réseau car l' interface réseau est indépendante  du bus USB, il peut y avoir un gain de ce coté.
 
 ### Caméra et optique
 
@@ -120,9 +120,16 @@ La capture en résolution maximum est plus lente mais il semble que cela apporte
 
 ### Lampe, Diffuseur
 
-J'ai de bon résultats avec une LED TrueColor Phillips faisceau étroit 4000K. Il faut faire des expériences avec des diffuseurs, un diffuseur à la surface de la LED réduit l'intensité lumineuse. Un diffuseur proche du film  apporte un certain flou, ce flou peut-être intéressant pour diminuer l'effet des rayures ou des craquelures du film mais au prix d'une perte de netteté donc il doit être assez léger.
+J'ai de bon résultats avec une LED TrueColor Phillips faisceau étroit 4000K (avec réflecteur GU5-3 MR16) )
 
- J'ai aussi placé un diffuseur à la surface de la LED.  Il faut ajuster le diffuseur et la distance de la lampe pour avoir une durée d'exposition convenable. Si la caméra fonctionne à 30fps l'exposition maximum est de 33333 micro seconds. Si le bracketing (cf infra) est utilisé il faut que l'exposition auto sur une image normale soit d'environ 2000 à 3000 micro-secondes.
+Le choix de la matière et de l'emplacement du diffuseur est très important
+
+- Sans diffuseur les rayons lumineux directs vont accentuer les défauts et les rayures du film.
+- Un mauvais diffuseur va entraîner une perte de netteté.
+
+Après beaucoup d'essais j'ai obtenu le meilleur résultat avec un diffuseur assez épais (1,5mm) de plastique translucide placé au plus près du film (5mm) qui donne un éclairage complètement indirect similaire à celui des scanner professionnels.  La LED est à environ 10cm du film sans aucun diffuseur.
+
+ Il faut ajuster la distance de la lampe et le diaphragme de l'objectif pour avoir une durée d'exposition convenable. Si la caméra fonctionne à 30fps l'exposition maximum est de 33333 micro seconds. Si le bracketing (cf infra) est utilisé il faut que l'exposition auto sur une image normale soit d'environ 2000 à 3000 micro-secondes.
 
   ### Projecteur, Trigger, Moteur
 
@@ -195,7 +202,7 @@ Un moteur pas à pas fonctionne en général à 200 pulses par tour. Utiliser le
 
 ### Camera	
 
-Bien entendu on utilise la librairie Python picamera. Cependant comme indiqué plus haut les camera avec un objectif non d'origine produisent une image très mauvaise. Il est absolument nécessaire de calibrer l'objectif en construisant une table de correction `lens_shading_table`. Cette modification n'est pas encore comprise dans la version actuelle de la librairie, il faut donc  installer et utiliser une version spéciale de la librairie., On pourra se référer au projet:
+Bien entendu on utilise la librairie Python picamera. Cependant comme indiqué plus haut la camera avec un objectif non d'origine produit une image très mauvaise. Il est absolument nécessaire de calibrer l'objectif en construisant une table de correction `lens_shading_table`. Cette modification n'est pas encore comprise dans la version actuelle de la librairie, il faut donc  installer et utiliser une version spéciale de la librairie., On pourra se référer au projet:
 
 https://github.com/rwb27/openflexure_microscope_software
 
@@ -238,9 +245,9 @@ La camera est limitée dans sa dynamique, si on augmente l'exposition pour écla
 
 C'est pourquoi il est absolument nécessaire de reprendre l'idée de Joe et de capturer chaque image avec différentes expositions (bracketing), une sous-exposée pour obtenir les clairs, une surexposée pour obtenir les sombres et une normale, avant de les fusionner. Ce traitement sera fait coté PC avec la librairie openCV.
 
-Plusieurs algorithmes de fusion Merge/HDR sont disponibles. Le plus simple utilisé par Joe est le Merge Mertens, les pixels sont fusionnés en ignorant les pixels trop blancs ou trop noirs.L'inconvénient de cette méthode est de donner une image un peu artificielle qui ne rend pas compte des luminosités réelles.
+Plusieurs algorithmes de fusion Merge/HDR sont disponibles. Le plus simple utilisé par Joe est le Merge Mertens, les pixels sont fusionnés en ignorant les pixels trop blancs ou trop noirs. 
 
-Les algorithmes de vrai HDR tentent de rendre compte de ce que verrait un œil humain en corrigeant l'imperfection de la caméra. Pour moi ils donnent un meilleur résultat, par contre ils nécessitent d'avoir le temps d'exposition de chaque image. Il ne sont pas plus consommateurs en CPU.
+Les algorithmes de vrai HDR tentent de rendre compte de ce que verrait un œil humain en corrigeant l'imperfection de la caméra. 
 
 On peut se référer à :
 [https://www.learnopencv.com/high-dynamic-range-hdr-imaging-using-opencv-cpp…](https://www.learnopencv.com/high-dynamic-range-hdr-imaging-using-opencv-cpp-python/)
@@ -358,9 +365,9 @@ Modes d'ouverture de la camera:
 
 ### Analyse de l'objectif et calibration
 
-Pour analyser et calibrer l'objectif il faut capturer une image <u>uniformément blanche</u> (pas de cadre noir par exemple). Personnellement  je place un diffuseur blanc devant la fenêtre du film et je mets la caméra un peu hors focus.
+Pour analyser et calibrer l'objectif il faut capturer une image <u>uniformément blanche</u> (pas de cadre noir par exemple). Si un diffuseur est utilisé on peut le faire simplement sans le film dans la fenêtre de projection, ajouter un diffuseur ou fermer le diaphragme si la luminosité est trop forte.
 
-Le bouton "Analyse" calcule un histogramme de répartition des couleurs le long des axes de l'image. Si la camera est ouverte sans table il permet de mettre en évidence le phénomène. Après calibration l'histogramme doit être plus plat et l'on peut ajuster les gains rouge et bleu pour obtenir une image neutre. Il est conseillé de noter et conserver ces gains pour toute la suite.
+Le bouton "Analyse" calcule un histogramme de répartition des couleurs le long des axes de l'image. Si la camera est ouverte sans calibration il permet de mettre en évidence le phénomène. Après calibration l'histogramme doit être presque plat et l'on peut ajuster les gains rouge et bleu pour obtenir une image neutre. Il est conseillé de noter et conserver ces gains pour toute la suite.
 
 Le bouton "Calibrate" exécute le programme de calibration repris du projet openflexure cité ci-dessus. Il crée un fichier calibrate.npz qui contient la lens_shading_table et qui sera utilisé à la prochaine ouverture de la caméra.
 
@@ -393,9 +400,10 @@ Shutter: Conseillé de laisser 0  "automatic exposure" . On peut jouer sur compe
 
 ### Contrôle de la caméra
 
-Shot: Capture une image (sans bracket)
+- Shot: Capture une image (sans bracket)
 
-- Preview: Capture sans moteur, utile pour tester la mise au point, les paramètres de la caméra et le bracket
+
+- Preview: Capture sans avance du moteur, utile pour tester la mise au point, les paramètres de la caméra et le bracket
 - Capture: Capture en avançant le moteur. 
 
 "On Frame" Le moteur avance jusqu'au trigger, stoppe puis capture
@@ -405,37 +413,41 @@ La méthode "On frame" est plus fiable surtout si le bracket est utilisé.
 
 ### Bracketing et fusion
 
-La capture peut d'effectuer sans bracket une exposition par image ou bien avec un bracket de trois expositions par image. 
+L'exposition "auto" fait déjà un bon travail en ajustant automatiquement le temps de pose pour chaque image, cependant la dynamique de la caméra est limitée. Le bracketing ou HDR permet d'améliorer considérablement la dynamique de l'image :
 
-Si un bracket de 3 est choisi il faut ajuster:
+- Pour les zones très claires éviter les "Blancs brulés" et retrouver les détails
+- Eclaircir les zones sombres pour retrouver les détails 
 
-- "Dark coefficient" coefficient à appliquer à l'exposition de l'image normale (auto exposition calculée par la caméra) pour obtenir l'image sous-exposée. 
-- "Light coefficient" coefficient à appliquer à l'exposition de l'image normale (auto exposition calculée par la caméra) pour obtenir l'image sur-exposée. 
+Il faut ajuster divers paramètres:
+
+- "Dark" coefficient à appliquer à l'exposition de l'image normale (auto exposition calculée par la caméra) pour obtenir l'image sous-exposée. 
+- "Light" coefficient à appliquer à l'exposition de l'image normale (auto exposition calculée par la caméra) pour obtenir l'image sur-exposée. 
 - "Wait between" Nombre de trames à ignorer après le changement d'exposition (minimum 4)
 - "Wait before" Nombre de trames à ignorer après le passage en auto pour l'image suivante (minimum 8). 
 
+Les coefficients "Wait between" et "Wait before" sont nécessaires pour donner à la caméra le temps de s'ajuster après un changement d'exposition pour une même image ou le passage en auto pour l'image suivante.
+
 Pour ajuster ces coefficients il faut faire des essais sur une image dans votre film. 
 
-Sans "Merge" mais avec "Save" choisir "Preview" framerate 30fps
+Sans "Merge" mais avec "Save" choisir "Preview" framerate 10fps
 
-- Vous devez bien voir dans la fenêtre de visualisation et dans le répertoire de sauvegarde les trois images dans l'ordre (sous-exposée, sur-exposée, normale) sinon il faut augmenter "Shutter speed wait" pour laisser le temps à la caméra d'ajuster l'exposition.
-- De plus l'exposition auto de la trame normale doit être stable, sinon il faut augmenter "Shutter auto wait" pour laisser le temps à la caméra de revenir en exposition automatique.
+- Vous devez bien voir dans la fenêtre de visualisation et dans le répertoire de sauvegarde les trois images dans l'ordre (sous-exposée, sur-exposée, normale) sinon il faut augmenter "Wait between" pour laisser le temps à la caméra d'ajuster l'exposition.
+- De plus l'exposition auto de la trame normale doit être stable, sinon il faut augmenter "Wait before" pour laisser le temps à la caméra de revenir en exposition automatique.
 
 Avec merge "Mertens" ou Debevec vous pouvez ensuite constater l'effet de la fusion
 
-Le réglage des coefficients "dark" et "light" est assez délicat. L'image sombre sous exposée va assombrir les blancs et éviter les blancs "brulés". Elle doit être presque noire sauf sur les blancs très fort sinon elle assombrira toute l'image. L'image claire surexposée va éclaircir les ombres, elle doit être assez blanche. 
+Le réglage des coefficients "dark" et "light" est assez délicat. 
 
-Le merge "Debevec " est le plus difficile à ajuster, il donne une image qui manque de contraste qui devra être égalisée au post-traitement. Il a aussi pour effet de réduire le grain.
+- Le coefficient "dark" détermine l'image sombre sous exposée qui va assombrir et retrouver les détails dans les blancs et éviter les blancs "brulés". L'image sous exposée doit être presque noire sauf sur les blancs très fort sinon elle assombrira toute l'image. Si elle est complètement noire elle n'aura aucun effet.
+- Le coefficient "light" détermine l'image claire surexposée qui va éclaircir et retrouver les détails dans les zones sombres. Si elle est complètement blanche elle n'aura aucun effet.
 
-Le merge "Mertens" est plus facile à ajuster. Il semble préférable
+Le merge "Debevec " est le plus difficile à ajuster, il donne une image qui manque de contraste qui devra être égalisée au post-traitement. Il a aussi pour effet de réduire la netteté. Le merge "Mertens" est plus facile à ajuster et semble préférable
 
-Dans mes premiers essais avec la V2 j'avais choisis le merge Debevec Dark=0.1 et Light=8.
-
-Avec la V1 le merge Mertens Dark=0.02 et Light=5 m'a donné de meilleurs résultats.
+Avec la V1 le merge Mertens Dark=0.1 et Light=2 m'a donné de meilleurs résultats.
 
 Ensuite vous pouvez faire les mêmes essais en "Capture"
 
-Au final avec un bracket de 3 et un framerate  camera de 30fps vous devez obtenir un débit d'environ 1 seconde par image en résolution 1640x1232  et 3 secondes par image en résolution maximale 3280*2464 
+Au final avec bracket et un framerate  camera de 30fps vous devez obtenir un débit d'environ 1 seconde par image en résolution 1640x1232  et 3 secondes par image en résolution maximale 3280*2464 
 
 ### Traitement des images
 
@@ -443,8 +455,8 @@ Il s'effectue sur le PC
 
 - "Histo" affiche l'histogramme de l'image
 - "Sharpness" Evalue et affiche la netteté de l'image pour une bonne mise au point (utiliser "Shot" ou "Play" avec 5fps) . La meilleur mise au point correspond à la valeur maximum de sharpness. 
-- Reduce permet de réduire l'image affichée
-- "Merge"  Détermine l'algorithme de fusion "None"  "Mertens" ou "Debevec"
+- Reduce permet de réduire la taille de l'image affichée
+- "Merge"  Détermine l'algorithme de fusion choisi "None"  "Mertens" ou "Debevec"
 - "Save" Sauvegarde les images dans le répertoire choisi. On peut choisir un numéro de bande et un numéro de clip. Pour chaque "Capture" les images sont numérotées à partir de 0
 
 ### Post Traitement
@@ -485,7 +497,7 @@ Lé résultat est spectaculaire:
 
 ![wetgate](images/wetgate.jpg)
 
-Ce procédé évite de placer un diffuseur trop près de l'image, un tel diffuseur diminue bien les craquelures et rayures mais au prix d'une sensible perte de netteté.
+
 
 ### Expériences utilisateurs
 

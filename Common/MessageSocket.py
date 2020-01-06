@@ -1,12 +1,13 @@
 import socket
-from struct import *
+from struct import *  
+from numpy import *    #for dtype
 import numpy as np
 from ast import literal_eval
 from fractions import Fraction 
 ## A message oriented socket class
 ## Features on the socket :
 ## send a receive a messge ie a counted bytes buf
-## On top of a message send a recive a Python string
+## On top of a message send a receive a Python string
 ## On top of a string send a receive a Python object
 
 class MessageSocket() :
@@ -71,17 +72,15 @@ class MessageSocket() :
         s = self.receiveString()
         return eval(s)[0]
 
-#Not actually used
 #Send a numpy array
     def sendArray(self,array):
-        self.sendObject(array.shape)
-        self.socket.sendall(array.tobyes())
+        self.sendObject((array.nbytes, array.shape, array.dtype))
+        self.socket.sendall(array.tobytes())
 
 #Receive a numpy array        
-    def receiveArray():
-        shape = self.receiveObject()
-        size = 1
-        for d in shape :
-            size = size * d
+    def receiveArray(self):
+        infos = self.receiveObject()
+        print (infos)
+        size = infos[0]
         buf = self.read(size)
-        return np.frombuffer(buf, np.uint8).reshape( shape)
+        return np.frombuffer(buf, infos[2]).reshape(infos[1])

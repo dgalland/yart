@@ -49,6 +49,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.hflip = False
         self.vflip = False
         self.mode = 2
+        self.resolution = None
         self.cameraVersion = ''
         self.root_directory = 'images'
         self.captureStopButton.setEnabled(False)
@@ -65,6 +66,9 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.motorOffButton.setEnabled(False)
         self.onTriggerButton.setEnabled(True)
         self.autoPauseCheckBox.setEnabled(False)
+        self.lensAnalyseButton.setEnabled(False)
+        self.calibrateLocalButton.setEnabled(False)
+#        self.whiteBalanceButton.setEnabled(False)
 
         
 #Lamp
@@ -181,7 +185,6 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             calibrationMode = CALIBRATION_TABLE
         self.sock.sendObject((OPEN_CAMERA, self.mode, requestedResolution, \
                              calibrationMode, self.hflip, self.vflip))
-        self.getCameraSettings()
         maxResolution = self.getCameraSetting('MAX_RESOLUTION')
         if maxResolution[0] == 3280 :
             self.cameraVersion = 2
@@ -203,6 +206,10 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.closeCameraButton.setEnabled(True)
         self.openCameraButton.setEnabled(False)
         self.calibrateButton.setEnabled(False)
+        self.getCameraSettings()
+        self.lensAnalyseButton.setEnabled(True)
+        self.calibrateLocalButton.setEnabled(True)
+#        self.whiteBalanceButton.setEnabled(True)
 
 
 
@@ -214,7 +221,11 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.closeCameraButton.setEnabled(False)
         self.openCameraButton.setEnabled(True)
         self.calibrateButton.setEnabled(True)
-    
+        self.lensAnalyseButton.setEnabled(False)
+        self.calibrateLocalButton.setEnabled(False)
+#        self.whiteBalanceButton.setEnabled(False)
+
+#Calibrate remote    
     def calibrate(self) :
         self.messageLabel.setText('Calibrating please wait')
         QApplication.setOverrideCursor(Qt.WaitCursor)
@@ -224,6 +235,14 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.messageLabel.setText(done)
         print(done)
 
+#Calibrate Local        
+    def calibrateLocal (self):
+        self.setResize()
+        self.sock.sendObject((TAKE_BGR,HEADER_CALIBRATE,1) )  #Calibrate on 1 image
+
+    def doCalibrateLocal (self):
+        self.imageThread.doCalibrate = self.calibrateLocalCheckBox.isChecked()
+        
     def setWhiteBalance(self)  :      
         self.sock.sendObject((WHITE_BALANCE,))
         gains = self.sock.receiveObject()
@@ -235,11 +254,65 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.imageThread.clahe = False
         self.imageThread.equalize = self.equalizeCheckBox.isChecked()
 
+    def setWB(self) :
+        self.imageThread.wb = self.wbCheckBox.isChecked()
+
     def setClahe(self) :
         self.equalizeCheckBox.setChecked(False)
         self.imageThread.equalize = False
         self.imageThread.clahe = self.claheCheckBox.isChecked()
         self.imageThread.clipLimit = self.clipLimitBox.value()
+
+#Modif possible durant capture
+    def ROIwChanged(self) :
+        width = self.ROIwBox.value()
+        height = self.ROIhBox.value()
+        ratio = self.resolution[0]/self.resolution[1]
+        if self.keepRatioCheckBox.isChecked() :
+            height = width/ratio
+            self.ROIhBox.setValue(height)
+        if self.centerCheckBox.isChecked() :
+            x = int((self.resolution[0] - width)/2 )
+            y = int((self.resolution[1] - height)/2 )
+            self.ROIxBox.setValue(x) 
+            self.ROIyBox.setValue(y)
+
+    def ROIhChanged(self) :
+        width = self.ROIwBox.value()
+        height = self.ROIhBox.value()
+        ratio = self.resolution[0]/self.resolution[1]
+        if self.keepRatioCheckBox.isChecked() :
+            width = height*ratio
+            self.ROIwBox.setValue(width)
+        if self.centerCheckBox.isChecked() :
+            x = int((self.resolution[0] - width)/2 )
+            y = int((self.resolution[1] - height)/2 )
+            self.ROIxBox.setValue(x) 
+            self.ROIyBox.setValue(y)
+
+           
+    def setROI(self) :
+        roi = (self.ROIxBox.value()/self.resolution[0],self.ROIyBox.value()/self.resolution[1],self.ROIwBox.value()/self.resolution[0],self.ROIhBox.value()/self.resolution[1])
+        print(roi)
+        self.sock.sendObject((SET_CAMERA_SETTINGS, {'zoom' : roi}))
+
+    def resetROI(self):
+        self.keepRatioCheckBox.setChecked(False)
+        self.centerCheckBox.setChecked(False)
+        self.ROIxBox.setValue(0.) 
+        self.ROIyBox.setValue(0.)
+        self.ROIwBox.setValue(self.resolution[0])
+        self.ROIhBox.setValue(self.resolution[1])
+        self.setROI()
+    
+    def setResize(self) :
+        doResize = self.resizeCheckBox.isChecked()
+        if doResize:
+            resize = (int(self.resizewBox.value()),int(self.resizehBox.value()))
+            self.sock.sendObject((SET_CAMERA_SETTINGS, {'doResize':doResize, 'resize' : resize}))
+        else :
+            self.sock.sendObject((SET_CAMERA_SETTINGS, {'doResize':doResize}))
+        
 #Capture
 #CAPTURE_BASIC play with ot without motor
 #CAPTURE_ON_FRAME capture frame and advance motor
@@ -272,6 +345,8 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.autoPauseCheckBox.setChecked(False)
         self.initGroupBox.setEnabled(False)
 
+        self.setResize()
+        
         self.sock.sendObject((SET_CAMERA_SETTINGS, {\
                                                     'framerate':frameRate,\
                                                     'bracket_steps':brackets, \
@@ -328,9 +403,9 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
 
 #Take one image
     def takeImage(self):
-#        self.sock.sendObject((SET_CAMERA_SETTINGS, {'use_video_port' : self.videoPortButton.isChecked(),}))
         self.imageThread.reduceFactor = self.reduceFactorBox.value()
-        self.sock.sendObject((SET_CAMERA_SETTINGS, {'use_video_port' : True})) 
+        self.setResize()
+        self.sock.sendObject((SET_CAMERA_SETTINGS, {'use_video_port' : True}))
         self.sock.sendObject((TAKE_IMAGE,))
 
 #Get all camera settings
@@ -364,6 +439,22 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.pauseEdit.setText(str(settings['pause_pin']))
         self.pauseLevelCheckBox.setChecked(settings['pause_level'] == 1)
         self.autoPauseCheckBox.setChecked(settings['auto_pause'])
+        roi = settings['zoom']
+        if roi == None :
+            roi = (0.,0.,1.,1.)
+        
+        self.ROIxBox.setValue(roi[0]*self.resolution[0])
+        self.ROIyBox.setValue(roi[1]*self.resolution[1])
+        self.ROIwBox.setValue(roi[2]*self.resolution[0])
+        self.ROIhBox.setValue(roi[3]*self.resolution[1])
+        
+        resize = settings['resize']
+        if resize == None :
+            resize = self.resolution
+        self.resizewBox.setValue(resize[0])
+        self.resizehBox.setValue(resize[1])
+        
+        self.resizeCheckBox.setChecked(settings['doResize'])
         return settings
 
 #Get one camera setting
@@ -428,16 +519,8 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         settings = {'exposure_mode':mode,}
         self.sock.sendObject((SET_CAMERA_SETTINGS, settings))
 
-
-#Experimental not used
-    def calibrateHDR(self):
-        self.sock.sendObject((CALIBRATE_HDR,25) )
-        
     def lensAnalyse(self):
-        self.sock.sendObject((TAKE_BGR,HEADER_ANALYZE) )
-
-    def getBayer(self):
-        self.sock.sendObject((TAKE_BAYER,) )
+        self.sock.sendObject((TAKE_BGR,HEADER_ANALYZE, 1) )
 
     def setSave(self) :
         self.imageThread.saveToFile(self.saveCheckBox.isChecked(), self.directory)
@@ -453,9 +536,14 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.directoryDisplay.setText(self.root_directory)
 
     def displayHeader(self, header) :
-        if header['type'] == HEADER_COUNT :
-            self.lcdDisplayCount.display(header['count'])
-        elif header['type'] == HEADER_MESSAGE :
+        typ = header['type']
+        if typ == HEADER_IMAGE :
+            gains = header['gains']
+            self.redGainBox.setValue(float(gains[0])*100.)
+            self.blueGainBox.setValue(float(gains[1])*100.)
+            shutter = header['shutter']
+            self.exposureSpeedLabel.setText(str(shutter))  # ms display
+        elif typ == HEADER_MESSAGE :
             self.messageLabel.setText(str(header['msg']))
 
     def displaySharpness(self, sharpness) :

@@ -114,9 +114,9 @@ En conclusion la camera V1 semble vraiment un meilleur choix
 
 La balance des blancs et les gains rouge et bleu interfèrent avec la calibration. Il semble qu'il est préférable de régler les gains au mieux sur l'image blanche calibrée et de conserver ces réglages par la suite.
 
-### Résolution
+### Capture au centre du capteur sans calibration
 
-La capture en résolution maximum est plus lente mais il semble que cela apporte un léger mieux.
+Au centre du capteur l'image est presque correcte même sans calibration. On peut donc sélectionner une ROI (Region of interest) au centre.  Par exemple avec la V1 en résolution 2592x1944 on peut sélectionner une ROI HD 4/3 de 1440x1080. Par contre l'image objet est plus petite, il faut moins de bagues d'extension et éloigner la camera de l'image.
 
 ### Lampe, Diffuseur
 
@@ -394,9 +394,9 @@ Le moteur peut tourner en avant ou en arrière à une certaine vitesse ou par im
 
 ### Paramètres de la caméra
 
-Color: Il est conseillé de conserver "off" avec les gains calculés lors de la calibration
+Color:  L'algorithme AWB de la Picamera ne donne pas toujours de bon résultats et peut causer des fluctuation durant la capture. Il est conseillé de laisse "off" avec des gains fixés à une valeur raisonnable pour donnera une image avec des couleurs au plus près de la réalité du film.
 
-Shutter: Conseillé de laisser 0  "automatic exposure" . On peut jouer sur compensation (comme une ouveture du diaphragme)
+Shutter: Il est conseillé de laisser 0  "automatic exposure" . On peut jouer sur compensation (comme une ouveture du diaphragme)
 
 ### Contrôle de la caméra
 

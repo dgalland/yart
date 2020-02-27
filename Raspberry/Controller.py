@@ -303,11 +303,11 @@ def openCamera(mode, resolution, calibrationMode, hflip,vflip) :
     cam = None
     if calibrationMode ==  CALIBRATION_TABLE:
         try :
-            lst = np.load("calibrate_test.npz")
+            lst = np.load("calibrate_test.npz", allow_pickle=True)
             cam = TelecineCamera(sensor_mode = mode, lens_shading_table = lst['lens_shading_table'])
         except Exception as ex:
             try :
-                lst = np.load("calibrate.npz")
+                lst = np.load("calibrate.npz", allow_pickle=True)
                 cam = TelecineCamera(sensor_mode = mode, lens_shading_table = lst['lens_shading_table'])
             except Exception as ex:
                 print(ex)
@@ -318,7 +318,7 @@ def openCamera(mode, resolution, calibrationMode, hflip,vflip) :
     if resolution != None :
         cam.resolution = resolution
     try:
-        npz = np.load("camera.npz")
+        npz = np.load("camera.npz", allow_pickle=True)
         setSettings(cam, npz['control'][()])
         try :
             setSettings(cam, npz['added'][()])
@@ -333,9 +333,6 @@ def openCamera(mode, resolution, calibrationMode, hflip,vflip) :
         cam.lens_shading_table = lens_shading_table
 #        cam.sharpness=10
 #Start capture Thread
-    print("exposure_mode", cam.exposure_mode, " analog_gain:", cam.analog_gain, " digital_gain:", cam.digital_gain)
-    cam.analog_gain=1
-    cam.digital_gain=1
     exitFlag = False
     captureImageThread = CaptureImageThread()
     captureImageThread.start()
@@ -382,7 +379,7 @@ try:
     motor = TelecineMotor(pi, queue)
     motor.triggerEvent = triggerEvent
     try :
-        npz = np.load("motor.npz")
+        npz = np.load("motor.npz", allow_pickle=True)
         setSettings(motor, npz['motor'][()])
     except Exception as e :
         print(e)

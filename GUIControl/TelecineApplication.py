@@ -600,7 +600,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
 
     def setLocalSettings(self) :
         try:
-            npz = np.load("local.npz")
+            npz = np.load("local.npz", allow_pickle=True)
             setSettings(self, npz['local'][()])
             self.ipLineEdit.setText(self.ip_pi)
             self.directoryDisplay.setText(self.root_directory)

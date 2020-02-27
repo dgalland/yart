@@ -108,15 +108,25 @@ Bas:Merge/Merge égalisée voir ci-dessous pour le merge
 
 ![v1](images/v1.jpg)
 
-En conclusion la camera V1 semble vraiment un meilleur choix
-
-### Balance des blancs et gains
-
-La balance des blancs et les gains rouge et bleu interfèrent avec la calibration. Il semble qu'il est préférable de régler les gains au mieux sur l'image blanche calibrée et de conserver ces réglages par la suite.
+En conclusion la camera V1 semble vraiment un meilleur choix. Cependant l'image corrigée n'est pas totalement uniforme, surtout pour le rouge
 
 ### Capture au centre du capteur sans calibration
 
-Au centre du capteur l'image est presque correcte même sans calibration. On peut donc sélectionner une ROI (Region of interest) au centre.  Par exemple avec la V1 en résolution 2592x1944 on peut sélectionner une ROI HD 4/3 de 1440x1080. Par contre l'image objet est plus petite, il faut moins de bagues d'extension et éloigner la camera de l'image.
+Au centre du capteur l'image est presque correcte même sans calibration. On peut donc sélectionner une ROI (Region of interest) au centre.  Par exemple avec la V1 en résolution 2592x1944 on peut sélectionner une ROI HD 4/3 de 1440x1080. Ci-dessous les histogrammes de répartition au centre sans calibration, 
+
+![V1_center](images/V1_center.png)
+
+Il y a seulement une plus de luminosité sur les cotés.
+
+Par contre l'image objet est plus petite, il faut moins de bagues d'extension et éloigner la camera de l'image.
+
+### Capture au centre et calibration locale
+
+Une autre possibilité est d'exécuter la correction de calibration non pas coté du PI avec la table lens_shading mais coté du PC . Ci-dessous les histogrammes de répartition au centre avec calibration locale
+
+![V1_center_local_calibrated](images/V1_center_local_calibrated.png)
+
+ C'est la solution qui combinée avec la capture au centre m'a donné le meilleur résultat.
 
 ### Lampe, Diffuseur
 
@@ -266,12 +276,12 @@ Autre exemple, l'image sous-exposée,  l'image avec l'exposition automatique, l'
 
 ###### Mise en œuvre du merge
 
-D'un point de vue programmation la mise en œuvre du bracketing est très délicate, en effet il faut bien avoir l'idée que la caméra n'est pas un appareil photo mais une caméra qui fournit un flux continu d'images.  Donc après avoir changé l'exposition il faut attendre quelques frames (minimum 4 d'après mon expérience) avant d'obtenir la bonne exposition. De même après  être repassé en automatique il faut attendre quelques trames (minimum 7 d'après mon expérience) avant d'avoir la bonne exposition. La capture devient:
+D'un point de vue programmation la mise en œuvre du bracketing est très délicate, en effet il faut bien avoir l'idée que la caméra n'est pas un appareil photo mais une caméra qui fournit un flux continu d'images.  Donc après avoir changé l'exposition il faut attendre quelques frames (minimum 4 d'après mon expérience) avant d'obtenir la bonne exposition. De même après  être repassé en automatique il faut attendre quelques trames (minimum 8 d'après mon expérience) avant d'avoir la bonne exposition. La capture devient:
 
 ```
 Tant que captureEvent
 	Avancer le moteur jusqu'au trigger
-	Attendre 7 frames
+	Attendre 8 frames
 	Répéter 3 fois
 		Changer l'exposition
 		Capturer la frame
@@ -334,7 +344,7 @@ Sur le Pi raspian:
 
 ## Usage
 
-Ci-dessous l'image de l'interface de l'application sur le PC
+Ci-dessous l'interface de l'application sur le PC
 
 ![gui](images/gui.jpg)
 
@@ -363,13 +373,24 @@ Modes d'ouverture de la camera:
 - Flat: Avec une table de lens-shading uniforme
 - Calibrated: Avec une table de lens shading calculée comme ci-dessous
 
+### ROI et capture au centre
+
+On peut sélectionner une région de capture. Par exemple dans mon cas la caméra V1 est ouverte en résolution maximale 2592x1944 et je sélectionne une région 1440x1080 au centre du capteur.
+
 ### Analyse de l'objectif et calibration
 
 Pour analyser et calibrer l'objectif il faut capturer une image <u>uniformément blanche</u> (pas de cadre noir par exemple). Si un diffuseur est utilisé on peut le faire simplement sans le film dans la fenêtre de projection, ajouter un diffuseur ou fermer le diaphragme si la luminosité est trop forte.
 
-Le bouton "Analyse" calcule un histogramme de répartition des couleurs le long des axes de l'image. Si la camera est ouverte sans calibration il permet de mettre en évidence le phénomène. Après calibration l'histogramme doit être presque plat et l'on peut ajuster les gains rouge et bleu pour obtenir une image neutre. Il est conseillé de noter et conserver ces gains pour toute la suite.
+Le bouton "Analyse" calcule un histogramme de répartition des couleurs le long des axes de l'image. Si la camera est ouverte sans calibration il permet de mettre en évidence le phénomène. Après calibration l'histogramme doit être presque plat.
 
-Le bouton "Calibrate" exécute le programme de calibration repris du projet openflexure cité ci-dessus. Il crée un fichier calibrate.npz qui contient la lens_shading_table et qui sera utilisé à la prochaine ouverture de la caméra.
+Deux modes de calibration sont possibles:
+
+- Calibration sur le PI , programme repris du projet openflexure cité ci-dessus. Il crée un fichier calibrate.npz qui contient la lens_shading_table et qui sera utilisé à la prochaine ouverture de la caméra.
+- Calibration locale sur le PC. Calcul d'une matrice de correction qui sera appliquée à l'image reçue
+
+Les analyses ci-dessus montrent que même pour la V1 la calibration coté du PI n'est pas parfaite. Pour moi le meilleur résultat est obtenu avec une capture au centre et une calibration locale.
+
+Attention la calibration doit être effectuée à nouveau chaque fois que l'éclairage est changé ou déplacé.
 
 ### Contrôle du moteur
 
@@ -394,7 +415,7 @@ Le moteur peut tourner en avant ou en arrière à une certaine vitesse ou par im
 
 ### Paramètres de la caméra
 
-Color:  L'algorithme AWB de la Picamera ne donne pas toujours de bon résultats et peut causer des fluctuation durant la capture. Il est conseillé de laisse "off" avec des gains fixés à une valeur raisonnable pour donnera une image avec des couleurs au plus près de la réalité du film.
+Color:  L'algorithme AWB de la Picamera ne donne pas toujours de bon résultats et peut causer des fluctuation durant la capture. Il est conseillé de laisser "off" avec des gains fixés à une valeur raisonnable pour donnera une image avec des couleurs au plus près de la réalité du film.
 
 Shutter: Il est conseillé de laisser 0  "automatic exposure" . On peut jouer sur compensation (comme une ouveture du diaphragme)
 
@@ -458,6 +479,7 @@ Il s'effectue sur le PC
 - Reduce permet de réduire la taille de l'image affichée
 - "Merge"  Détermine l'algorithme de fusion choisi "None"  "Mertens" ou "Debevec"
 - "Save" Sauvegarde les images dans le répertoire choisi. On peut choisir un numéro de bande et un numéro de clip. Pour chaque "Capture" les images sont numérotées à partir de 0
+- Calibrate local correction de l'image avec la matrice de correction local
 
 ### Post Traitement
 

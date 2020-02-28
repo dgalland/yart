@@ -412,8 +412,8 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
     def getCameraSettings(self) :
         self.sock.sendObject((GET_CAMERA_SETTINGS,))
         settings = self.sock.receiveObject()
-        self.redGainBox.setValue(float(settings['awb_gains'][0])*100.)
-        self.blueGainBox.setValue(float(settings['awb_gains'][1])*100.)
+        self.redGainBox.setValue(int(float(settings['awb_gains'][0])*100.))
+        self.blueGainBox.setValue(int(float(settings['awb_gains'][1])*100.))
         self.awbModeBox.setCurrentIndex(self.awbModeBox.findText(settings['awb_mode']))
         shutterSpeed = int(settings['shutter_speed'])
         self.shutterSpeedBox.setValue(shutterSpeed)
@@ -539,8 +539,8 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         typ = header['type']
         if typ == HEADER_IMAGE :
             gains = header['gains']
-            self.redGainBox.setValue(float(gains[0])*100.)
-            self.blueGainBox.setValue(float(gains[1])*100.)
+            self.redGainBox.setValue(int(float(gains[0])*100.))
+            self.blueGainBox.setValue(int(float(gains[1])*100.))
             shutter = header['shutter']
             self.exposureSpeedLabel.setText(str(shutter))  # ms display
         elif typ == HEADER_MESSAGE :

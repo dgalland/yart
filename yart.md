@@ -321,26 +321,47 @@ Il est intéressant de noter que le réseau n'est pas un facteur limitant, avec 
 
 ## Installation and setup
 
-L'application nécessite python 3 sur le PC et sur le Pi
+L'application nécessite python 3 sur le PC et sur le Pi.
+
+Le 28/02/2020 j'ai refait une installation complete 
 
 Sur le PC Windows
 
-- Python 3.7
-- matplotlib        pip3 install mathplotlib
-- numpy              pip3 install numpy
-- openCV             pip3 install opencv-python
-- PyQt5                 pip3 install PyQt5
+- Python 3.8.2
+- pip install mathplotlib
+- pip install numpy
+- pip install opencv-python
+- pip install opencv-contrib-python
+- pip install PyQt5
+
+Si on veut utiliser de designer PyQT pour modifier l'interface graphique
+
+- pip install pyqt5-tools
 
 Si on utilise l'IDE Thonny, il est préférable de l'installer dans Python lui-même plutôt que d'installer la version qui comprend une autre installation de Python:
 
-- pip3 install thonnyapp
+- pip install thonnyapp
 
 Sur le Pi raspian:
 
-- Python 3.7
-- numpy
-- pigpio
-- picamera (version expérimentale)
+Python est en version 3.5.3
+
+- pip3 install numpy
+- pip3 install pigpio
+
+Pour la librairie picamera si on n'utilise pas la calibration coté du PI :
+
+- pip3 install picamera 
+
+Si on utilise la calibration il faut installer la version du projet openflexure de Richard Bowman
+
+```
+wget https://github.com/rwb27/picamera/archive/lens-shading.zip
+pip3 install lens-shading.zip
+rm lens-shading.zip
+```
+
+Pour plus de commodité l'archive est également dans le répertoire Raspberry de mon projet
 
 ## Usage
 
@@ -418,6 +439,8 @@ Le moteur peut tourner en avant ou en arrière à une certaine vitesse ou par im
 Color:  L'algorithme AWB de la Picamera ne donne pas toujours de bon résultats et peut causer des fluctuation durant la capture. Il est conseillé de laisser "off" avec des gains fixés à une valeur raisonnable pour donnera une image avec des couleurs au plus près de la réalité du film.
 
 Shutter: Il est conseillé de laisser 0  "automatic exposure" . On peut jouer sur compensation (comme une ouveture du diaphragme)
+
+Gains: Laisser sur auto, les gains analog et digital doivent rester à 1
 
 ### Contrôle de la caméra
 

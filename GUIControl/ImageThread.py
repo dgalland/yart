@@ -17,9 +17,8 @@ from MessageSocket import *
 #Focus your lens to have the maximum sharpness  
  
 class ImageThread (QThread):
-    histoSignal = pyqtSignal([object,])   #Signal to the GUI display histo
+    imageSignal = pyqtSignal([object,])   #Signal to the GUI display histo
     headerSignal = pyqtSignal([object,])  #Signal to the GUI display header
-    sharpnessSignal = pyqtSignal([object,])  #Signal to the GUI display sharpness
     merge = MERGE_NONE
     sharpness = False
     saveToFile = False
@@ -35,17 +34,17 @@ class ImageThread (QThread):
         self.mergeMertens = cv2.createMergeMertens(1.,1.,1.)
         self.mergeDebevec = cv2.createMergeDebevec()
         self.toneMap = cv2.createTonemapReinhard()
-        self.claheProc = cv2.createCLAHE(clipLimit=1, tileGridSize=(8,8))
-        self.simpleWB = cv2.xphoto.createSimpleWB()
+#        self.claheProc = cv2.createCLAHE(clipLimit=1, tileGridSize=(8,8))
+#        self.simpleWB = cv2.xphoto.createSimpleWB()
 #        self.simpleWB = cv2.xphoto.createGrayworldWB()
-        self.clipLimit = 1.
+#        self.wb= False
+#         self.equalize = False
+#         self.clahe = False
+#        self.clipLimit = 1.
         self.reduceFactor = 1;
-        self.equalize = False
-        self.clahe = False
         self.ip_pi = ip_pi
         self.hflip = False
         self.vflip = False
-        self.wb= False
         self.table=None
         self.doCalibrate = False
         try:
@@ -55,17 +54,17 @@ class ImageThread (QThread):
             pass
 
 
-    def simplest_cb(self, img, percent):
-        out_channels = []
-        channels = cv2.split(img)
-        totalstop = channels[0].shape[0] * channels[0].shape[1] * percent / 200.0
-        for channel in channels:
-            bc = cv2.calcHist([channel], [0], None, [256], (0,256), accumulate=False)
-            lv = np.searchsorted(np.cumsum(bc), totalstop)
-            hv = 255-np.searchsorted(np.cumsum(bc[::-1]), totalstop)
-            lut = np.array([0 if i < lv else (255 if i > hv else round(float(i-lv)/float(hv-lv)*255)) for i in np.arange(0, 256)], dtype="uint8")
-            out_channels.append(cv2.LUT(channel, lut))
-        return cv2.merge(out_channels)
+#     def simplest_cb(self, img, percent):
+#         out_channels = []
+#         channels = cv2.split(img)
+#         totalstop = channels[0].shape[0] * channels[0].shape[1] * percent / 200.0
+#         for channel in channels:
+#             bc = cv2.calcHist([channel], [0], None, [256], (0,256), accumulate=False)
+#             lv = np.searchsorted(np.cumsum(bc), totalstop)
+#             hv = 255-np.searchsorted(np.cumsum(bc[::-1]), totalstop)
+#             lut = np.array([0 if i < lv else (255 if i > hv else round(float(i-lv)/float(hv-lv)*255)) for i in np.arange(0, 256)], dtype="uint8")
+#             out_channels.append(cv2.LUT(channel, lut))
+#         return cv2.merge(out_channels)
 
     def calcHistogram(self, image) :
         histos = []
@@ -110,32 +109,33 @@ class ImageThread (QThread):
                 if self.doCalibrate :
                     image = image * self.table
                 image = np.clip(image*255, 0, 255).astype('uint8')
-                if self.equalize :
-                    H, S, V = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2HSV))
-                    low, high = np.percentile(V, (1, 99))
-                    eq_V = np.interp(V, (low,high), (V.min(), V.max())).astype(np.uint8)
-                    image = cv2.cvtColor(cv2.merge([H, S, eq_V]), cv2.COLOR_HSV2BGR)
-                if self.clahe :
-                    H, S, V = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2HSV))
-                    self.claheProc.setClipLimit(self.clipLimit)
-                    eq_V = self.claheProc.apply(V)
-                    image = cv2.cvtColor(cv2.merge([H, S, eq_V]), cv2.COLOR_HSV2BGR)
-                if self.wb :
-#                    image = self.simpleWB.balanceWhite(image)
-                    image = self.simplest_cb(image, 1)
+#                 if self.equalize :
+#                     H, S, V = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2HSV))
+#                     low, high = np.percentile(V, (1, 99))
+#                     eq_V = np.interp(V, (low,high), (V.min(), V.max())).astype(np.uint8)
+#                     image = cv2.cvtColor(cv2.merge([H, S, eq_V]), cv2.COLOR_HSV2BGR)
+#                 if self.clahe :
+#                     H, S, V = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2HSV))
+#                     self.claheProc.setClipLimit(self.clipLimit)
+#                     eq_V = self.claheProc.apply(V)
+#                     image = cv2.cvtColor(cv2.merge([H, S, eq_V]), cv2.COLOR_HSV2BGR)
+#                 if self.wb :
+#                     image = self.simpleWB.balanceWhite(image)
+#                     image = self.simplest_cb(image, 1)
                 if self.saveOn :
                     cv2.imwrite(self.directory + "/image_%#05d.jpg" % count, image)
                 self.images.clear()
                 self.shutters.clear()
         else :
-            saveJpeg = bracket == 0 and self.wb == False and self.doCalibrate  == False
+#            saveJpeg = bracket == 0 and self.wb == False and self.doCalibrate  == False
+            saveJpeg = bracket == 0 and self.doCalibrate  == False
 
             if self.doCalibrate :
                 image = image * self.table
                 image = image.astype(np.uint8)
 
-            if self.wb and bracket == 0:
-                image = self.simplest_cb(image, 1)
+#             if self.wb and bracket == 0:
+#                 image = self.simplest_cb(image, 1)
              
             if self.saveOn :
                 if saveJpeg :
@@ -152,8 +152,9 @@ class ImageThread (QThread):
         if self.reduceFactor != 1 :
             newShape = (int(image.shape[1]/self.reduceFactor),int(image.shape[0]/self.reduceFactor))
             image = cv2.resize(image, dsize=newShape, interpolation=cv2.INTER_CUBIC)            
-        cv2.imshow("PiCamera", image)
-        cv2.waitKey(1)
+        self.imageSignal.emit(image) #«display image in the GUI
+#        cv2.imshow("PiCamera", image)
+#        cv2.waitKey(1)
 
     def lensAnalyze(self, header) :
         image = self.imageSock.receiveArray()  #bgr
@@ -189,34 +190,17 @@ class ImageThread (QThread):
         image = self.imageSock.receiveArray()  #bgr
         i = header['num']
         count = header['count']
-#        print("Iteration:", i, "count:", count)
-#        print("Capture:", np.max(image), " ", np.min(image))
-#        print("image red 400 400", image[400,400,2])
         if i != 0 :
             image = image * self.table
-#        print("Calibrated:", np.max(image), " ", np.min(image))
         gains = np.copy(image).astype(np.float)
         ih, iw, nc = image.shape
-#        centre = np.mean(image[iw//2-48:iw//2+48, ih//2-48:ih//2+48,:], axis=(0,1))
         centre = np.min(image, axis=(0,1))
         gains = centre/gains
-#        print(centre)
-#        print("Gains")
-#        print(np.min(gains[:,:,0]), ' ' , np.max(gains[:,:,0]))
-#        print(np.min(gains[:,:,1]), ' ' , np.max(gains[:,:,1]))
-#        print(np.min(gains[:,:,2]), ' ' , np.max(gains[:,:,1]))
-        
         if i  == 0 :    #Firts one
             self.table = gains
         else :
             self.table = self.table*gains
         self.table[self.table>1.] = 1.
-
-#        print("Table")
-#        print(np.min(self.table[:,:,0]), ' ' , np.max(self.table[:,:,0]))
-#        print(np.min(self.table[:,:,1]), ' ' , np.max(self.table[:,:,1]))
-#        print(np.min(self.table[:,:,2]), ' ' , np.max(self.table[:,:,2]))
-#        print("gain red 400 400", self.table[400,400,2])
         if i == count -1 :
             np.savez('calibrate.npz',   table = self.table)
             

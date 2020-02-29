@@ -68,6 +68,8 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.autoPauseCheckBox.setEnabled(False)
         self.lensAnalyseButton.setEnabled(False)
         self.calibrateLocalButton.setEnabled(False)
+        self.imageDialog = None
+
 #        self.whiteBalanceButton.setEnabled(False)
 
         
@@ -344,6 +346,8 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.autoPauseCheckBox.setEnabled(True)
         self.autoPauseCheckBox.setChecked(False)
         self.initGroupBox.setEnabled(False)
+        self.lensAnalyseButton.setEnabled(False)
+        self.calibrateLocalButton.setEnabled(False)
 
         self.setResize()
         
@@ -383,6 +387,9 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.capturePauseButton.setEnabled(False)
         self.motorControlGroupBox.setEnabled(True)
         self.autoPauseCheckBox.setEnabled(False)
+        self.lensAnalyseButton.setEnabled(True)
+        self.calibrateLocalButton.setEnabled(True)
+
         self.initGroupBox.setEnabled(True)
         self.sock.sendObject((STOP_CAPTURE,))
         
@@ -474,7 +481,8 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.sock.sendObject((SET_CAMERA_SETTINGS, settings))
     
     def setShutterSpeed(self):
-         self.sock.sendObject((SET_CAMERA_SETTINGS, {'shutter_speed':self.shutterSpeedBox.value(), 'exposure_compensation':self.exposureCompensationBox.value()}))
+        print("Shuuter")
+        self.sock.sendObject((SET_CAMERA_SETTINGS, {'shutter_speed':self.shutterSpeedBox.value(), 'exposure_compensation':self.exposureCompensationBox.value()}))
                  
 
     def setIso(self):
@@ -546,8 +554,11 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         elif typ == HEADER_MESSAGE :
             self.messageLabel.setText(str(header['msg']))
 
-    def displaySharpness(self, sharpness) :
-        self.sharpnessDisplay.setText(str(sharpness))
+    def displayImage(self, image) :
+        if self.imageDialog == None :
+            self.imageDialog = ImageDialog(self)
+        self.imageDialog.show()
+        self.imageDialog.displayImage(image)
             
     def connectDisconnect(self) :
         if self.connected :
@@ -569,7 +580,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.sock = MessageSocket(socke)
         self.imageThread = ImageThread(self.ip_pi)
         self.imageThread.headerSignal.connect(self.displayHeader)
-        self.imageThread.sharpnessSignal.connect(self.displaySharpness)
+        self.imageThread.imageSignal.connect(self.displayImage)
         self.imageThread.start()
         self.getMotorSettings()
         self.cameraGroupBox.setEnabled(True)
@@ -610,7 +621,26 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         except Exception as e:
             print(e)
         
+class ImageDialog(QDialog) :
+    def __init__(self, parent):
+        super(ImageDialog, self).__init__(parent)
+        self.setWindowTitle("Pi Film Capture:")
+        self.mQImage = None
         
+    def displayImage(self, image):
+        height, width, byteValue=image.shape
+        byteValue=byteValue*width
+        self.mQImage = QImage(image, width, height, byteValue, QImage.Format_RGB888)
+        self.setFixedSize(width, height)
+        self.update()
+
+    def paintEvent(self, QPaintEvent):
+        painter = QPainter()
+        painter.begin(self)
+        if self.mQImage != None:
+            painter.drawImage(0, 0, self.mQImage)
+        painter.end()
+    
 
 commandDialog = None
 #For getting exception while in QT        

@@ -636,6 +636,7 @@ class ImageDialog(QDialog) :
     def displayImage(self, image):
         height, width, byteValue=image.shape
         byteValue=byteValue*width
+        image = image[...,::-1].copy()
         self.mQImage = QImage(image, width, height, byteValue, QImage.Format_RGB888)
         self.setFixedSize(width, height)
         self.update()

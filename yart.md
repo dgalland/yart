@@ -444,6 +444,8 @@ Le moteur peut tourner en avant ou en arrière à une certaine vitesse ou par im
 
 Color:  L'algorithme AWB de la Picamera ne donne pas toujours de bon résultats et peut causer des fluctuation durant la capture. Il est conseillé de laisser "off" avec des gains fixés à une valeur raisonnable pour donner une image avec des couleurs au plus près de la réalité du film.
 
+01/03/2020 Il semble qu'il y ait eu des changements dans algorithme AWB. Si awb_"auto" ne marche plus faire:   sudo vcdbg set awb_mode 0 pour revenir à l'ancien algorithme
+
 Shutter: Il est conseillé de laisser 0  "automatic exposure" . Si l'image parait en général trop claire ou foncée on peut jouer sur compensation par exemple +2 comme une ouverture du diaphragme pour éclaircir
 
 Gains: Laisser sur auto, les gains analog et digital doivent rester à 1

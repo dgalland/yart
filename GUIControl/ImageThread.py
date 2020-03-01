@@ -86,10 +86,11 @@ class ImageThread (QThread):
         figure.canvas.draw()
         w, h  = figure.canvas.get_width_height()
         buf = np.fromstring ( figure.canvas.tostring_rgb(), dtype=np.uint8 ).reshape(h,w,3)
-        ww = int(image.shape[0]/4)
-        hh = int(h*ww/w)
-        resized = cv2.resize(buf, dsize=(ww,hh), interpolation=cv2.INTER_CUBIC)
-        image[:hh,:ww] = resized
+        self.plotSignal.emit(buf) #«display plot in the GUI
+#         ww = int(image.shape[0]/4)
+#         hh = int(h*ww/w)
+#         resized = cv2.resize(buf, dsize=(ww,hh), interpolation=cv2.INTER_CUBIC)
+#         image[:hh,:ww] = resized
             
     def processImage(self, header, jpeg):
         bracket = header['bracket']
@@ -154,8 +155,8 @@ class ImageThread (QThread):
             newShape = (int(image.shape[1]/self.reduceFactor),int(image.shape[0]/self.reduceFactor))
             image = cv2.resize(image, dsize=newShape, interpolation=cv2.INTER_CUBIC)            
         self.imageSignal.emit(image) #«display image in the GUI
-#        cv2.imshow("PiCamera", image)
-#        cv2.waitKey(1)
+#         cv2.imshow("PiCamera", image)
+#         cv2.waitKey(1)
 
     def lensAnalyze(self, header) :
         image = self.imageSock.receiveArray()  #bgr
@@ -254,14 +255,14 @@ class ImageThread (QThread):
                 self.imageSock.close()
 
 #Experimental Receive a set of exposures not used
-    def processHdrImage(self, header, jpeg):
-        jpeg = np.frombuffer(jpeg, np.uint8,count = len(jpeg))
-        file = open(self.directory + "/ldr_%#05d.jpg" % (header['shutter']) ,'wb')
-        file.write(jpeg)
-        file.close()
-        image = cv2.imdecode(jpeg, 1)   #Jpeg decode
-        cv2.imshow("PiCamera", image)
-        cv2.waitKey(1)
+#     def processHdrImage(self, header, jpeg):
+#         jpeg = np.frombuffer(jpeg, np.uint8,count = len(jpeg))
+#         file = open(self.directory + "/ldr_%#05d.jpg" % (header['shutter']) ,'wb')
+#         file.write(jpeg)
+#         file.close()
+#         image = cv2.imdecode(jpeg, 1)   #Jpeg decode
+#         cv2.imshow("PiCamera", image)
+#         cv2.waitKey(1)
 
 
 

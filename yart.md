@@ -323,7 +323,7 @@ Il est intéressant de noter que le réseau n'est pas un facteur limitant, avec 
 
 L'application nécessite python 3 sur le PC et sur le Pi.
 
-Le 28/02/2020 j'ai refait une installation complete 
+Le 28/02/2020 j'ai refait une installation complète 
 
 Sur le PC Windows
 
@@ -382,7 +382,7 @@ Ci-dessous l'interface de l'application sur le PC
 
 ### Ouvrir la camera
 
-Le plus simple est de choisir un sensor_mode prédéfini , le mode 2 en résolution maximale
+Le plus simple est de choisir un sensor_mode prédéfini , par exemple le mode 2 en résolution maximale
 
 https://picamera.readthedocs.io/en/release-1.13/fov.html#sensor-modes
 
@@ -396,18 +396,24 @@ Modes d'ouverture de la camera:
 
 ### ROI et capture au centre
 
-On peut sélectionner une région de capture. Par exemple dans mon cas la caméra V1 est ouverte en résolution maximale 2592x1944 et je sélectionne une région 1440x1080 au centre du capteur.
+On peut sélectionner une région de capture. Par exemple dans mon cas la caméra V1 est ouverte en résolution maximale 2592x1944 et je sélectionne une région 1440x1080 au centre du capteur. Pour moi c'est ce qui m'a donné le meilleur résultat.
 
-### Analyse de l'objectif et calibration
+### Analyse de l'objectif
 
-Pour analyser et calibrer l'objectif il faut capturer une image <u>uniformément blanche</u> (pas de cadre noir par exemple). Si un diffuseur est utilisé on peut le faire simplement sans le film dans la fenêtre de projection, ajouter un diffuseur ou fermer le diaphragme si la luminosité est trop forte.
+Pour analyser l'objectif il faut capturer une image <u>uniformément blanche</u> (pas de cadre noir par exemple). Si un diffuseur est utilisé on peut le faire simplement sans le film dans la fenêtre de projection, ajouter un diffuseur ou fermer le diaphragme si la luminosité est trop forte.
 
-Le bouton "Analyse" calcule un histogramme de répartition des couleurs le long des axes de l'image. Si la camera est ouverte sans calibration il permet de mettre en évidence le phénomène. Après calibration l'histogramme doit être presque plat.
+Le bouton "Analyse" calcule et affiche un histogramme de répartition des couleurs le long des axes de l'image. Si la camera est ouverte sans calibration il permet de mettre en évidence le vignettage
+
+### Calibration de l'objectif
 
 Deux modes de calibration sont possibles:
 
-- Calibration sur le PI , programme repris du projet openflexure cité ci-dessus. Il crée un fichier calibrate.npz qui contient la lens_shading_table et qui sera utilisé à la prochaine ouverture de la caméra.
+- Calibration sur le PI avec programme repris du projet openflexure cité ci-dessus. Il crée un fichier calibrate.npz qui contient la lens_shading_table et qui sera utilisé à la prochaine ouverture de la caméra.
 - Calibration locale sur le PC. Calcul d'une matrice de correction qui sera appliquée à l'image reçue
+
+La calibration sur le PI s'effectue en résolution maximale sur la totalité du capteur.
+
+La calibration locale effectue sur l'image telle qu'elle est reçu avec la résolution choisie et éventuellement le choix d'une ROI. 
 
 Les analyses ci-dessus montrent que même pour la V1 la calibration coté du PI n'est pas parfaite. Pour moi le meilleur résultat est obtenu avec une capture au centre et une calibration locale.
 
@@ -436,9 +442,9 @@ Le moteur peut tourner en avant ou en arrière à une certaine vitesse ou par im
 
 ### Paramètres de la caméra
 
-Color:  L'algorithme AWB de la Picamera ne donne pas toujours de bon résultats et peut causer des fluctuation durant la capture. Il est conseillé de laisser "off" avec des gains fixés à une valeur raisonnable pour donnera une image avec des couleurs au plus près de la réalité du film.
+Color:  L'algorithme AWB de la Picamera ne donne pas toujours de bon résultats et peut causer des fluctuation durant la capture. Il est conseillé de laisser "off" avec des gains fixés à une valeur raisonnable pour donner une image avec des couleurs au plus près de la réalité du film.
 
-Shutter: Il est conseillé de laisser 0  "automatic exposure" . On peut jouer sur compensation (comme une ouveture du diaphragme)
+Shutter: Il est conseillé de laisser 0  "automatic exposure" . Si l'image parait en général trop claire ou foncée on peut jouer sur compensation par exemple +2 comme une ouverture du diaphragme pour éclaircir
 
 Gains: Laisser sur auto, les gains analog et digital doivent rester à 1
 
@@ -457,7 +463,7 @@ La méthode "On frame" est plus fiable surtout si le bracket est utilisé.
 
 ### Bracketing et fusion
 
-L'exposition "auto" fait déjà un bon travail en ajustant automatiquement le temps de pose pour chaque image, cependant la dynamique de la caméra est limitée. Le bracketing ou HDR permet d'améliorer considérablement la dynamique de l'image :
+L'exposition "auto" fait déjà un bon travail en ajustant automatiquement le temps de pose pour chaque image, cependant la dynamique de la caméra est limitée. Le bracketing ou HDR permet d'améliorer considérablement la dynamique de l'image , donc:
 
 - Pour les zones très claires éviter les "Blancs brulés" et retrouver les détails
 - Eclaircir les zones sombres pour retrouver les détails 
@@ -502,7 +508,7 @@ Il s'effectue sur le PC
 - Reduce permet de réduire la taille de l'image affichée
 - "Merge"  Détermine l'algorithme de fusion choisi "None"  "Mertens" ou "Debevec"
 - "Save" Sauvegarde les images dans le répertoire choisi. On peut choisir un numéro de bande et un numéro de clip. Pour chaque "Capture" les images sont numérotées à partir de 0
-- Calibrate local correction de l'image avec la matrice de correction local
+- Calibrate local correction de l'image avec la matrice de correction locale
 
 ### Post Traitement
 

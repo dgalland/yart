@@ -17,8 +17,9 @@ from MessageSocket import *
 #Focus your lens to have the maximum sharpness  
  
 class ImageThread (QThread):
-    imageSignal = pyqtSignal([object,])   #Signal to the GUI display histo
+    imageSignal = pyqtSignal([object,])   #Signal to the GUI display image
     headerSignal = pyqtSignal([object,])  #Signal to the GUI display header
+    plotSignal = pyqtSignal([object,])  #Signal to the GUI display analyze
     merge = MERGE_NONE
     sharpness = False
     saveToFile = False
@@ -163,7 +164,6 @@ class ImageThread (QThread):
             image = image.astype(np.uint8)
         x = image.shape[0]/image.shape[1]
         diag = np.empty((image.shape[1],3))
-        print(diag.shape)
         for i in range(image.shape[1]) :  #3280
             j = int(i * x)
             diag[i,:] = image[j,i,:]
@@ -183,7 +183,12 @@ class ImageThread (QThread):
         for i,col in enumerate(colors):
             axe.plot(diag[:, i],color = col) #Diagonal
 #        figure.subplots_adjust(top=0.85)
-        plt.show()
+        figure.tight_layout()
+        figure.canvas.draw()
+        w, h  = figure.canvas.get_width_height()
+        image = np.fromstring ( figure.canvas.tostring_rgb(), dtype=np.uint8 ).reshape(h,w,3)
+        self.plotSignal.emit(image) #«display plot in the GUI
+#        plt.show()
 
 #Normalize each channel toward the Min
     def calibrate(self, header) :

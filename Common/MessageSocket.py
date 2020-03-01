@@ -80,7 +80,6 @@ class MessageSocket() :
 #Receive a numpy array        
     def receiveArray(self):
         infos = self.receiveObject()
-        print (infos)
         size = infos[0]
         buf = self.read(size)
         return np.frombuffer(buf, infos[2]).reshape(infos[1])

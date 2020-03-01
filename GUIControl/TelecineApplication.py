@@ -69,6 +69,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.lensAnalyseButton.setEnabled(False)
         self.calibrateLocalButton.setEnabled(False)
         self.imageDialog = None
+        self.plotDialog = None
 
 #        self.whiteBalanceButton.setEnabled(False)
 
@@ -295,7 +296,6 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
            
     def setROI(self) :
         roi = (self.ROIxBox.value()/self.resolution[0],self.ROIyBox.value()/self.resolution[1],self.ROIwBox.value()/self.resolution[0],self.ROIhBox.value()/self.resolution[1])
-        print(roi)
         self.sock.sendObject((SET_CAMERA_SETTINGS, {'zoom' : roi}))
 
     def resetROI(self):
@@ -481,7 +481,6 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.sock.sendObject((SET_CAMERA_SETTINGS, settings))
     
     def setShutterSpeed(self):
-        print("Shuuter")
         self.sock.sendObject((SET_CAMERA_SETTINGS, {'shutter_speed':self.shutterSpeedBox.value(), 'exposure_compensation':self.exposureCompensationBox.value()}))
                  
 
@@ -560,6 +559,12 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.imageDialog.show()
         self.imageDialog.displayImage(image)
             
+    def displayPlot(self, image) :
+        if self.plotDialog == None :
+            self.plotDialog = PlotDialog(self)
+        self.plotDialog.show()
+        self.plotDialog.displayImage(image)
+        
     def connectDisconnect(self) :
         if self.connected :
             self.disconnect()
@@ -581,6 +586,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.imageThread = ImageThread(self.ip_pi)
         self.imageThread.headerSignal.connect(self.displayHeader)
         self.imageThread.imageSignal.connect(self.displayImage)
+        self.imageThread.plotSignal.connect(self.displayPlot)
         self.imageThread.start()
         self.getMotorSettings()
         self.cameraGroupBox.setEnabled(True)
@@ -641,6 +647,25 @@ class ImageDialog(QDialog) :
             painter.drawImage(0, 0, self.mQImage)
         painter.end()
     
+class PlotDialog(QDialog) :
+    def __init__(self, parent):
+        super(PlotDialog, self).__init__(parent)
+        self.setWindowTitle("Plot")
+        self.mQImage = None
+        
+    def displayImage(self, image):
+        height, width, byteValue=image.shape
+        byteValue=byteValue*width
+        self.mQImage = QImage(image, width, height, byteValue, QImage.Format_RGB888)
+        self.setFixedSize(width, height)
+        self.update()
+
+    def paintEvent(self, QPaintEvent):
+        painter = QPainter()
+        painter.begin(self)
+        if self.mQImage != None:
+            painter.drawImage(0, 0, self.mQImage)
+        painter.end()
 
 commandDialog = None
 #For getting exception while in QT        

@@ -18,7 +18,7 @@ sys.path.append('../Common')
 from Constants import *
 from MessageSocket import *
 
-localSettings = ('ip_pi', 'root_directory','hflip', 'vflip', 'mode')
+localSettings = ('ip_pi', 'root_directory','hflip', 'vflip', 'mode', 'tape', 'clip')
 
 #Generic methods to set/get object attributes from a dictionary
 def getSettings(object, keys):
@@ -48,10 +48,12 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.ip_pi = ''
         self.hflip = False
         self.vflip = False
+        self.tape = 1
+        self.clip = 1
         self.mode = 2
         self.resolution = None
         self.cameraVersion = ''
-        self.root_directory = 'images'
+        self.root_directory = None
         self.captureStopButton.setEnabled(False)
         self.capturePauseButton.setEnabled(False)
         self.cameraControlGroupBox.setEnabled(False)
@@ -85,11 +87,13 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
     def motorOn(self) :
         self.sock.sendObject((MOTOR_ON,))
         self.motorControlGroupBox.setEnabled(True)
+        self.motorSettingsGroupBox.setEnabled(False)
         self.motorOnButton.setEnabled(False)
         self.motorOffButton.setEnabled(True)
     def motorOff(self) :
         self.sock.sendObject((MOTOR_OFF,))
         self.motorControlGroupBox.setEnabled(False)
+        self.motorSettingsGroupBox.setEnabled(True)
         self.motorOnButton.setEnabled(True)
         self.motorOffButton.setEnabled(False)
     def forwardOne(self):
@@ -142,7 +146,6 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             'pulse_pin':int(self.pulseEdit.text()),\
             'trigger_pin':int(self.triggerEdit.text()),\
             'dir_level': 1 if self.dirLevelCheckBox.isChecked() else 0 ,\
-            'pulse_level': 1 if self.pulseLevelCheckBox.isChecked() else 0, \
             'ena_level': 1 if self.enaLevelCheckBox.isChecked() else 0, \
             'trigger_level': 1 if self.triggerLevelCheckBox.isChecked() else 0 \
             }))
@@ -161,7 +164,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.triggerEdit.setText(str(settings['trigger_pin']))
         self.enaLevelCheckBox.setChecked(settings['ena_level'] == 1)
         self.dirLevelCheckBox.setChecked(settings['dir_level'] == 1)
-        self.pulseLevelCheckBox.setChecked(settings['pulse_level'] == 1)
+#        self.pulseLevelCheckBox.setChecked(settings['pulse_level'] == 1)
         self.triggerLevelCheckBox.setChecked(settings['trigger_level'] == 1)
         return settings
 
@@ -324,6 +327,8 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         frameRate = self.framerateBox.value()
         if self.bracketCheckBox.isChecked() :
             brackets = 3
+        self.imageThread.brakckets = brackets
+
         method = None
         if self.onFrameButton.isChecked() :
             method = CAPTURE_ON_FRAME
@@ -336,9 +341,10 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             self.motorControlGroupBox.setEnabled(False)
             self.sock.sendObject((SET_MOTOR_SETTINGS, {'speed':self.captureMotorSpeedBox.value()}))
 
-        self.setMerge()
-        self.setSave()
-        self.imageThread.reduceFactor = self.reduceFactorBox.value()
+        self.setMerge() #Merge options
+        self.setSave() #Save options
+        self.setReduce()
+
         self.captureStopButton.setEnabled(True)
         self.captureStartButton.setEnabled(False)
         self.capturePauseButton.setEnabled(True)
@@ -377,6 +383,10 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.imageThread.merge = merge
 #        self.imageThread.linearize = self.linearizeCheckBox.isChecked()
 
+    def setSave(self) :
+        self.imageThread.saveToFile(self.saveCheckBox.isChecked(), self.directory)
+
+
 
         
 #Stopping capture        
@@ -410,8 +420,9 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
 
 #Take one image
     def takeImage(self):
-        self.imageThread.reduceFactor = self.reduceFactorBox.value()
+        self.setReduce()
         self.setResize()
+        self.setSave()
         self.sock.sendObject((SET_CAMERA_SETTINGS, {'use_video_port' : True}))
         self.sock.sendObject((TAKE_IMAGE,))
 
@@ -529,14 +540,14 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
     def lensAnalyse(self):
         self.sock.sendObject((TAKE_BGR,HEADER_ANALYZE, 1) )
 
-    def setSave(self) :
-        self.imageThread.saveToFile(self.saveCheckBox.isChecked(), self.directory)
-
     def setDirectory(self) :
-        self.directory = self.root_directory  + "/%#02d_%#02d" % (self.tapeBox.value(), self.clipBox.value())
-        self.directoryDisplay.setText(self.directory)
-        if not os.path.exists(self.directory):
-            os.makedirs(self.directory)
+        if self.root_directory != None :
+            self.tape = self.tapeBox.value()
+            self.clip = self.clipBox.value()
+            self.directory = self.root_directory  + "/%#02d_%#02d" % (self.tape, self.clip)
+            self.directoryDisplay.setText(self.directory)
+            if not os.path.exists(self.directory):
+                os.makedirs(self.directory)
         
     def chooseDirectory(self) :
         self.root_directory = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
@@ -546,6 +557,8 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         typ = header['type']
         if typ == HEADER_IMAGE :
             gains = header['gains']
+            self.analogGainLabel.setText(str(float(header['analog_gain'])))
+            self.digitalGainLabel.setText(str(float(header['digital_gain'])))
             self.redGainBox.setValue(int(float(gains[0])*100.))
             self.blueGainBox.setValue(int(float(gains[1])*100.))
             shutter = header['shutter']
@@ -624,6 +637,10 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             self.hflipCheckBox.setChecked(self.hflip)
             self.vflipCheckBox.setChecked(self.vflip)
             self.modeBox.setValue(self.mode)
+            self.tapeBox.setValue(self.tape)
+            self.clipBox.setValue(self.clip)
+            self.setDirectory()
+
         except Exception as e:
             print(e)
         

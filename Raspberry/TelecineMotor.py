@@ -12,34 +12,42 @@ from Constants import *
 
 
 class TelecineMotor() :
-    steps_per_rev = 800 #Marche mieux an 800
-    ena_pin = 17
-    dir_pin = 18
-    pulse_pin = 23
-    trigger_pin = 24
-    pulley_ratio = 1  #  Motor/Frame
-    ena_level = 0
-    dir_level = 0
-    pulse_level = 1
-    trigger_level = 0
-    frameCounter = 0
-    triggerCallback = None
-    speed = 0
-    capture_speed = 0
-    play_speed = 0
-    triggered = False
-    triggerEvent = None
-    direction = MOTOR_FORWARD
       
     def __init__(self, pi, queue):
+
+        self.steps_per_rev = 800 #Marche mieux an 800
+        self.ena_pin = 17
+        self.dir_pin = 18
+        self.pulse_pin = 23
+        self.trigger_pin = 24
+        self.pulley_ratio = 1  #  Motor/Frame
+        self.ena_level = 0
+        self.dir_level = 0
+#        self.pulse_level = 1
+        self.trigger_level = 0
+        self.frameCounter = 0
+        self.triggerCallback = None
+        self.speed = 0
+        self.capture_speed = 0
+        self.play_speed = 0
+        self.triggered = False
+        self.triggerEvent = None
+        self.direction = MOTOR_FORWARD
         self.pi = pi
+        self.queue = queue
+
+    def on(self) :
+        self.frameCounter = 0
+        if self.ena_pin != 0 :
+            self.pi.write(self.ena_pin, self.ena_level)
         self.pi.set_mode(self.dir_pin, pigpio.OUTPUT)
         self.pi.set_mode(self.pulse_pin, pigpio.OUTPUT)
         self.pi.set_mode(self.ena_pin, pigpio.OUTPUT)
         self.pi.set_mode(self.trigger_pin, pigpio.INPUT)
         self.pi.write(self.dir_pin, self.dir_level)
-        self.pi.write(self.pulse_pin, 1 - self.pulse_level)
-        self.pi.write(self.ena_pin, 1 - self.ena_level) #repos
+#        self.pi.write(self.pulse_pin, 1 - self.pulse_level)
+        if self.triggerCallback != None :
+            self.triggerCallback.cancel()
         if self.trigger_pin != 0 :
             if self.trigger_level == 0 :
                 self.triggerCallback = self.pi.callback(self.trigger_pin, pigpio.FALLING_EDGE, self.trigger)
@@ -47,16 +55,14 @@ class TelecineMotor() :
             else :
                 self.triggerCallback = self.pi.callback(self.trigger_pin, pigpio.RISING_EDGE, self.trigger)
                 self.pi.set_pull_up_down(self.trigger_pin, pigpio.PUD_DOWN)
-
-        self.queue = queue
-        
-    def on(self) :
-        if self.ena_pin != 0 :
-            self.pi.write(self.ena_pin, self.ena_level)
+#            self.pi.set_glitch_filter(self.trigger_pin, 1)
         
     def off(self) :
         if self.ena_pin != 0 :
             self.pi.write(self.ena_pin, 1 - self.ena_level)
+        if self.triggerCallback != None :
+            self.triggerCallback.cancel()
+        self.triggerCallback = None
 
     def trigger(self, gpio,level,  tick ) :
         if self.direction == MOTOR_FORWARD :
@@ -115,7 +121,7 @@ class TelecineMotor() :
             self.triggered = True
             self.pi.write(self.dir_pin, 0 if self.direction == self.dir_level else 1)  #self.direction = 0 forward
             self.pi.wave_clear()
-##            chain = [255, 0, self.wave(self.speed), 255, 3]  #Loop forever but triggered without ramping
+#            chain = [255, 0, self.wave(self.speed), 255, 3]  #Loop forever but triggered without ramping
             chain = []
             x = (int(self.steps_per_rev/8))  & 255   
             y = (int(self.steps_per_rev/8))  >> 8  
@@ -130,11 +136,9 @@ class TelecineMotor() :
            
     def close(self):
         self.stop()
-        self.triggerCallback.cancel()
         self.off()
         
     def stop(self) :
-        print('Stop')
         self.pi.wave_clear()
         self.pi.wave_tx_stop()
 

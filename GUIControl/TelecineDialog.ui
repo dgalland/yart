@@ -1822,19 +1822,6 @@
      <string>High</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="pulseLevelCheckBox">
-    <property name="geometry">
-     <rect>
-      <x>310</x>
-      <y>40</y>
-      <width>41</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>High</string>
-    </property>
-   </widget>
    <widget class="QCheckBox" name="dirLevelCheckBox">
     <property name="geometry">
      <rect>
@@ -1963,7 +1950,7 @@
      <enum>Qt::LeftToRight</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <item>
      <property name="text">
@@ -2175,14 +2162,14 @@
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>110</x>
+      <x>90</x>
       <y>80</y>
-      <width>26</width>
-      <height>16</height>
+      <width>81</width>
+      <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>Gains</string>
+     <string>Exposure mode</string>
     </property>
    </widget>
    <widget class="QLabel" name="digitalGainLabel">
@@ -2391,19 +2378,6 @@
      <string>Contrast</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="autoGetSettingsCheckBox">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>50</y>
-      <width>70</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>AutoGet</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="setCorrectionsButton">
     <property name="geometry">
      <rect>
@@ -2468,7 +2442,7 @@
      <number>100</number>
     </property>
     <property name="value">
-     <number>0</number>
+     <number>100</number>
     </property>
    </widget>
    <widget class="QLabel" name="label_14">
@@ -2834,22 +2808,6 @@
     <hint type="destinationlabel">
      <x>661</x>
      <y>173</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>autoGetSettingsCheckBox</sender>
-   <signal>stateChanged(int)</signal>
-   <receiver>TelecineDialog</receiver>
-   <slot>setAutoGetSettings()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>89</x>
-     <y>696</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>618</x>
-     <y>226</y>
     </hint>
    </hints>
   </connection>

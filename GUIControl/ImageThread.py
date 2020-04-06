@@ -21,6 +21,7 @@ class ImageThread (QThread):
     headerSignal = pyqtSignal([object,])  #Signal to the GUI display header
     plotSignal = pyqtSignal([object,])  #Signal to the GUI display analyze
     merge = MERGE_NONE
+    brackets = 1
     sharpness = False
     saveToFile = False
     histos = False
@@ -86,6 +87,7 @@ class ImageThread (QThread):
         figure.canvas.draw()
         w, h  = figure.canvas.get_width_height()
         buf = np.fromstring ( figure.canvas.tostring_rgb(), dtype=np.uint8 ).reshape(h,w,3)
+        plt.close()
         self.plotSignal.emit(buf) #«display plot in the GUI
 #         ww = int(image.shape[0]/4)
 #         hh = int(h*ww/w)
@@ -97,7 +99,8 @@ class ImageThread (QThread):
         count = header['count']
         jpeg = np.frombuffer(jpeg, np.uint8,count = len(jpeg)) 
         image = cv2.imdecode(jpeg, 1)   #Jpeg decoded
-        if self.merge != MERGE_NONE and bracket != 0 : #Merge
+        isJpeg = True
+        if self.merge != MERGE_NONE and bracket != 0 : #Merge We receive bracket 3 2 1
             self.images.append(image)
             self.shutters.append(header['shutter'])
             if bracket != 1 :
@@ -124,42 +127,44 @@ class ImageThread (QThread):
 #                 if self.wb :
 #                     image = self.simpleWB.balanceWhite(image)
 #                     image = self.simplest_cb(image, 1)
-                if self.saveOn :
-                    cv2.imwrite(self.directory + "/image_%#05d.jpg" % count, image)
+                isJpeg = False
                 self.images.clear()
                 self.shutters.clear()
-        else :
-#            saveJpeg = bracket == 0 and self.wb == False and self.doCalibrate  == False
-            saveJpeg = bracket == 0 and self.doCalibrate  == False
+        elif self.doCalibrate :
+            image = image * self.table
+            image = image.astype(np.uint8)
+            isJpeg = False
 
-            if self.doCalibrate :
-                image = image * self.table
-                image = image.astype(np.uint8)
-
-#             if self.wb and bracket == 0:
-#                 image = self.simplest_cb(image, 1)
-             
-            if self.saveOn :
-                if saveJpeg :
-                    file = open(self.directory + "/image_%#05d_%#02d.jpg" % (header['count'], header['bracket']),'wb')
-                    file.write(jpeg)
-                    file.close()
+        if self.saveOn :
+            if isJpeg :
+                if bracket != 0 :
+                    file = open(self.directory + "/image_%#05d_%#02d.jpg" % (count, bracket),'wb')
                 else :
-                    cv2.imwrite(self.directory + "/image_%#05d.jpg" % count, image)
-            if self.sharpness :
-                sharpness = cv2.Laplacian(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), cv2.CV_64F).var()
-                cv2.putText(image, str(sharpness), (200,200), cv2.FONT_HERSHEY_SIMPLEX,3,(255,255,255),2)
+                    file = open(self.directory + "/image_%#05d.jpg" % count,'wb')
+                file.write(jpeg)
+                file.close()
+            else :
+                cv2.imwrite(self.directory + "/image_%#05d.jpg" % count, image)
+                
+        if isJpeg and bracket == 0 and self.sharpness :
+            sharpness = cv2.Laplacian(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), cv2.CV_64F).var()
+            cv2.putText(image, str(sharpness), (200,200), cv2.FONT_HERSHEY_SIMPLEX,3,(255,255,255),2)
+        
         if self.histos :            
             self.calcHistogram(image)
         if self.reduceFactor != 1 :
             newShape = (int(image.shape[1]/self.reduceFactor),int(image.shape[0]/self.reduceFactor))
             image = cv2.resize(image, dsize=newShape, interpolation=cv2.INTER_CUBIC)            
         self.imageSignal.emit(image) #«display image in the GUI
+#         print(np.min(image, axis=(0,1)))
+#         print(np.max(image, axis=(0,1)))
+#         print(np.mean(image, axis=(0,1)))
 #         cv2.imshow("PiCamera", image)
 #         cv2.waitKey(1)
 
     def lensAnalyze(self, header) :
         image = self.imageSock.receiveArray()  #bgr
+
         if self.doCalibrate :
             image = image * self.table
             image = image.astype(np.uint8)
@@ -186,6 +191,7 @@ class ImageThread (QThread):
 #        figure.subplots_adjust(top=0.85)
         figure.tight_layout()
         figure.canvas.draw()
+        plt.close()
         w, h  = figure.canvas.get_width_height()
         image = np.fromstring ( figure.canvas.tostring_rgb(), dtype=np.uint8 ).reshape(h,w,3)
         self.plotSignal.emit(image) #«display plot in the GUI
@@ -201,11 +207,16 @@ class ImageThread (QThread):
         gains = np.copy(image).astype(np.float)
         ih, iw, nc = image.shape
         centre = np.min(image, axis=(0,1))
+#         print(np.min(image, axis=(0,1)))
+#         print(np.max(image, axis=(0,1)))
+#         print(np.mean(image, axis=(0,1)))
         gains = centre/gains
         if i  == 0 :    #Firts one
             self.table = gains
         else :
             self.table = self.table*gains
+#         print(np.min(self.table, axis=(0,1)))
+#         print(np.max(self.table, axis=(0,1)))
         self.table[self.table>1.] = 1.
         if i == count -1 :
             np.savez('calibrate.npz',   table = self.table)

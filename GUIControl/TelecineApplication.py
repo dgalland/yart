@@ -72,8 +72,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.calibrateLocalButton.setEnabled(False)
         self.imageDialog = None
         self.plotDialog = None
-
-#        self.whiteBalanceButton.setEnabled(False)
+        self.whiteBalanceButton.setEnabled(False)
 
         
 #Lamp
@@ -90,12 +89,14 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.motorSettingsGroupBox.setEnabled(False)
         self.motorOnButton.setEnabled(False)
         self.motorOffButton.setEnabled(True)
+
     def motorOff(self) :
         self.sock.sendObject((MOTOR_OFF,))
         self.motorControlGroupBox.setEnabled(False)
         self.motorSettingsGroupBox.setEnabled(True)
         self.motorOnButton.setEnabled(True)
         self.motorOffButton.setEnabled(False)
+
     def forwardOne(self):
         self.setMotorSettings({'speed':self.motorSpeedBox.value()})
         self.sock.sendObject((MOTOR_ADVANCE_ONE,MOTOR_FORWARD))
@@ -215,7 +216,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.getCameraSettings()
         self.lensAnalyseButton.setEnabled(True)
         self.calibrateLocalButton.setEnabled(True)
-#        self.whiteBalanceButton.setEnabled(True)
+        self.whiteBalanceButton.setEnabled(True)
 
 
 
@@ -229,7 +230,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.calibrateButton.setEnabled(True)
         self.lensAnalyseButton.setEnabled(False)
         self.calibrateLocalButton.setEnabled(False)
-#        self.whiteBalanceButton.setEnabled(False)
+        self.whiteBalanceButton.setEnabled(False)
 
 #Calibrate remote    
     def calibrate(self) :
@@ -252,8 +253,8 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
     def setWhiteBalance(self)  :      
         self.sock.sendObject((WHITE_BALANCE,))
         gains = self.sock.receiveObject()
-        self.redGainBox.setValue(float(gains[0])*100.)
-        self.blueGainBox.setValue(float(gains[1])*100.)
+        self.redGainBox.setValue(int(float(gains[0])*100.))
+        self.blueGainBox.setValue(int(float(gains[1])*100.))
 
     def setEqualize(self) :
         self.claheCheckBox.setChecked(False)
@@ -442,6 +443,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.analogGainLabel.setText(str(float(settings['analog_gain'])))
         self.digitalGainLabel.setText(str(float(settings['digital_gain'])))
         self.exposureModeBox.setCurrentIndex(self.exposureModeBox.findText(settings['exposure_mode']))
+        self.meterModeBox.setCurrentIndex(self.meterModeBox.findText(settings['meter_mode']))
         self.brightnessBox.setValue(settings['brightness'])
         self.contrastBox.setValue(settings['contrast'])
         self.contrastBox.setValue(settings['saturation'])
@@ -533,8 +535,9 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.sock.sendObject((SET_CAMERA_SETTINGS, {'brightness':self.brightnessBox.value(), 'contrast':self.contrastBox.value(),'saturation':self.saturationBox.value()}))
 
     def setGains(self):
-        mode = str(self.exposureModeBox.currentText())
-        settings = {'exposure_mode':mode,}
+        exposure_mode = str(self.exposureModeBox.currentText())
+        meter_mode = str(self.meterModeBox.currentText())
+        settings = {'exposure_mode':exposure_mode,'meter_mode':meter_mode,}
         self.sock.sendObject((SET_CAMERA_SETTINGS, settings))
 
     def lensAnalyse(self):

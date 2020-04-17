@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>671</width>
+    <width>672</width>
     <height>1019</height>
    </rect>
   </property>
@@ -1906,6 +1906,19 @@
      <string>Calibrate Local</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="whiteBalanceButton">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>20</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>WB</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QGroupBox" name="cameraSettingsGroupBox">
    <property name="geometry">
@@ -2162,22 +2175,25 @@
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>90</x>
-      <y>80</y>
-      <width>81</width>
-      <height>20</height>
+      <x>40</x>
+      <y>70</y>
+      <width>51</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
      <string>Exposure mode</string>
     </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
    </widget>
    <widget class="QLabel" name="digitalGainLabel">
     <property name="geometry">
      <rect>
-      <x>340</x>
+      <x>370</x>
       <y>80</y>
-      <width>61</width>
+      <width>41</width>
       <height>21</height>
      </rect>
     </property>
@@ -2191,9 +2207,9 @@
    <widget class="QLabel" name="analogGainLabel">
     <property name="geometry">
      <rect>
-      <x>450</x>
+      <x>470</x>
       <y>80</y>
-      <width>61</width>
+      <width>41</width>
       <height>21</height>
      </rect>
     </property>
@@ -2207,35 +2223,41 @@
    <widget class="QLabel" name="label_7">
     <property name="geometry">
      <rect>
-      <x>290</x>
-      <y>80</y>
-      <width>29</width>
-      <height>16</height>
+      <x>330</x>
+      <y>70</y>
+      <width>41</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>Digital</string>
+     <string>Digital gain</string>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QLabel" name="label_8">
     <property name="geometry">
      <rect>
-      <x>410</x>
-      <y>80</y>
-      <width>33</width>
-      <height>16</height>
+      <x>420</x>
+      <y>70</y>
+      <width>41</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>Analog</string>
+     <string>Analog gain</string>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QComboBox" name="exposureModeBox">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>100</x>
       <y>80</y>
-      <width>101</width>
+      <width>71</width>
       <height>20</height>
      </rect>
     </property>
@@ -2314,7 +2336,7 @@
    <widget class="QSpinBox" name="brightnessBox">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>230</x>
       <y>110</y>
       <width>43</width>
       <height>20</height>
@@ -2333,7 +2355,7 @@
    <widget class="QSpinBox" name="contrastBox">
     <property name="geometry">
      <rect>
-      <x>300</x>
+      <x>340</x>
       <y>110</y>
       <width>47</width>
       <height>20</height>
@@ -2355,7 +2377,7 @@
    <widget class="QLabel" name="label_5">
     <property name="geometry">
      <rect>
-      <x>110</x>
+      <x>160</x>
       <y>110</y>
       <width>50</width>
       <height>16</height>
@@ -2368,7 +2390,7 @@
    <widget class="QLabel" name="label_6">
     <property name="geometry">
      <rect>
-      <x>250</x>
+      <x>280</x>
       <y>110</y>
       <width>42</width>
       <height>16</height>
@@ -2394,7 +2416,7 @@
    <widget class="QLabel" name="label_10">
     <property name="geometry">
      <rect>
-      <x>370</x>
+      <x>400</x>
       <y>110</y>
       <width>50</width>
       <height>16</height>
@@ -2407,10 +2429,10 @@
    <widget class="QSpinBox" name="saturationBox">
     <property name="geometry">
      <rect>
-      <x>430</x>
+      <x>460</x>
       <y>110</y>
       <width>47</width>
-      <height>20</height>
+      <height>21</height>
      </rect>
     </property>
     <property name="minimum">
@@ -2429,9 +2451,9 @@
    <widget class="QSpinBox" name="isoBox">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>460</x>
       <y>140</y>
-      <width>43</width>
+      <width>51</width>
       <height>20</height>
      </rect>
     </property>
@@ -2448,7 +2470,7 @@
    <widget class="QLabel" name="label_14">
     <property name="geometry">
      <rect>
-      <x>110</x>
+      <x>420</x>
       <y>140</y>
       <width>16</width>
       <height>16</height>
@@ -2517,6 +2539,58 @@
     </property>
     <property name="text">
      <string>Get Settings</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="meterModeBox">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>80</y>
+      <width>71</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="currentText">
+     <string>average</string>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <item>
+     <property name="text">
+      <string>average</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>spot</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>backlit</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>matrix</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="label_35">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>70</y>
+      <width>51</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Meter mode</string>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>
@@ -3191,7 +3265,23 @@
     </hint>
     <hint type="destinationlabel">
      <x>482</x>
-     <y>1045</y>
+     <y>1018</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>whiteBalanceButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setWhiteBalance()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>349</x>
+     <y>933</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>418</x>
+     <y>1012</y>
     </hint>
    </hints>
   </connection>

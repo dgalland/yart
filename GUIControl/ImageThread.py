@@ -33,8 +33,13 @@ class ImageThread (QThread):
         self.name = "ImgThread"
         self.window = None
         self.saveOn = False
-        self.mergeMertens = cv2.createMergeMertens(1.,1.,1.)
+        self.mergeMertens = cv2.createMergeMertens(1.,1.,1)
+#*        self.mergeMertens = cv2.createMergeMertens()
+#         print("Contrast:",self.mergeMertens.getContrastWeight())
+#         print("Saturation:",self.mergeMertens.getSaturationWeight())
+#         print("Exposure:",self.mergeMertens.getExposureWeight())
         self.mergeDebevec = cv2.createMergeDebevec()
+        self.calibrateDebevec = cv2.createCalibrateDebevec()
         self.toneMap = cv2.createTonemapReinhard()
 #        self.claheProc = cv2.createCLAHE(clipLimit=1, tileGridSize=(8,8))
 #        self.simpleWB = cv2.xphoto.createSimpleWB()
@@ -43,6 +48,12 @@ class ImageThread (QThread):
 #         self.equalize = False
 #         self.clahe = False
 #        self.clipLimit = 1.
+        self.invgamma = np.empty((1,256), np.uint8)
+        for i in range(256):
+            self.invgamma[0,i] = np.clip(pow(i / 255.0, 0.45) * 255.0, 0, 255)
+        self.gamma = np.empty((1,256), np.uint8)
+        for i in range(256):
+            self.gamma[0,i] = np.clip(pow(i / 255.0, 2.2) * 255.0, 0, 255)
         self.reduceFactor = 1;
         self.ip_pi = ip_pi
         self.hflip = False
@@ -99,8 +110,10 @@ class ImageThread (QThread):
         count = header['count']
         jpeg = np.frombuffer(jpeg, np.uint8,count = len(jpeg)) 
         image = cv2.imdecode(jpeg, 1)   #Jpeg decoded
+
         isJpeg = True
         if self.merge != MERGE_NONE and bracket != 0 : #Merge We receive bracket 3 2 1
+#            image = cv2.LUT(image, self.gamma)
             self.images.append(image)
             self.shutters.append(header['shutter'])
             if bracket != 1 :
@@ -109,11 +122,16 @@ class ImageThread (QThread):
                 if self.merge == MERGE_MERTENS:
                     image = self.mergeMertens.process(self.images)
                 else :
-                    image = self.mergeDebevec.process(self.images, np.asarray(self.shutters,dtype=np.float32)/1000000.)
+                    times = np.asarray(self.shutters,dtype=np.float32)/1000000.
+#                    responseDebevec = self.calibrateDebevec.process(self.images, times)
+#                    image = self.mergeDebevec.process(self.images, times, responseDebevec)
+                    image = self.mergeDebevec.process(self.images, times)
                     image = self.toneMap.process(image)
                 if self.doCalibrate :
                     image = image * self.table
                 image = np.clip(image*255, 0, 255).astype('uint8')
+#                image = cv2.LUT(image, self.invgamma)
+
 #                 if self.equalize :
 #                     H, S, V = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2HSV))
 #                     low, high = np.percentile(V, (1, 99))
@@ -132,6 +150,7 @@ class ImageThread (QThread):
                 self.shutters.clear()
         elif self.doCalibrate :
             image = image * self.table
+            image = np.clip(image, 0, 255).astype('uint8')
             image = image.astype(np.uint8)
             isJpeg = False
 
@@ -206,7 +225,9 @@ class ImageThread (QThread):
             image = image * self.table
         gains = np.copy(image).astype(np.float)
         ih, iw, nc = image.shape
-        centre = np.min(image, axis=(0,1))
+#        centre = np.min(image, axis=(0,1))
+        centre = np.mean(image, axis=(0,1))
+
 #         print(np.min(image, axis=(0,1)))
 #         print(np.max(image, axis=(0,1)))
 #         print(np.mean(image, axis=(0,1)))
@@ -220,6 +241,8 @@ class ImageThread (QThread):
         self.table[self.table>1.] = 1.
         if i == count -1 :
             np.savez('calibrate.npz',   table = self.table)
+        header = {'type':HEADER_MESSAGE,'msg':"Local Calibration done"}
+        self.headerSignal.emit(header) #«display header info in GUI if necessary (count,...)
             
     def saveToFile(self, saveFlag, directory) :
         self.saveOn = saveFlag
@@ -278,3 +301,4 @@ class ImageThread (QThread):
 
 
         
+

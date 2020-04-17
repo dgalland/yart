@@ -24,7 +24,7 @@ from TelecineMotor import *
 ## Todo More object oriented and avoid globals !
 
 initSettings = ("sensor_mode",)
-controlSettings = ("awb_mode","awb_gains","shutter_speed","brightness","contrast","saturation", "framerate","exposure_mode","iso", "exposure_compensation", "zoom")
+controlSettings = ("awb_mode","awb_gains","shutter_speed","brightness","contrast","saturation", "framerate","exposure_mode","iso", "exposure_compensation", "zoom","meter_mode")
 addedSettings = ("bracket_steps","use_video_port", "bracket_dark_coefficient", "bracket_light_coefficient","capture_method", "shutter_speed_wait", "shutter_auto_wait","pause_pin","pause_level","auto_pause","resize","doResize")
 motorSettings = ("speed","pulley_ratio","steps_per_rev","ena_pin","dir_pin","pulse_pin","trigger_pin","capture_speed","play_speed","ena_level","dir_level","trigger_level")
 readOnlySettings = ("analog_gain", "digital_gain")
@@ -208,7 +208,7 @@ class TelecineCamera(PiCamera) :
                     yield stream
                     stream.seek(0)
                     stream.truncate(0)
-                self.exposure_mode='off' #lock the gains
+#                self.exposure_mode='off' #lock the gains
                 self.shutter_speed = int(autoExposureSpeed*self.bracket_dark_coefficient)
                 yield stream                        
                 stream.seek(0)
@@ -384,6 +384,8 @@ def openCamera(mode, resolution, calibrationMode, hflip,vflip) :
             pass
     except :
         pass
+    
+    cam.sharpness=10
     cam.hflip = hflip
     cam.vflip = vflip
     if calibrationMode == CALIBRATION_FLAT :
@@ -523,7 +525,6 @@ try:
         elif command == WHITE_BALANCE :
             gains = camera.whiteBalance()
             commandSock.sendObject(gains)
-            motor.off()
         elif command == PAUSE_CAPTURE :
             if restartEvent.isSet() :
                 restartEvent.clear()   #pause

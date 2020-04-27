@@ -8,10 +8,6 @@ Documentation (in french ! Google translate is your best friend)
 
 [yart.md](./yart.md)
 
-Idées pour le Post processing
-
-[postprocessing.md](./postprocessing.md)
-
 Google group
 
 https://groups.google.com/forum/#!forum/yart

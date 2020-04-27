@@ -1848,6 +1848,19 @@
      <string>High</string>
     </property>
    </widget>
+   <widget class="QCheckBox" name="afterTriggerCheckBox">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>60</y>
+      <width>91</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Advance after</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QGroupBox" name="lensAnalyseGroupBox">
    <property name="geometry">

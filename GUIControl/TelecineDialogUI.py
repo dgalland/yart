@@ -493,6 +493,9 @@ class Ui_TelecineDialog(object):
         self.triggerLevelCheckBox = QtWidgets.QCheckBox(self.motorSettingsGroupBox)
         self.triggerLevelCheckBox.setGeometry(QtCore.QRect(470, 40, 41, 17))
         self.triggerLevelCheckBox.setObjectName("triggerLevelCheckBox")
+        self.afterTriggerCheckBox = QtWidgets.QCheckBox(self.motorSettingsGroupBox)
+        self.afterTriggerCheckBox.setGeometry(QtCore.QRect(470, 60, 91, 17))
+        self.afterTriggerCheckBox.setObjectName("afterTriggerCheckBox")
         self.lensAnalyseGroupBox = QtWidgets.QGroupBox(TelecineDialog)
         self.lensAnalyseGroupBox.setGeometry(QtCore.QRect(20, 910, 631, 51))
         self.lensAnalyseGroupBox.setStyleSheet("QGroupBox {\n"
@@ -831,6 +834,7 @@ class Ui_TelecineDialog(object):
         self.enaLevelCheckBox.setText(_translate("TelecineDialog", "High"))
         self.dirLevelCheckBox.setText(_translate("TelecineDialog", "High"))
         self.triggerLevelCheckBox.setText(_translate("TelecineDialog", "High"))
+        self.afterTriggerCheckBox.setText(_translate("TelecineDialog", "Advance after"))
         self.lensAnalyseGroupBox.setTitle(_translate("TelecineDialog", "Lens analyse"))
         self.lensAnalyseButton.setText(_translate("TelecineDialog", "Analyse"))
         self.calibrateButton.setText(_translate("TelecineDialog", "Calibrate"))

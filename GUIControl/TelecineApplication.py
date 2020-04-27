@@ -148,7 +148,8 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             'trigger_pin':int(self.triggerEdit.text()),\
             'dir_level': 1 if self.dirLevelCheckBox.isChecked() else 0 ,\
             'ena_level': 1 if self.enaLevelCheckBox.isChecked() else 0, \
-            'trigger_level': 1 if self.triggerLevelCheckBox.isChecked() else 0 \
+            'trigger_level': 1 if self.triggerLevelCheckBox.isChecked() else 0, \
+            'after_trigger': 1 if self.afterTriggerCheckBox.isChecked() else 0 \
             }))
 
 
@@ -167,6 +168,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.dirLevelCheckBox.setChecked(settings['dir_level'] == 1)
 #        self.pulseLevelCheckBox.setChecked(settings['pulse_level'] == 1)
         self.triggerLevelCheckBox.setChecked(settings['trigger_level'] == 1)
+        self.afterTriggerCheckBox.setChecked(settings['after_trigger'] == 1)
         return settings
 
         

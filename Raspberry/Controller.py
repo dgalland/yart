@@ -26,7 +26,7 @@ from TelecineMotor import *
 initSettings = ("sensor_mode",)
 controlSettings = ("awb_mode","awb_gains","shutter_speed","brightness","contrast","saturation", "framerate","exposure_mode","iso", "exposure_compensation", "zoom","meter_mode")
 addedSettings = ("bracket_steps","use_video_port", "bracket_dark_coefficient", "bracket_light_coefficient","capture_method", "shutter_speed_wait", "shutter_auto_wait","pause_pin","pause_level","auto_pause","resize","doResize")
-motorSettings = ("speed","pulley_ratio","steps_per_rev","ena_pin","dir_pin","pulse_pin","trigger_pin","capture_speed","play_speed","ena_level","dir_level","trigger_level")
+motorSettings = ("speed","pulley_ratio","steps_per_rev","ena_pin","dir_pin","pulse_pin","trigger_pin","capture_speed","play_speed","ena_level","dir_level","trigger_level", "after_trigger")
 readOnlySettings = ("analog_gain", "digital_gain")
 commandSock = None
 imageSock = None
@@ -130,7 +130,7 @@ class TelecineCamera(PiCamera) :
                 msg = "Reducing motor speed to %f"%(motor.speed)
                 headermsg = {'type':HEADER_MESSAGE, 'msg':msg}
                 queue.put(headermsg)
-                print('Capture on trigger with bracket reducing motor speed to', motor.speed)
+                print('Capture on trigger with bracket reducing motor speed to', motor.speed,flush=True)
             motor.direction = MOTOR_FORWARD     
             motor.advance()
         header = {'type':HEADER_IMAGE}
@@ -221,7 +221,7 @@ class TelecineCamera(PiCamera) :
                     stream.seek(0)
                     stream.truncate(0)
                 self.shutter_speed = autoExposureSpeed
-                self.exposure_mode='auto'
+#                self.exposure_mode='auto'
                 yield stream                        
                 stream.seek(0)
                 self.putHeader(1) #First is 3 Last  is 1
@@ -469,8 +469,7 @@ try:
         if request == None :
             break
         command = request[0]
-#        print('Command:%s\n' % hex(command)) #Thread safe print with NL !
-        print(commands[command] + " ",flush=True)
+        print('%s'%commands[command],flush=True)
         if command == TAKE_IMAGE :
             camera.captureImage()
         elif command == TAKE_BGR:
@@ -495,6 +494,7 @@ try:
             saveCameraSettings()
             saveMotorSettings()
         elif command == START_CAPTURE:
+            motor.direction = MOTOR_FORWARD
             captureEvent.set()
         elif command == STOP_CAPTURE:
             captureEvent.clear()
@@ -516,6 +516,7 @@ try:
             calibrateCamera(request[1],request[2])  #hflip vflip
             commandSock.sendObject('Calibrate done')
         elif command == MOTOR_ON_TRIGGER :
+            motor.direction = MOTOR_FORWARD
             motor.advanceUntilTrigger()
         elif command == MOTOR_ON :
             motor.on()

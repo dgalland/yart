@@ -35,6 +35,8 @@ class TelecineMotor() :
         self.direction = MOTOR_FORWARD
         self.pi = pi
         self.queue = queue
+        self.tick=0
+        self.after_trigger = True
 
     def on(self) :
         self.frameCounter = 0
@@ -65,12 +67,29 @@ class TelecineMotor() :
         self.triggerCallback = None
 
     def trigger(self, gpio,level,  tick ) :
+        if not self.triggered :
+            return
+        delay = 1./self.speed *1000000. #micros for one rev
+        diff = tick - self.tick
+        self.tick = tick
+#        print(" Diff:", diff , " Delay:",  delay, not diff < delay/2, flush=True)
+        if self.tick != 0 and diff < delay/2. :
+            return
         if self.direction == MOTOR_FORWARD :
             self.frameCounter = self.frameCounter +1
         else :
             self.frameCounter = self.frameCounter - 1
         if self.triggered and self.pi.wave_tx_busy() :
-            self.pi.wave_tx_stop()
+            if self.after_trigger :
+#Continue for 1/16 of rev after the trigger                
+                start = int(self.steps_per_rev/16) #1/16 of rev at peed/2
+                x = start  & 255
+                y = start  >> 8
+                chain=[]
+                chain += [255, 0, self.wave(self.speed/2), 255, 1, x, y] #half rev at speed/2
+                self.pi.wave_chain(chain)
+            else :                
+                self.pi.wave_tx_stop()
         self.triggerEvent.set()
         self.triggerEvent.clear()
             
@@ -97,8 +116,6 @@ class TelecineMotor() :
             chain += [255, 0, self.wave(s), 255, 1, x, y] #One rev for each
         chain += [255, 0, self.wave(self.speed), 255, 3]  #Loop forever
         self.pi.wave_chain(chain)  # Transmit chain.
-##        self.pi.wave_chain(chain)  # Transmit ramping chain
-##        self.pi.wave_send_repeat(self.wave(self.speed))
 
 #Advance count rev, return when finished (no ramping)
     def advanceCounted(self, count=1):
@@ -118,18 +135,21 @@ class TelecineMotor() :
      
     def advanceUntilTrigger(self):
         if self.trigger_pin != 0 :
-            self.triggered = True
             self.pi.write(self.dir_pin, 0 if self.direction == self.dir_level else 1)  #self.direction = 0 forward
             self.pi.wave_clear()
 #            chain = [255, 0, self.wave(self.speed), 255, 3]  #Loop forever but triggered without ramping
             chain = []
-            x = (int(self.steps_per_rev/8))  & 255   
-            y = (int(self.steps_per_rev/8))  >> 8  
-            chain += [255, 0, self.wave(self.speed/2), 255, 1, x, y] #speed/2 for 1/8 rev
+            x = (int(self.steps_per_rev/16))  & 255   
+            y = (int(self.steps_per_rev/16))  >> 8  
+            chain += [255, 0, self.wave(self.speed/2), 255, 1, x, y] #speed/2 for 1/16rev
             chain += [255, 0, self.wave(self.speed), 255, 3]  #Loop forever but triggered
-
             self.pi.wave_chain(chain)  # Transmit chain.
-            self.triggerEvent.wait()
+            delay = 1./self.speed
+            self.triggered = True
+            isSet = self.triggerEvent.wait(2*delay) #No more than two turns
+            if not isSet :
+                print(" Missed event", flush=True)
+            self.triggered = False
         else :
             self.advanceCounted()
 

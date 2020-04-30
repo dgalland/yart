@@ -15,7 +15,7 @@ class TelecineMotor() :
       
     def __init__(self, pi, queue):
 
-        self.steps_per_rev = 800 #Marche mieux an 800
+        self.steps_per_rev = 200 #Marche mieux an 800
         self.ena_pin = 17
         self.dir_pin = 18
         self.pulse_pin = 23
@@ -148,6 +148,9 @@ class TelecineMotor() :
             self.triggered = True
             isSet = self.triggerEvent.wait(2*delay) #No more than two turns
             if not isSet :
+                self.pi.wave_tx_stop()
+                msgheader = {'type':HEADER_MESSAGE, 'msg': 'Warning missed trigger'}
+                self.queue.put(msgheader)
                 print(" Missed event", flush=True)
             self.triggered = False
         else :

@@ -825,7 +825,7 @@ class Ui_TelecineDialog(object):
         self.label_32.setText(_translate("TelecineDialog", "Reduce "))
         self.motorSettingsGroupBox.setTitle(_translate("TelecineDialog", "Motor settings"))
         self.label_18.setText(_translate("TelecineDialog", "Steps per Rev"))
-        self.label_20.setText(_translate("TelecineDialog", "Frame/Motor ratio"))
+        self.label_20.setText(_translate("TelecineDialog", "Motor/Frame ratio"))
         self.label_11.setText(_translate("TelecineDialog", "ON"))
         self.label_13.setText(_translate("TelecineDialog", "PULSE"))
         self.label_19.setText(_translate("TelecineDialog", "DIR"))

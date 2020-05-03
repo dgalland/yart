@@ -20,14 +20,14 @@ class TelecineMotor() :
         self.dir_pin = 18
         self.pulse_pin = 23
         self.trigger_pin = 24
-        self.pulley_ratio = 1  #  Motor/Frame
+        self.pulley_ratio = 1  #  Motor/Frame ratio ex 2 2 motor rev for 1 frame
         self.ena_level = 0
         self.dir_level = 0
 #        self.pulse_level = 1
         self.trigger_level = 0
         self.frameCounter = 0
         self.triggerCallback = None
-        self.speed = 0
+        self.speed = 0                    #Motor speed rev/s
         self.capture_speed = 0
         self.play_speed = 0
         self.triggered = False
@@ -67,13 +67,10 @@ class TelecineMotor() :
         self.triggerCallback = None
 
     def trigger(self, gpio,level,  tick ) :
-        if not self.triggered :
-            return
-        delay = 1./self.speed *1000000. #micros for one rev
+        delay = (self.pulley_ratio/self.speed)*1000000.  #normal delay for one turn micro seconds
         diff = tick - self.tick
         self.tick = tick
-#        print(" Diff:", diff , " Delay:",  delay, not diff < delay/2, flush=True)
-        if self.tick != 0 and diff < delay/2. :
+        if self.tick != 0 and diff < int(delay/2.) :
             return
         if self.direction == MOTOR_FORWARD :
             self.frameCounter = self.frameCounter +1
@@ -82,9 +79,10 @@ class TelecineMotor() :
         if self.triggered and self.pi.wave_tx_busy() :
             if self.after_trigger :
 #Continue for 1/16 of rev after the trigger                
-                start = int(self.steps_per_rev/16) #1/16 of rev at peed/2
-                x = start  & 255
-                y = start  >> 8
+                pulses = int(self.steps_per_rev*self.pulley_ratio)  #Motor pulses for one turn
+                end = int(pulses / 16) 
+                x = end  & 255
+                y = end  >> 8
                 chain=[]
                 chain += [255, 0, self.wave(self.speed/2), 255, 1, x, y] #half rev at speed/2
                 self.pi.wave_chain(chain)
@@ -94,7 +92,8 @@ class TelecineMotor() :
         self.triggerEvent.clear()
             
     def wave(self, speed) :
-        freq = int(self.steps_per_rev*speed/self.pulley_ratio) #en HZ
+#        freq = int(self.steps_per_rev*speed/self.pulley_ratio) #en HZ
+        freq = int(self.steps_per_rev*speed) #en HZ
         wf = []
         micros = int(500000/freq)
         wf.append(pigpio.pulse(1 << self.pulse_pin, 0, micros))  # pulse on micros
@@ -123,12 +122,13 @@ class TelecineMotor() :
         self.pi.write(self.dir_pin, 0 if self.direction == self.dir_level else 1)  #self.direction = 0 forward
         self.pi.wave_clear()
         chain = []
-        start = int(self.steps_per_rev/2)
+        pulses = int(count*self.steps_per_rev*self.pulley_ratio)  #Motor pulses count
+        start = int(pulses / 2) 
         x = start  & 255
         y = start  >> 8  
         chain += [255, 0, self.wave(self.speed/2), 255, 1, x, y] #half rev at speed/2
-        x = (count*self.steps_per_rev-start)  & 255
-        y = (count*self.steps_per_rev-start)  >> 8  #to to pulley_ratio !
+        x = (pulses - start)  & 255
+        y = (pulses -start)  >> 8  
         chain += [255, 0, self.wave(self.speed), 255, 1, x, y] 
         self.pi.wave_chain(chain)  # Transmit chain.
         time.sleep(self.pi.wave_get_micros()*count*self.steps_per_rev/1000000.)      
@@ -137,21 +137,23 @@ class TelecineMotor() :
         if self.trigger_pin != 0 :
             self.pi.write(self.dir_pin, 0 if self.direction == self.dir_level else 1)  #self.direction = 0 forward
             self.pi.wave_clear()
-#            chain = [255, 0, self.wave(self.speed), 255, 3]  #Loop forever but triggered without ramping
+            pulses = int(self.steps_per_rev*self.pulley_ratio)  #Motor pulses for one turn
+            start = int(pulses / 16) 
             chain = []
-            x = (int(self.steps_per_rev/16))  & 255   
-            y = (int(self.steps_per_rev/16))  >> 8  
+            x = start  & 255   
+            y = start  >> 8  
             chain += [255, 0, self.wave(self.speed/2), 255, 1, x, y] #speed/2 for 1/16rev
             chain += [255, 0, self.wave(self.speed), 255, 3]  #Loop forever but triggered
             self.pi.wave_chain(chain)  # Transmit chain.
-            delay = 1./self.speed
+            
+            delay = self.pulley_ratio/self.speed  #normal delay for one turn in seconds
             self.triggered = True
             isSet = self.triggerEvent.wait(2*delay) #No more than two turns
             if not isSet :
                 self.pi.wave_tx_stop()
-                msgheader = {'type':HEADER_MESSAGE, 'msg': 'Warning missed trigger'}
+                msgheader = {'type':HEADER_MESSAGE, 'msg': 'Warning: trigger not detected'}
                 self.queue.put(msgheader)
-                print(" Missed event", flush=True)
+                print(" Trigger not detected", flush=True)
             self.triggered = False
         else :
             self.advanceCounted()

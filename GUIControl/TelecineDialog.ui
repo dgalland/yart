@@ -1701,7 +1701,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Frame/Motor ratio</string>
+     <string>Motor/Frame ratio</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_11">

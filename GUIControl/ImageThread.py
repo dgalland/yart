@@ -33,7 +33,7 @@ class ImageThread (QThread):
         self.name = "ImgThread"
         self.window = None
         self.saveOn = False
-        self.mergeMertens = cv2.createMergeMertens(1.,1.,1)
+        self.mergeMertens = cv2.createMergeMertens(1,1,1)
 #*        self.mergeMertens = cv2.createMergeMertens()
 #         print("Contrast:",self.mergeMertens.getContrastWeight())
 #         print("Saturation:",self.mergeMertens.getSaturationWeight())
@@ -238,7 +238,7 @@ class ImageThread (QThread):
             self.table = self.table*gains
 #         print(np.min(self.table, axis=(0,1)))
 #         print(np.max(self.table, axis=(0,1)))
-        self.table[self.table>1.] = 1.
+#        self.table[self.table>1.] = 1.
         if i == count -1 :
             np.savez('calibrate.npz',   table = self.table)
         header = {'type':HEADER_MESSAGE,'msg':"Local Calibration done"}

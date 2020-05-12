@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>672</width>
-    <height>1019</height>
+    <width>676</width>
+    <height>1053</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -941,7 +941,7 @@
    <widget class="QLabel" name="label_17">
     <property name="geometry">
      <rect>
-      <x>430</x>
+      <x>510</x>
       <y>20</y>
       <width>47</width>
       <height>16</height>
@@ -954,7 +954,7 @@
    <widget class="QDoubleSpinBox" name="motorSpeedBox">
     <property name="geometry">
      <rect>
-      <x>480</x>
+      <x>550</x>
       <y>20</y>
       <width>41</width>
       <height>22</height>
@@ -995,6 +995,25 @@
      <string>On trigger</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="motorCalibrateButton">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>20</y>
+      <width>61</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>61</width>
+      <height>16777215</height>
+     </size>
+    </property>
+    <property name="text">
+     <string>Calibrate</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QGroupBox" name="initGroupBox">
    <property name="geometry">
@@ -1018,7 +1037,7 @@
      <rect>
       <x>140</x>
       <y>10</y>
-      <width>371</width>
+      <width>391</width>
       <height>141</height>
      </rect>
     </property>
@@ -1061,23 +1080,7 @@
      <property name="geometry">
       <rect>
        <x>220</x>
-       <y>50</y>
-       <width>81</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::Box</enum>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-    <widget class="QLabel" name="cameraResolutionLabel">
-     <property name="geometry">
-      <rect>
-       <x>220</x>
-       <y>80</y>
+       <y>20</y>
        <width>81</width>
        <height>21</height>
       </rect>
@@ -1138,7 +1141,7 @@
     <widget class="QPushButton" name="closeCameraButton">
      <property name="geometry">
       <rect>
-       <x>290</x>
+       <x>310</x>
        <y>20</y>
        <width>75</width>
        <height>23</height>
@@ -1285,7 +1288,7 @@
    <widget class="QGroupBox" name="motorOnGroupBox">
     <property name="geometry">
      <rect>
-      <x>520</x>
+      <x>540</x>
       <y>10</y>
       <width>81</width>
       <height>141</height>
@@ -1600,25 +1603,6 @@
      </property>
     </widget>
    </widget>
-  </widget>
-  <widget class="QLabel" name="messageLabel">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>970</y>
-     <width>631</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">font color:'red'</string>
-   </property>
-   <property name="frameShape">
-    <enum>QFrame::Box</enum>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
   </widget>
   <widget class="QGroupBox" name="motorSettingsGroupBox">
    <property name="geometry">
@@ -2607,6 +2591,16 @@
     </property>
    </widget>
   </widget>
+  <widget class="QTextEdit" name="messageTextEdit">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>970</y>
+     <width>631</width>
+     <height>71</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections>
@@ -3298,6 +3292,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>motorCalibrateButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>motorCalibrate()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>496</x>
+     <y>219</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>665</x>
+     <y>833</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>takeImage()</slot>
@@ -3355,5 +3365,6 @@
   <slot>resetROI()</slot>
   <slot>calibrateLocal()</slot>
   <slot>doCalibrateLocal()</slot>
+  <slot>motorCalibrate()</slot>
  </slots>
 </ui>

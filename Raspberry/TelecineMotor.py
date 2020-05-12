@@ -37,6 +37,7 @@ class TelecineMotor() :
         self.queue = queue
         self.tick=0
         self.after_trigger = True
+        self.triggerCount = 0
 
     def on(self) :
         self.frameCounter = 0
@@ -67,6 +68,7 @@ class TelecineMotor() :
         self.triggerCallback = None
 
     def trigger(self, gpio,level,  tick ) :
+        self.triggerCount = self.triggerCount + 1
         delay = (self.pulley_ratio/self.speed)*1000000.  #normal delay for one turn micro seconds
         diff = tick - self.tick
         self.tick = tick
@@ -123,7 +125,7 @@ class TelecineMotor() :
         self.pi.wave_clear()
         chain = []
         pulses = int(count*self.steps_per_rev*self.pulley_ratio)  #Motor pulses count
-        start = int(pulses / 2) 
+        start = int((pulses/count) / 2) 
         x = start  & 255
         y = start  >> 8  
         chain += [255, 0, self.wave(self.speed/2), 255, 1, x, y] #half rev at speed/2
@@ -132,7 +134,21 @@ class TelecineMotor() :
         chain += [255, 0, self.wave(self.speed), 255, 1, x, y] 
         self.pi.wave_chain(chain)  # Transmit chain.
         time.sleep(self.pi.wave_get_micros()*count*self.steps_per_rev/1000000.)      
-     
+
+    def calibrate(self) :
+        oldRatio = self.pulley_ratio
+        rev = 20
+        self.pulley_ratio = 1.
+        self.triggerCount = 0
+        self.advanceCounted(rev)
+        time.sleep(1)
+        ratio = 0
+        if not self.triggerCount == 0 :
+            ratio = rev/self.triggerCount
+        msgheader = {'type':HEADER_MESSAGE, 'msg': '%d triggers detected for %d motor rev ratio seems %f' % (self.triggerCount, rev, ratio)}
+        self.queue.put(msgheader)
+        self.pulley_ratio = oldRatio
+
     def advanceUntilTrigger(self):
         if self.trigger_pin != 0 :
             self.pi.write(self.dir_pin, 0 if self.direction == self.dir_level else 1)  #self.direction = 0 forward

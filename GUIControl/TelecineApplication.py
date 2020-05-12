@@ -89,6 +89,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.motorSettingsGroupBox.setEnabled(False)
         self.motorOnButton.setEnabled(False)
         self.motorOffButton.setEnabled(True)
+        self.motorCalibrateButton.setEnabled(True)
 
     def motorOff(self) :
         self.sock.sendObject((MOTOR_OFF,))
@@ -96,6 +97,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.motorSettingsGroupBox.setEnabled(True)
         self.motorOnButton.setEnabled(True)
         self.motorOffButton.setEnabled(False)
+        self.motorCalibrateButton.setEnabled(False)
 
     def forwardOne(self):
         self.setMotorSettings({'speed':self.motorSpeedBox.value()})
@@ -134,6 +136,9 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.setMotorSettings({'speed':self.motorSpeedBox.value()})
         self.sock.sendObject((MOTOR_ON_TRIGGER,))
 
+    def motorCalibrate(self):
+        self.setMotorSettings({'speed':self.motorSpeedBox.value()})
+        self.sock.sendObject((CALIBRATE_MOTOR,))
 
     def setMotorSettings(self, settings) :
         self.sock.sendObject((SET_MOTOR_SETTINGS, settings))
@@ -195,15 +200,19 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.sock.sendObject((OPEN_CAMERA, self.mode, requestedResolution, \
                              calibrationMode, self.hflip, self.vflip))
         maxResolution = self.getCameraSetting('MAX_RESOLUTION')
-        if maxResolution[0] == 3280 :
+        if maxResolution[0] == 4056 :
+            self.cameraVersion = 3  #HQ
+        elif maxResolution[0] == 3280 :
             self.cameraVersion = 2
         else :
             self.cameraVersion = 1
         if hres== 0 and vres==0 and self.mode != 0 :
             if self.cameraVersion == 2 :
                 res=V2_RESOLUTIONS[self.mode-1]
-            else :
+            elif self.cameraVersion == 1 :
                 res=V1_RESOLUTIONS[self.mode-1]
+            else :
+                res=HQ_RESOLUTIONS[self.mode-1]
             self.sock.sendObject((SET_CAMERA_SETTINGS, {'resolution':res}))
         self.cameraVersionLabel.setText('Picamera V' + str(self.cameraVersion))
         self.resolution = self.getCameraSetting('resolution')
@@ -236,16 +245,16 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
 
 #Calibrate remote    
     def calibrate(self) :
-        self.messageLabel.setText('Calibrating please wait')
+        self.displayMessage("Calibrating please wait")
         QApplication.setOverrideCursor(Qt.WaitCursor)
         self.sock.sendObject((CALIBRATE_CAMERA,self.hflipCheckBox.isChecked(), self.vflipCheckBox.isChecked()))
         done = self.sock.receiveObject()
         QApplication.restoreOverrideCursor()
-        self.messageLabel.setText(done)
-        print(done)
+        self.displayMessage("done")
 
 #Calibrate Local        
     def calibrateLocal (self):
+        self.displayMessage("Calibrating local please wait")
         self.setResize()
         self.sock.sendObject((TAKE_BGR,HEADER_CALIBRATE,1) )  #Calibrate on 1 image
 
@@ -558,6 +567,17 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.root_directory = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
         self.directoryDisplay.setText(self.root_directory)
 
+    def displayMessage(self, text) :
+        self.messageTextEdit.insertPlainText(text+"\n");
+        sb = self.messageTextEdit.verticalScrollBar();
+        sb.setValue(sb.maximum());
+
+#         c = messageTextEdit.textCursor();
+#         c.movePosition(QTextCursor::End);
+#         messageTextEdit->setTextCursor(c);        
+        
+        
+        
     def displayHeader(self, header) :
         typ = header['type']
         if typ == HEADER_IMAGE :
@@ -569,7 +589,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             shutter = header['shutter']
             self.exposureSpeedLabel.setText(str(shutter))  # ms display
         elif typ == HEADER_MESSAGE :
-            self.messageLabel.setText(str(header['msg']))
+            self.displayMessage(str(header['msg']))
 
     def displayImage(self, image) :
         if self.imageDialog == None :
@@ -645,8 +665,8 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             self.tapeBox.setValue(self.tape)
             self.clipBox.setValue(self.clip)
             self.setDirectory()
-
         except Exception as e:
+            self.displayMessage(str(e))
             print(e)
         
 class ImageDialog(QDialog) :
@@ -693,7 +713,7 @@ class PlotDialog(QDialog) :
 commandDialog = None
 #For getting exception while in QT        
 def my_excepthook(type, value, tback):
-    commandDialog.messageLabel.setText(str(value))
+    commandDialog.displayMessage(str(value))
     print(type)
     print(value)
     print(tback)

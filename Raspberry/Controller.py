@@ -198,6 +198,7 @@ class TelecineCamera(PiCamera) :
 #Normal
                 autoExposureSpeed = self.exposure_speed              #First shoot
                 self.shutter_speed = int(autoExposureSpeed*self.bracket_light_coefficient)
+                self.exposure_mode='off' #lock the gains
                 yield stream                        
                 stream.seek(0)
                 self.putHeader(3) #First is 3 Last  is 1
@@ -208,7 +209,6 @@ class TelecineCamera(PiCamera) :
                     yield stream
                     stream.seek(0)
                     stream.truncate(0)
-#                self.exposure_mode='off' #lock the gains
                 self.shutter_speed = int(autoExposureSpeed*self.bracket_dark_coefficient)
                 yield stream                        
                 stream.seek(0)
@@ -220,8 +220,7 @@ class TelecineCamera(PiCamera) :
                     yield stream
                     stream.seek(0)
                     stream.truncate(0)
-                self.shutter_speed = autoExposureSpeed
-#                self.exposure_mode='auto'
+                self.shutter_speed = autoExposureSpeed  #return to normal
                 yield stream                        
                 stream.seek(0)
                 self.putHeader(1) #First is 3 Last  is 1
@@ -231,7 +230,9 @@ class TelecineCamera(PiCamera) :
                     yield stream
                     stream.seek(0)
                     stream.truncate(0)
+                self.exposure_mode='auto' #Return to auto
                 self.shutter_speed = 0
+                
 
 
 
@@ -523,6 +524,8 @@ try:
         elif command == MOTOR_OFF :
             saveMotorSettings()
             motor.off()
+        elif command == CALIBRATE_MOTOR :
+            motor.calibrate()
         elif command == WHITE_BALANCE :
             gains = camera.whiteBalance()
             commandSock.sendObject(gains)

@@ -212,7 +212,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             elif self.cameraVersion == 1 :
                 res=V1_RESOLUTIONS[self.mode-1]
             else :
-                res=HQ_RESOLUTIONS[self.mode-1]
+                res=V3_RESOLUTIONS[self.mode-1]
             self.sock.sendObject((SET_CAMERA_SETTINGS, {'resolution':res}))
         self.cameraVersionLabel.setText('Picamera V' + str(self.cameraVersion))
         self.resolution = self.getCameraSetting('resolution')

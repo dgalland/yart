@@ -73,6 +73,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.imageDialog = None
         self.plotDialog = None
         self.whiteBalanceButton.setEnabled(False)
+        self.maxFpsButton.setEnabled(False)
 
         
 #Lamp
@@ -228,7 +229,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.lensAnalyseButton.setEnabled(True)
         self.calibrateLocalButton.setEnabled(True)
         self.whiteBalanceButton.setEnabled(True)
-
+        self.maxFpsButton.setEnabled(True)
 
 
     def closeCamera(self) :
@@ -242,6 +243,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.lensAnalyseButton.setEnabled(False)
         self.calibrateLocalButton.setEnabled(False)
         self.whiteBalanceButton.setEnabled(False)
+        self.maxFpsButton.setEnabled(False)
 
 #Calibrate remote    
     def calibrate(self) :
@@ -348,7 +350,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             method = CAPTURE_ON_TRIGGER
         else :
             method = CAPTURE_BASIC
-            frameRate = self.playFramerateBox.value()
+#            frameRate = self.playFramerateBox.value()
         if method != CAPTURE_BASIC :
             self.motorControlGroupBox.setEnabled(False)
             self.sock.sendObject((SET_MOTOR_SETTINGS, {'speed':self.captureMotorSpeedBox.value()}))
@@ -366,9 +368,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.initGroupBox.setEnabled(False)
         self.lensAnalyseButton.setEnabled(False)
         self.calibrateLocalButton.setEnabled(False)
-
         self.setResize()
-        
         self.sock.sendObject((SET_CAMERA_SETTINGS, {\
                                                     'framerate':frameRate,\
                                                     'bracket_steps':brackets, \
@@ -553,6 +553,14 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
 
     def lensAnalyse(self):
         self.sock.sendObject((TAKE_BGR,HEADER_ANALYZE, 1) )
+
+    def maxFps(self):
+        self.sock.sendObject((MAX_FPS,))
+        framerate = self.getCameraSetting('framerate')
+        self.framerateBox.setValue(self.getCameraSetting('framerate'))
+
+#     def maxSpeed(self):
+#         self.sock.sendObject((MAX_SPEED,))
 
     def setDirectory(self) :
         if self.root_directory != None :

@@ -83,6 +83,7 @@ class TelecineCamera(PiCamera) :
         self.doResize = False
         self.resize = None
         self.roi = None
+        self.maxFps = 0
         pi.set_mode(self.pause_pin, pigpio.INPUT)
 
         if self.pause_level == 0 :
@@ -124,13 +125,6 @@ class TelecineCamera(PiCamera) :
         elif self.capture_method == CAPTURE_ON_FRAME :
             motor.direction = MOTOR_FORWARD     
         elif self.capture_method == CAPTURE_ON_TRIGGER :
-            if self.bracket_steps != 1 : #Reduce motor speed
-                frames = 3*self.shutter_auto_wait + self.shutter_speed_wait
-                motor.speed = float(self.framerate) / frames
-                msg = "Reducing motor speed to %f"%(motor.speed)
-                headermsg = {'type':HEADER_MESSAGE, 'msg':msg}
-                queue.put(headermsg)
-                print('Capture on trigger with bracket reducing motor speed to', motor.speed,flush=True)
             motor.direction = MOTOR_FORWARD     
             motor.advance()
         header = {'type':HEADER_IMAGE}
@@ -139,20 +133,23 @@ class TelecineCamera(PiCamera) :
             if not restartEvent.isSet() :
                 msgheader = {'type':HEADER_MESSAGE, 'msg': 'Pausing capture'}
                 queue.put(msgheader)
+                if self.capture_method == CAPTURE_ON_TRIGGER :
+                    motor.stop()
                 restartEvent.wait()
                 msgheader = {'type':HEADER_MESSAGE, 'msg': 'Resuming capture'}
+                if self.capture_method == CAPTURE_ON_TRIGGER :
+                    motor.advance()
                 queue.put(msgheader)
             if self.capture_method == CAPTURE_ON_TRIGGER :
                 triggerEvent.wait()
             elif self.capture_method == CAPTURE_ON_FRAME :
                 motor.advanceUntilTrigger()
-#bypass old frames                
-            for foo in range(self.shutter_auto_wait) : 
-                yield stream
-                stream.seek(0)
-                stream.truncate(0)
-
-
+#bypass old frames if not in preview
+            if not self.capture_method == CAPTURE_BASIC :
+                for foo in range(self.shutter_auto_wait) : 
+                    yield stream
+                    stream.seek(0)
+                    stream.truncate(0)
 #Wait if queue is full          
             if queue.qsize() > 20 :
                 if self.capture_method == CAPTURE_ON_TRIGGER :
@@ -232,16 +229,14 @@ class TelecineCamera(PiCamera) :
                     stream.truncate(0)
                 self.exposure_mode='auto' #Return to auto
                 self.shutter_speed = 0
-                
-
-
-
         if self.capture_method == CAPTURE_ON_TRIGGER :
             motor.stop()
 
     def captureSequence(self) :
         self.capturing = True
         self.frameCounter = 0
+        if self.capture_method == CAPTURE_ON_TRIGGER :
+            self.calcMaxFps(50)
         startTime = time.time()
         resize = self.resolution
         if self.doResize == True :
@@ -249,12 +244,63 @@ class TelecineCamera(PiCamera) :
         self.capture_sequence(self.captureGenerator(), format="jpeg", use_video_port=self.use_video_port, resize=resize)
         stopTime = time.time()
         fps = float(self.frameCounter/(stopTime-startTime))
-        msg = "Capture terminated    Count %i    fps %f \n"%(self.frameCounter , fps)
+        spf = 1./fps
+        msg = "Capture terminated    Count %i    fps %f spf %f"%(self.frameCounter , fps, spf)
         header = {'type':HEADER_MESSAGE, 'msg':msg}
         queue.put(header)
         while queue.qsize() > 1 :
             time.sleep(1)
         self.capturing=False
+
+#Try to evaluate the maximum framerate        
+    def dummyGenerator(self, count):
+        startTime = time.time()
+        stream = BytesIO()
+        for i in range (count) :
+            yield stream
+            stream.seek(0)
+            image = stream.getvalue()
+            stream.truncate(0)
+        stopTime = time.time()
+        fps = float(count/(stopTime-startTime))
+        self.framerate = fps
+        spf = 1./fps
+        msg = "Maximum framerate    Count %i    fps %f spf %f" % (count , fps, spf)
+        header = {'type':HEADER_MESSAGE, 'msg':msg}
+        queue.put(header)
+        
+    
+    def doMaxFps(self, count) :
+        resize = self.resolution
+        if self.doResize == True :
+            resize = (self.resize[0], self.resize[1])
+        self.capture_sequence(self.dummyGenerator(count), format="jpeg", use_video_port=True,resize=resize)
+    
+    def doMaxSpeed(self) :
+        doMaxFps()
+        if self.bracket_steps != 1 : #Reduce motor speed
+            frames = self.shutter_auto_wait + 4.*self.shutter_speed_wait + 1 #un peu de marge
+        else :
+            frames = self.shutter_auto_wait + 1
+        projectorSpeed = self.framerate/ frames  #rev per seconds
+        motor.speed = motor.pulley_ratio * projectorSpeed
+        print(self.maxFps)
+        print(frames)
+        print(projectorSpeed)
+        msg = "Calculated motor speed %f"%(motor.speed)
+        headermsg = {'type':HEADER_MESSAGE, 'msg':msg}
+        queue.put(headermsg)
+    
+        
+    def printSettings() :
+        print("exposure_mode", self.exposure_mode)
+        print("exposure_speed", self.exposure_speed)
+        print("shutter_speed", self.shutter_speed)
+        print("analog_gain", self.analog_gain)
+        print("digital_gain", self.digital_gain)
+        print("iso", self.iso)
+        print("resolution", self.resolution)
+        print("zoom", self.zoom)
         
     def captureImage(self) :
         while self.capturing :
@@ -263,12 +309,6 @@ class TelecineCamera(PiCamera) :
         if self.doResize == True :
             resize = (self.resize[0], self.resize[1])
         stream = BytesIO()
-#        print("exposure_mode", self.exposure_mode)
-#        print("exposure_speed", self.exposure_speed)
-#        print("shutter_speed", self.shutter_speed)
-#        print("analog_gain", self.analog_gain)
-#        print("digital_gain", self.digital_gain)
-#        print("iso", self.iso)
         camera.capture(stream, format="jpeg", quality=90, use_video_port=self.use_video_port, resize=resize)
         stream.seek(0)
         image = stream.getvalue()
@@ -526,6 +566,10 @@ try:
             motor.off()
         elif command == CALIBRATE_MOTOR :
             motor.calibrate()
+        elif command == MAX_FPS :
+            camera.doMaxFps(100)
+        elif command == MAX_SPEED :
+            camera.doMaxSpeed()
         elif command == WHITE_BALANCE :
             gains = camera.whiteBalance()
             commandSock.sendObject(gains)

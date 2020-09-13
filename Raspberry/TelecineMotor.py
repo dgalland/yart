@@ -161,7 +161,7 @@ class TelecineMotor() :
             chain += [255, 0, self.wave(self.speed/2), 255, 1, x, y] #speed/2 for 1/16rev
             chain += [255, 0, self.wave(self.speed), 255, 3]  #Loop forever but triggered
             self.pi.wave_chain(chain)  # Transmit chain.
-            
+            self.tick = self.pi.get_current_tick()  #tick at motor start
             delay = self.pulley_ratio/self.speed  #normal delay for one turn in seconds
             self.triggered = True
             isSet = self.triggerEvent.wait(2*delay) #No more than two turns

@@ -57,7 +57,8 @@ class MessageSocket() :
 
 #Receive a string
     def receiveString(self):
-        return self.receiveMsg().decode()
+        str = self.receiveMsg()
+        return None if str == None else str.decode()
 
 ##Send a receive a python object
 ## For sending the object is converted to its string representation
@@ -70,7 +71,7 @@ class MessageSocket() :
 #Receive an object
     def receiveObject(self):
         s = self.receiveString()
-        return eval(s)[0]
+        return None if s == None else eval(s)[0]
 
 #Send a numpy array
     def sendArray(self,array):

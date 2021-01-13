@@ -1,5 +1,9 @@
 # Yet Another Raspberry Pi Telecine
 
+Noter que cette documentation date des débuts du projet et peut être obsolète sur certains points. Il est indispensable de consulter le groupe Google qui contient tous les conseils, les questions réponses et les expériences des utilisateurs
+
+https://groups.google.com/forum/#!forum/yart
+
 En premier lieu je dois remercier Joe Herman pour son projet https://github.com/jphfilm/rpi-film-capture. Mon projet n'est pas un fork car toute la partie logicielle a été réécrite. Cependant toute la partie matérielle reprend les idées de Joe.
 
 ## Hardware

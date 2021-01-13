@@ -8,6 +8,8 @@ Documentation (in french ! Google translate is your best friend)
 
 [yart.md](./yart.md)
 
+**Note that this documentation dates from the beginning of the project and may be obsolete at some points. It is essential to consult the Google group, which contains all the advice and experiences of the users.**
+
 Google group
 
 https://groups.google.com/forum/#!forum/yart

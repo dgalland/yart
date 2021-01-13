@@ -89,7 +89,7 @@
           <number>7</number>
          </property>
          <property name="value">
-          <number>3</number>
+          <number>2</number>
          </property>
         </widget>
         <widget class="QLabel" name="cameraVersionLabel">
@@ -1238,7 +1238,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Auto</string>
+          <string>Test</string>
          </property>
         </widget>
         <widget class="QDoubleSpinBox" name="framerateBox">
@@ -1264,6 +1264,25 @@
          </property>
          <property name="value">
           <double>30.000000000000000</double>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="maxSpeedButton">
+         <property name="geometry">
+          <rect>
+           <x>170</x>
+           <y>80</y>
+           <width>61</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>61</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Test</string>
          </property>
         </widget>
        </widget>
@@ -2530,6 +2549,41 @@
          <bool>true</bool>
         </property>
        </widget>
+       <widget class="QSpinBox" name="sharpnessBox">
+        <property name="geometry">
+         <rect>
+          <x>340</x>
+          <y>140</y>
+          <width>51</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="minimum">
+         <number>-100</number>
+        </property>
+        <property name="maximum">
+         <number>100</number>
+        </property>
+        <property name="singleStep">
+         <number>10</number>
+        </property>
+        <property name="value">
+         <number>0</number>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_41">
+        <property name="geometry">
+         <rect>
+          <x>265</x>
+          <y>140</y>
+          <width>51</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Sharpness</string>
+        </property>
+       </widget>
       </widget>
       <widget class="QGroupBox" name="lensAnalyseGroupBox">
        <property name="geometry">
@@ -2659,7 +2713,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>614</x>
-     <y>700</y>
+     <y>780</y>
     </hint>
     <hint type="destinationlabel">
      <x>483</x>
@@ -2675,7 +2729,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>614</x>
-     <y>730</y>
+     <y>810</y>
     </hint>
     <hint type="destinationlabel">
      <x>570</x>
@@ -2690,8 +2744,8 @@
    <slot>setAutoExposure()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>305</x>
-     <y>696</y>
+     <x>314</x>
+     <y>780</y>
     </hint>
     <hint type="destinationlabel">
      <x>620</x>
@@ -2787,7 +2841,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>614</x>
-     <y>760</y>
+     <y>840</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -2803,7 +2857,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>90</x>
-     <y>469</y>
+     <y>600</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -2819,7 +2873,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>614</x>
-     <y>790</y>
+     <y>870</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -2834,8 +2888,8 @@
    <slot>getCameraSettings()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>52</x>
-     <y>670</y>
+     <x>61</x>
+     <y>750</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -2850,8 +2904,8 @@
    <slot>chooseDirectory()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>113</x>
-     <y>472</y>
+     <x>90</x>
+     <y>540</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -2866,8 +2920,8 @@
    <slot>setSharpness()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>490</x>
-     <y>499</y>
+     <x>510</x>
+     <y>570</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -2882,8 +2936,8 @@
    <slot>setHistos()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>490</x>
-     <y>479</y>
+     <x>510</x>
+     <y>550</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -2930,8 +2984,8 @@
    <slot>setMotorInitSettings()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>540</x>
-     <y>582</y>
+     <x>549</x>
+     <y>660</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -2962,8 +3016,8 @@
    <slot>setDirectory()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>403</x>
-     <y>472</y>
+     <x>340</x>
+     <y>540</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -2994,8 +3048,8 @@
    <slot>setReduce()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>568</x>
-     <y>519</y>
+     <x>546</x>
+     <y>590</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -3010,8 +3064,8 @@
    <slot>calibrate()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>175</x>
-     <y>873</y>
+     <x>184</x>
+     <y>930</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -3090,8 +3144,8 @@
    <slot>setMerge()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>291</x>
-     <y>510</y>
+     <x>410</x>
+     <y>590</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -3106,8 +3160,8 @@
    <slot>setMerge()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>140</x>
-     <y>510</y>
+     <x>410</x>
+     <y>550</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -3122,8 +3176,8 @@
    <slot>setMerge()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>221</x>
-     <y>510</y>
+     <x>410</x>
+     <y>570</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -3138,8 +3192,8 @@
    <slot>setGains()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>583</x>
-     <y>732</y>
+     <x>592</x>
+     <y>810</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -3154,8 +3208,8 @@
    <slot>setColors()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>582</x>
-     <y>672</y>
+     <x>591</x>
+     <y>750</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -3186,8 +3240,8 @@
    <slot>lensAnalyse()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>76</x>
-     <y>872</y>
+     <x>85</x>
+     <y>930</y>
     </hint>
     <hint type="destinationlabel">
      <x>377</x>
@@ -3202,8 +3256,8 @@
    <slot>ROIwChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>106</x>
-     <y>446</y>
+     <x>115</x>
+     <y>460</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -3218,8 +3272,8 @@
    <slot>ROIhChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>176</x>
-     <y>452</y>
+     <x>185</x>
+     <y>461</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -3234,8 +3288,8 @@
    <slot>setROI()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>371</x>
-     <y>421</y>
+     <x>380</x>
+     <y>430</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -3250,8 +3304,8 @@
    <slot>resetROI()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>338</x>
-     <y>447</y>
+     <x>347</x>
+     <y>460</y>
     </hint>
     <hint type="destinationlabel">
      <x>661</x>
@@ -3266,8 +3320,8 @@
    <slot>calibrateLocal()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>309</x>
-     <y>932</y>
+     <x>290</x>
+     <y>941</y>
     </hint>
     <hint type="destinationlabel">
      <x>659</x>
@@ -3330,12 +3384,44 @@
    <slot>maxFps()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>189</x>
-     <y>360</y>
+     <x>200</x>
+     <y>369</y>
     </hint>
     <hint type="destinationlabel">
      <x>669</x>
      <y>853</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>onTriggerButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>setOnTrigger()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>242</x>
+     <y>323</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>977</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>maxSpeedButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TelecineDialog</receiver>
+   <slot>maxSpeed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>212</x>
+     <y>387</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1</x>
+     <y>1039</y>
     </hint>
    </hints>
   </connection>
@@ -3399,5 +3485,6 @@
   <slot>motorCalibrate()</slot>
   <slot>maxFps()</slot>
   <slot>maxSpeed()</slot>
+  <slot>setOnTrigger()</slot>
  </slots>
 </ui>

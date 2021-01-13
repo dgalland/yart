@@ -27,9 +27,9 @@ class TelecineMotor() :
         self.trigger_level = 0
         self.frameCounter = 0
         self.triggerCallback = None
-        self.speed = 0                    #Motor speed rev/s
-        self.capture_speed = 0
-        self.play_speed = 0
+        self.speed = 5                    #Motor speed rev/s
+        self.play_speed = 5                    #Motor speed rev/s
+        self.capture_speed = 5
         self.triggered = False
         self.triggerEvent = None
         self.direction = MOTOR_FORWARD
@@ -58,7 +58,7 @@ class TelecineMotor() :
             else :
                 self.triggerCallback = self.pi.callback(self.trigger_pin, pigpio.RISING_EDGE, self.trigger)
                 self.pi.set_pull_up_down(self.trigger_pin, pigpio.PUD_DOWN)
-#            self.pi.set_glitch_filter(self.trigger_pin, 1)
+            self.pi.set_glitch_filter(self.trigger_pin, 100)
         
     def off(self) :
         if self.ena_pin != 0 :

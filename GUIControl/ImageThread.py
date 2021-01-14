@@ -174,7 +174,7 @@ class ImageThread (QThread):
                 file.write(jpeg)
                 file.close()
             else :
-                if bracket != 0 :
+                if bracket != 0 and self.merge == MERGE_NONE :
                     cv2.imwrite(self.directory + "/image_%#05d_%#02d.jpg" % (count, bracket), image)
                 else :
                     cv2.imwrite(self.directory + "/image_%#05d.jpg" % count, image)

@@ -85,6 +85,7 @@ class TelecineCamera(PiCamera) :
         self.roi = None
         self.maxFps = 0
         self.iso = 100
+        self.sharpness=0
         pi.set_mode(self.pause_pin, pigpio.INPUT)
 
         if self.pause_level == 0 :
@@ -149,12 +150,13 @@ class TelecineCamera(PiCamera) :
                 triggerEvent.wait()
             elif self.capture_method == CAPTURE_ON_FRAME :
                 motor.advanceUntilTrigger()
-#bypass frames if bracket or auto exposure
+#bypass wait_before frames if bracket or auto exposure
             if self.bracket_steps != 1 or startShutterSpeed == 0 :
-                for foo in range(self.shutter_auto_wait) : 
+                for foo in range(self.shutter_auto_wait) :
                     yield stream
                     stream.seek(0)
                     stream.truncate(0)
+                    
 #Wait if queue is full          
             if queue.qsize() > 20 :
                 if self.capture_method == CAPTURE_ON_TRIGGER :
@@ -198,9 +200,9 @@ class TelecineCamera(PiCamera) :
 ##                        stream.truncate(0)
 
 #Normal
+                self.exposure_mode='off' #lock the gains
                 refExposureSpeed = self.exposure_speed              #First shoot
                 self.shutter_speed = int(refExposureSpeed*self.bracket_light_coefficient)
-                self.exposure_mode='off' #lock the gains
                 yield stream                        
                 stream.seek(0)
                 self.putHeader(3) #First is 3 Last  is 1
@@ -222,8 +224,8 @@ class TelecineCamera(PiCamera) :
                     yield stream
                     stream.seek(0)
                     stream.truncate(0)
-                self.shutter_speed = startShutterSpeed  #return to normal auto or fixed 
-                self.exposure_mode='auto' #Return to auto
+#For the HQ better to return in normal with locked gains befure returning in auto
+                self.shutter_speed = refExposureSpeed  #return to normal auto or fixed 
                 yield stream                        
                 stream.seek(0)
                 self.putHeader(1) #Underexposed First is 3 Last  is 1
@@ -233,6 +235,7 @@ class TelecineCamera(PiCamera) :
                     yield stream
                     stream.seek(0)
                     stream.truncate(0)
+                self.exposure_mode='auto' #Return to auto
         if self.capture_method == CAPTURE_ON_TRIGGER :
             motor.stop()
         self.shutter_speed = startShutterSpeed  #return to normal auto or fixed
@@ -298,7 +301,9 @@ class TelecineCamera(PiCamera) :
         headermsg = {'type':HEADER_MESSAGE, 'msg':msg}
         queue.put(headermsg)
     
-        
+    def printExposure(self) :
+        print("exposure_mode:" , self.exposure_mode, " shutter_speed!", self.shutter_speed," exposure_speed:", self.exposure_speed," analog_gain:", self.analog_gain," digital_gain:", self.digital_gain)
+
     def printSettings(self) :
         print("exposure_mode" , self.exposure_mode)
         print("exposure_speed ", self.exposure_speed)
@@ -437,6 +442,7 @@ def openCamera(mode, resolution, calibrationMode, hflip,vflip) :
     time.sleep(1)  #necessay for setting awb_gains
 
     cam.image_denoise=False
+    cam.video_denoise=False
     cam.hflip = hflip
     cam.vflip = vflip
     if calibrationMode == CALIBRATION_FLAT :

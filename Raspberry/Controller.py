@@ -120,6 +120,13 @@ class TelecineCamera(PiCamera) :
         speed = motor.speed   #save normal speed
         stream = BytesIO()
         startShutterSpeed = self.shutter_speed      #at start fixed shutter ou 0 for auto
+        if startShutterSpeed == 0 :
+            msgheader = {'type':HEADER_MESSAGE, 'msg': 'Capture with shutter auto'}
+            queue.put(msgheader)
+        else :
+            msgheader = {'type':HEADER_MESSAGE, 'msg': 'Capture with fixed shutter'}
+            queue.put(msgheader)
+           
         for foo in range(self.shutter_auto_wait) : 
             yield stream
             stream.seek(0)
@@ -236,6 +243,7 @@ class TelecineCamera(PiCamera) :
                     stream.seek(0)
                     stream.truncate(0)
                 self.exposure_mode='auto' #Return to auto
+                self.shutter_speed = startShutterSpeed  #return to normal auto or fixed 
         if self.capture_method == CAPTURE_ON_TRIGGER :
             motor.stop()
         self.shutter_speed = startShutterSpeed  #return to normal auto or fixed

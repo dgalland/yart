@@ -625,6 +625,9 @@
            <height>17</height>
           </rect>
          </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Without motor&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="text">
           <string>Preview</string>
          </property>
@@ -641,6 +644,9 @@
            <height>17</height>
           </rect>
          </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Motor until trigerr and capture&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="text">
           <string>OnFrame</string>
          </property>
@@ -651,11 +657,14 @@
         <widget class="QRadioButton" name="onTriggerButton">
          <property name="geometry">
           <rect>
-           <x>160</x>
+           <x>240</x>
            <y>20</y>
            <width>71</width>
            <height>17</height>
           </rect>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Motor continuous capture on trigger&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
           <string>OnTrigger</string>
@@ -734,6 +743,9 @@
            <height>20</height>
           </rect>
          </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of frames to wait for return to normal exposure (fixed or auto)&lt;br/&gt;Default 8&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="maximum">
           <number>20</number>
          </property>
@@ -760,11 +772,14 @@
         <widget class="QCheckBox" name="bracketCheckBox">
          <property name="geometry">
           <rect>
-           <x>300</x>
+           <x>360</x>
            <y>20</y>
            <width>70</width>
            <height>17</height>
           </rect>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Do three exposure for each frame&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
           <string>Bracket </string>
@@ -791,6 +806,9 @@
            <width>62</width>
            <height>22</height>
           </rect>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Coefficient to be applied to normal exposure for under exposure&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="minimum">
           <double>0.000000000000000</double>
@@ -827,6 +845,9 @@
            <height>22</height>
           </rect>
          </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Coefficient to be applied to normal exposure for over exposure&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="minimum">
           <double>0.100000000000000</double>
          </property>
@@ -861,6 +882,9 @@
            <width>37</width>
            <height>20</height>
           </rect>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of frames to wait at each exposure change&lt;/p&gt;&lt;p&gt;Default 4&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="maximum">
           <number>10</number>
@@ -1283,6 +1307,22 @@
          </property>
          <property name="text">
           <string>Test</string>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="onTurnButton">
+         <property name="geometry">
+          <rect>
+           <x>160</x>
+           <y>20</y>
+           <width>71</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Motor one turn and capture&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>OnTurn</string>
          </property>
         </widget>
        </widget>

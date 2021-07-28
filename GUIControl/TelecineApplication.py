@@ -78,6 +78,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.maxSpeedButton.setEnabled(False)
         self.onTriggerButton.setEnabled(False)
         self.onFrameButton.setEnabled(False)
+        self.onTurnButton.setEnabled(False)
 
 
         
@@ -98,6 +99,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.motorCalibrateButton.setEnabled(True)
         self.onTriggerButton.setEnabled(True)
         self.onFrameButton.setEnabled(True)
+        self.onTurnButton.setEnabled(True)
 
 
     def motorOff(self) :
@@ -109,6 +111,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.motorCalibrateButton.setEnabled(False)
         self.onTriggerButton.setEnabled(False)
         self.onFrameButton.setEnabled(False)
+        self.onTurnButton.setEnabled(False)
 
     def forwardOne(self):
         self.setMotorSettings({'speed':self.motorSpeedBox.value()})
@@ -353,8 +356,9 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         
 #Capture
 #CAPTURE_BASIC play with ot without motor
-#CAPTURE_ON_FRAME capture frame and advance motor
+#CAPTURE_ON_FRAME capture frame and advance motor until trigger
 #CAPTURE_ON_TRIGGER lauchn motor and capture on trigger        
+#CAPTURE_ON_TURN capture frame and advance motor one turn no trigger needed      
     def captureStart(self):
         brackets = 1
         frameRate = self.framerateBox.value()
@@ -367,6 +371,8 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             method = CAPTURE_ON_FRAME
         elif self.onTriggerButton.isChecked() :
             method = CAPTURE_ON_TRIGGER
+        elif self.onTurnButton.isChecked() :
+            method = CAPTURE_ON_TURN
         else :
             method = CAPTURE_BASIC
 #            frameRate = self.playFramerateBox.value()
@@ -483,6 +489,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.darkCoefficientBox.setValue(settings['bracket_dark_coefficient'])
 #        self.videoPortButton.setChecked(settings['use_video_port'])
         self.onFrameButton.setChecked(settings['capture_method'] == CAPTURE_ON_FRAME)
+        self.onTurnButton.setChecked(settings['capture_method'] == CAPTURE_ON_TURN)
         self.shutterSpeedWaitBox.setValue(settings['shutter_speed_wait'])
         self.shutterAutoWaitBox.setValue(settings['shutter_auto_wait'])
         self.pauseEdit.setText(str(settings['pause_pin']))

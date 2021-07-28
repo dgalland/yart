@@ -133,7 +133,7 @@ class TelecineCamera(PiCamera) :
             stream.truncate(0)
         if self.capture_method == CAPTURE_BASIC :
             pass
-        elif self.capture_method == CAPTURE_ON_FRAME :
+        elif self.capture_method == CAPTURE_ON_FRAME or self.capture_method == CAPTURE_ON_TURN:
             motor.direction = MOTOR_FORWARD
             motor.speed = motor.capture_speed
         elif self.capture_method == CAPTURE_ON_TRIGGER :
@@ -157,6 +157,8 @@ class TelecineCamera(PiCamera) :
                 triggerEvent.wait()
             elif self.capture_method == CAPTURE_ON_FRAME :
                 motor.advanceUntilTrigger()
+            elif self.capture_method == CAPTURE_ON_TURN :
+                motor.advanceCounted()
 #bypass wait_before frames if bracket or auto exposure
             if self.bracket_steps != 1 or startShutterSpeed == 0 :
                 for foo in range(self.shutter_auto_wait) :
@@ -259,7 +261,8 @@ class TelecineCamera(PiCamera) :
         resize = self.resolution
         if self.doResize == True :
             resize = (self.resize[0], self.resize[1])
-        self.capture_sequence(self.captureGenerator(), format="jpeg", use_video_port=self.use_video_port, resize=resize)
+#Default quality is 85            
+        self.capture_sequence(self.captureGenerator(), format="jpeg", quality=90, use_video_port=self.use_video_port, resize=resize)
         stopTime = time.time()
         fps = float(self.frameCounter/(stopTime-startTime))
         spf = 1./fps
@@ -331,7 +334,7 @@ class TelecineCamera(PiCamera) :
         if self.doResize == True :
             resize = (self.resize[0], self.resize[1])
         stream = BytesIO()
-        camera.capture(stream, format="jpeg", quality=95, use_video_port=True, resize=resize)
+        camera.capture(stream, format="jpeg", quality=90, use_video_port=True, resize=resize)
         stream.seek(0)
         image = stream.getvalue()
         header = {'type':HEADER_IMAGE, 'count':motor.frameCounter, 'bracket':0, 'shutter':self.exposure_speed,'gains':self.awb_gains,'analog_gain':self.analog_gain,'digital_gain':self.digital_gain}

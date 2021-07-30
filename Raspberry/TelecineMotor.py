@@ -72,6 +72,7 @@ class TelecineMotor() :
         delay = (self.pulley_ratio/self.speed)*1000000.  #normal delay for one turn micro seconds
         diff = tick - self.tick
         self.tick = tick
+#        print(" Trigger detected", diff, flush=True)
         if self.tick != 0 and diff < int(delay/2.) :
             return
         if self.direction == MOTOR_FORWARD :
@@ -107,6 +108,7 @@ class TelecineMotor() :
 #Advance at speed with some ramping to obtain the desired speed
 #return immediately    
     def advance(self):
+        print(self.steps_per_rev)
         self.triggered = False
         self.pi.write(self.dir_pin, 0 if self.direction == self.dir_level else 1)  #self.direction = 0 forward
         self.pi.wave_clear()
@@ -118,22 +120,49 @@ class TelecineMotor() :
         chain += [255, 0, self.wave(self.speed), 255, 3]  #Loop forever
         self.pi.wave_chain(chain)  # Transmit chain.
 
-#Advance count rev, return when finished (no ramping)
-    def advanceCounted(self, count=1):
+#Advance count rev, return when finished
+    def advanceCounted(self, count=1, ramping=True):
         self.triggered = False
         self.pi.write(self.dir_pin, 0 if self.direction == self.dir_level else 1)  #self.direction = 0 forward
         self.pi.wave_clear()
         chain = []
         pulses = int(count*self.steps_per_rev*self.pulley_ratio)  #Motor pulses count
-        start = int((pulses/count) / 2) 
-        x = start  & 255
-        y = start  >> 8  
-        chain += [255, 0, self.wave(self.speed/2), 255, 1, x, y] #half rev at speed/2
-        x = (pulses - start)  & 255
-        y = (pulses -start)  >> 8  
+        sleep = 0
+        if ramping :
+            start = int((pulses/count) / 2) 
+            x = start  & 255
+            y = start  >> 8  
+            chain += [255, 0, self.wave(self.speed/2), 255, 1, x, y] #half rev at speed/2
+            micros = self.pi.wave_get_micros()
+            sleep += micros*start
+#            print("Pulses:", start, " micros:", micros, " Sleep:", sleep)
+            pulses = pulses -start
+        x = (pulses)  & 255
+        y = (pulses)  >> 8
         chain += [255, 0, self.wave(self.speed), 255, 1, x, y] 
         self.pi.wave_chain(chain)  # Transmit chain.
-        time.sleep(self.pi.wave_get_micros()*count*self.steps_per_rev/1000000.)      
+        micros = self.pi.wave_get_micros()
+        sleep += micros*pulses
+#        print("Pulses:", pulses, " micros:", micros, " Sleep:", sleep)
+        time.sleep(sleep/1000000.)      
+
+#Advance count pulses, return when finished (no ramping)
+    def advanceSteps(self, steps):
+        self.triggered = False
+        self.pi.write(self.dir_pin, 0 if self.direction == self.dir_level else 1)  #self.direction = 0 forward
+        self.pi.wave_clear()
+        chain = []
+#         start = int(pulses / 2) 
+#         x = start  & 255
+#         y = start  >> 8  
+#         chain += [255, 0, self.wave(self.speed/2), 255, 1, x, y] #half rev at speed/2
+#         x = (pulses - start)  & 255
+#         y = (pulses -start)  >> 8
+        pulses = int(steps)
+        x = pulses  & 255
+        y = pulses >> 8  
+        chain += [255, 0, self.wave(self.speed), 255, 1, x, y] 
+        self.pi.wave_chain(chain)  # Transmit chain.
 
     def calibrate(self) :
         oldRatio = self.pulley_ratio

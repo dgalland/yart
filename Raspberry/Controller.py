@@ -25,7 +25,7 @@ from TelecineMotor import *
 
 initSettings = ("sensor_mode",)
 controlSettings = ("awb_mode","awb_gains","shutter_speed","brightness","contrast","saturation", "framerate","exposure_mode","iso", "exposure_compensation", "zoom","meter_mode","sharpness")
-addedSettings = ("bracket_steps","use_video_port", "bracket_dark_coefficient", "bracket_light_coefficient","capture_method", "shutter_speed_wait", "shutter_auto_wait","pause_pin","pause_level","auto_pause","resize","doResize")
+addedSettings = ("bracket_steps","use_video_port", "bracket_dark_coefficient", "bracket_light_coefficient","capture_method", "shutter_speed_wait", "shutter_auto_wait","pause_pin","pause_level","auto_pause","resize","doResize","jpeg_quality")
 motorSettings = ("speed","pulley_ratio","steps_per_rev","ena_pin","dir_pin","pulse_pin","trigger_pin","capture_speed","play_speed","ena_level","dir_level","trigger_level", "after_trigger")
 readOnlySettings = ("analog_gain", "digital_gain")
 commandSock = None
@@ -86,6 +86,7 @@ class TelecineCamera(PiCamera) :
         self.maxFps = 0
         self.iso = 100
         self.sharpness=0
+        self.jpeg_quality = 85
         pi.set_mode(self.pause_pin, pigpio.INPUT)
 
         if self.pause_level == 0 :
@@ -261,8 +262,8 @@ class TelecineCamera(PiCamera) :
         resize = self.resolution
         if self.doResize == True :
             resize = (self.resize[0], self.resize[1])
-#Default quality is 85            
-        self.capture_sequence(self.captureGenerator(), format="jpeg", quality=90, use_video_port=self.use_video_port, resize=resize)
+#Default quality is 85
+        self.capture_sequence(self.captureGenerator(), format="jpeg", quality=self.jpeg_quality, use_video_port=self.use_video_port, resize=resize)
         stopTime = time.time()
         fps = float(self.frameCounter/(stopTime-startTime))
         spf = 1./fps
@@ -334,7 +335,7 @@ class TelecineCamera(PiCamera) :
         if self.doResize == True :
             resize = (self.resize[0], self.resize[1])
         stream = BytesIO()
-        camera.capture(stream, format="jpeg", quality=90, use_video_port=True, resize=resize)
+        camera.capture(stream, format="jpeg", quality=self.jpeg_quality, use_video_port=True, resize=resize)
         stream.seek(0)
         image = stream.getvalue()
         header = {'type':HEADER_IMAGE, 'count':motor.frameCounter, 'bracket':0, 'shutter':self.exposure_speed,'gains':self.awb_gains,'analog_gain':self.analog_gain,'digital_gain':self.digital_gain}
@@ -578,6 +579,9 @@ try:
         elif command == MOTOR_ADVANCE_ONE :
             motor.direction = request[1]
             motor.advanceCounted()
+        elif command == MOTOR_STEPS :
+            motor.direction = request[1]
+            motor.advanceSteps(request[2])
         elif command == MOTOR_STOP :
             motor.stop()
         elif command == OPEN_CAMERA :

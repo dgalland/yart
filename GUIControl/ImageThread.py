@@ -67,6 +67,7 @@ class ImageThread (QThread):
         self.vflip = False
         self.table=None
         self.doCalibrate = False
+        self.jpeg_quality = 95
         try:
             npz = np.load("calibrate.npz")
             self.table = npz['table']
@@ -175,9 +176,9 @@ class ImageThread (QThread):
                 file.close()
             else :
                 if bracket != 0 and self.merge == MERGE_NONE :
-                    cv2.imwrite(self.directory + "/image_%#05d_%#02d.jpg" % (count, bracket), image)
+                    cv2.imwrite(self.directory + "/image_%#05d_%#02d.jpg" % (count, bracket), image, [cv2.IMWRITE_JPEG_QUALITY, self.jpeg_quality])
                 else :
-                    cv2.imwrite(self.directory + "/image_%#05d.jpg" % count, image)
+                    cv2.imwrite(self.directory + "/image_%#05d.jpg" % count, image, [cv2.IMWRITE_JPEG_QUALITY, self.jpeg_quality])
         if isJpeg and bracket == 0 and self.sharpness :
             sharpness = cv2.Laplacian(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), cv2.CV_64F).var()
             cv2.putText(image, str(sharpness), (200,200), cv2.FONT_HERSHEY_SIMPLEX,3,(255,255,255),2)

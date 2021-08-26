@@ -18,7 +18,7 @@ sys.path.append('../Common')
 from Constants import *
 from MessageSocket import *
 
-localSettings = ('ip_pi', 'root_directory','hflip', 'vflip', 'mode', 'tape', 'clip', 'merge')
+localSettings = ('ip_pi', 'root_directory','hflip', 'vflip', 'mode', 'tape', 'clip', 'merge', 'jpeg_quality')
 
 #Generic methods to set/get object attributes from a dictionary
 def getSettings(object, keys):
@@ -55,6 +55,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.resolution = None
         self.cameraVersion = ''
         self.root_directory = None
+        self.jpeg_quality = 95
         self.captureStopButton.setEnabled(False)
         self.capturePauseButton.setEnabled(False)
         self.cameraControlGroupBox.setEnabled(False)
@@ -119,6 +120,12 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
     def backwardOne(self) :
         self.setMotorSettings({'speed':self.motorSpeedBox.value()})
         self.sock.sendObject((MOTOR_ADVANCE_ONE,MOTOR_BACKWARD))
+    def forwardSteps(self):
+        self.setMotorSettings({'speed':self.motorSpeedBox.value()})
+        self.sock.sendObject((MOTOR_STEPS,MOTOR_FORWARD,self.stepsBox.value()))
+    def backwardSteps(self) :
+        self.setMotorSettings({'speed':self.motorSpeedBox.value()})
+        self.sock.sendObject((MOTOR_STEPS,MOTOR_BACKWARD,self.stepsBox.value()))
     def forward(self):
         self.setMotorSettings({'speed':self.motorSpeedBox.value()})
         self.sock.sendObject((MOTOR_ADVANCE, MOTOR_FORWARD))
@@ -380,9 +387,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             self.motorControlGroupBox.setEnabled(False)
             self.sock.sendObject((SET_MOTOR_SETTINGS, {'capture_speed':self.captureMotorSpeedBox.value()}))
 
-        self.setMerge() #Merge options
-        self.setSave() #Save options
-        self.setReduce()
+        self.setProcessingSettings()
 
         self.captureStopButton.setEnabled(True)
         self.captureStartButton.setEnabled(False)
@@ -401,6 +406,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
                                                     'bracket_light_coefficient':self.lightCoefficientBox.value(),\
                                                     'shutter_speed_wait':self.shutterSpeedWaitBox.value(),\
                                                     'shutter_auto_wait':self.shutterAutoWaitBox.value(),\
+                                                    'jpeg_quality':self.jpegBox.value(),\
 #                                                    'use_video_port' : self.videoPortButton.isChecked(),\
                                                     'use_video_port' : True,\
                                                     'capture_method' : method,\
@@ -422,6 +428,11 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
     def setSave(self) :
         self.imageThread.saveToFile(self.saveCheckBox.isChecked(), self.directory)
 
+    def setProcessingSettings(self) :
+        self.setMerge() #Merge options
+        self.setSave() #Save options
+        self.setReduce()
+        self.jpeg_quality = self.imageThread.jpeg_quality = self.jpegCVBox.value()
 
 
         
@@ -455,12 +466,20 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
 
 #Take one image
     def takeImage(self):
-        self.setReduce()
+        self.setProcessingSettings()
         self.setResize()
-        self.setSave()
-        self.sock.sendObject((SET_CAMERA_SETTINGS, {'use_video_port' : True}))
+        self.sock.sendObject((SET_CAMERA_SETTINGS, {'use_video_port' : True ,\
+                                                    'jpeg_quality':self.jpegBox.value(),\
+                                                    }))
         self.sock.sendObject((TAKE_IMAGE,))
 
+    def takeDNG(self):
+        self.setProcessingSettings()
+        self.sock.sendObject((TAKE_DNG,HEADER_DNG))
+
+    def takeBGR(self):
+        self.setProcessingSettings()
+        self.sock.sendObject((TAKE_BGR,HEADER_BGR,1))
 #Get all camera settings
     def getCameraSettings(self) :
         self.sock.sendObject((GET_CAMERA_SETTINGS,))
@@ -487,6 +506,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.bracketCheckBox.setChecked(settings['bracket_steps'] != 1)
         self.lightCoefficientBox.setValue(settings['bracket_light_coefficient'])
         self.darkCoefficientBox.setValue(settings['bracket_dark_coefficient'])
+        self.jpegBox.setValue(settings['jpeg_quality'])
 #        self.videoPortButton.setChecked(settings['use_video_port'])
         self.onFrameButton.setChecked(settings['capture_method'] == CAPTURE_ON_FRAME)
         self.onTurnButton.setChecked(settings['capture_method'] == CAPTURE_ON_TURN)
@@ -722,6 +742,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
             self.modeBox.setValue(self.mode)
             self.tapeBox.setValue(self.tape)
             self.clipBox.setValue(self.clip)
+            self.jpegCVBox.setValue(self.jpeg_quality)
             self.setDirectory()
             if self.merge != None :
                 self.mergeNoneRadioButton.setChecked(self.merge == MERGE_NONE) 

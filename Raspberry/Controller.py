@@ -262,7 +262,8 @@ class TelecineCamera(PiCamera) :
         resize = self.resolution
         if self.doResize == True :
             resize = (self.resize[0], self.resize[1])
-#Default quality is 85
+#Default jpeg_quality is 85
+#        self.printSettings()
         self.capture_sequence(self.captureGenerator(), format="jpeg", quality=self.jpeg_quality, use_video_port=self.use_video_port, resize=resize)
         stopTime = time.time()
         fps = float(self.frameCounter/(stopTime-startTime))
@@ -331,6 +332,7 @@ class TelecineCamera(PiCamera) :
     def captureImage(self) :
         while self.capturing :
             time.sleep(1)
+#        self.printSettings()
         resize = self.resolution
         if self.doResize == True :
             resize = (self.resize[0], self.resize[1])
@@ -346,9 +348,18 @@ class TelecineCamera(PiCamera) :
         for i in range(count) :
             header = {'type':type, 'shutter':self.exposure_speed, 'gains':self.awb_gains, 'count':count, 'num':i}
             queue.put(header)
-            image = self.get_bgr_image()
+            image = self.get_bgr_image()  
             queue.put(image)
 
+    def captureDNG(self, type) :
+        header = {'type':type, 'shutter':self.exposure_speed, 'gains':self.awb_gains}
+        queue.put(header)
+        stream = BytesIO()
+        camera.capture(stream, format='jpeg', bayer=True,use_video_port=False)
+        stream.seek(0)
+        image = stream.getvalue()
+        print("Bayer:",len(image))
+        queue.put(image)
 
     def get_rgb_image(self):
         resize = self.resolution
@@ -544,6 +555,8 @@ try:
             camera.captureImage()
         elif command == TAKE_BGR:
             camera.captureBgr(request[1], request[2])
+        elif command == TAKE_DNG:
+            camera.captureDNG(request[1])
         elif command == GET_CAMERA_SETTINGS:
             settings = getSettings(camera, initSettings+controlSettings+addedSettings+readOnlySettings)
             commandSock.sendObject(settings)

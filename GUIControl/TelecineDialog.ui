@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>674</width>
-    <height>1060</height>
+    <height>1062</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -81,6 +81,9 @@
            <width>42</width>
            <height>22</height>
           </rect>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Mode for the camera&lt;/p&gt;&lt;p&gt;see:&lt;/p&gt;&lt;p&gt;&lt;a href=&quot;https://www.raspberrypi.org/documentation/raspbian/applications/camera.md&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Pï Camera module&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="minimum">
           <number>0</number>
@@ -201,6 +204,9 @@
            <width>101</width>
            <height>81</height>
           </rect>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Default: None&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="title">
           <string>Calibration</string>
@@ -1331,6 +1337,9 @@
            <height>16777215</height>
           </size>
          </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Test this framerate&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="text">
           <string>Test</string>
          </property>
@@ -1801,7 +1810,7 @@
          </rect>
         </property>
         <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OpenCV JPEG quality 1-100&lt;br/&gt;Default 95&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;OpenCV JPEG quality 1-100&lt;/p&gt;&lt;p&gt;Default 95&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="maximum">
          <number>100</number>
@@ -2304,6 +2313,9 @@
           <height>17</height>
          </rect>
         </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pi camera Auto exposure &lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="text">
          <string>Auto</string>
         </property>
@@ -2771,7 +2783,7 @@
          <x>10</x>
          <y>900</y>
          <width>631</width>
-         <height>51</height>
+         <height>71</height>
         </rect>
        </property>
        <property name="styleSheet">
@@ -2840,9 +2852,9 @@
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>960</y>
+         <y>980</y>
          <width>631</width>
-         <height>71</height>
+         <height>51</height>
         </rect>
        </property>
       </widget>
@@ -3616,8 +3628,8 @@
      <y>223</y>
     </hint>
     <hint type="destinationlabel">
-     <x>677</x>
-     <y>1114</y>
+     <x>673</x>
+     <y>1100</y>
     </hint>
    </hints>
   </connection>
@@ -3632,7 +3644,7 @@
      <y>218</y>
     </hint>
     <hint type="destinationlabel">
-     <x>674</x>
+     <x>673</x>
      <y>1097</y>
     </hint>
    </hints>
@@ -3700,5 +3712,7 @@
   <slot>setOnTrigger()</slot>
   <slot>forwardSteps()</slot>
   <slot>backwardSteps()</slot>
+  <slot>takeDNG()</slot>
+  <slot>takeBGR()</slot>
  </slots>
 </ui>

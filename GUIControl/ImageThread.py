@@ -266,6 +266,10 @@ class ImageThread (QThread):
         image = self.imageSock.receiveArray()  #bgr
         cv2.imwrite(self.directory + "/image_%#05d.tiff" % 0, image)
         
+    def processDNG(self, header):
+        image = self.imageSock.receiveMsg()
+        print("Received:", len(image))
+
     def run(self):
         print('ImageThread started')
         self.imageSock = None
@@ -288,6 +292,8 @@ class ImageThread (QThread):
                 if  typ == HEADER_IMAGE :
                     image = self.imageSock.receiveMsg()
                     self.processImage(header, image)
+                elif typ == HEADER_DNG :
+                    self.processDNG(header)
                 elif typ == HEADER_BGR :
                     self.processBgr(header)
                 elif typ == HEADER_CALIBRATE :

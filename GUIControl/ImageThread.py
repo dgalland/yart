@@ -49,7 +49,7 @@ class ImageThread (QThread):
 #        self.simpleWB = cv2.xphoto.createSimpleWB()
 #        self.simpleWB = cv2.xphoto.createGrayworldWB()
 #        self.wb= False
-#         self.equalize = False
+        self.equalize = False
 #         self.clahe = False
 #        self.clipLimit = 1.
 #        self.alignMTB = cv2.createAlignMTB()
@@ -130,6 +130,7 @@ class ImageThread (QThread):
                 if self.merge == MERGE_MERTENS:
                     image = self.mergeMertens.process(self.images)
 #                    image = self.linearTonemap.process(image)
+#                    print("Min:", image.min(), " Max:", image.max())
                     image = cv2.normalize(image, None, 0., 1., cv2.NORM_MINMAX)
                 else :
                     times = np.asarray(self.shutters,dtype=np.float32)/1000000.
@@ -144,11 +145,11 @@ class ImageThread (QThread):
                 image = np.clip(image*255, 0, 255).astype('uint8')
 #                image = cv2.LUT(image, self.invgamma)
 
-#                 if self.equalize :
-#                     H, S, V = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2HSV))
-#                     low, high = np.percentile(V, (1, 99))
-#                     eq_V = np.interp(V, (low,high), (V.min(), V.max())).astype(np.uint8)
-#                     image = cv2.cvtColor(cv2.merge([H, S, eq_V]), cv2.COLOR_HSV2BGR)
+                if self.equalize :
+                    H, S, V = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2HSV))
+                    low, high = np.percentile(V, (1, 99))
+                    eq_V = np.interp(V, (low,high), (V.min(), V.max())).astype(np.uint8)
+                    image = cv2.cvtColor(cv2.merge([H, S, eq_V]), cv2.COLOR_HSV2BGR)
 #                 if self.clahe :
 #                     H, S, V = cv2.split(cv2.cvtColor(image, cv2.COLOR_BGR2HSV))
 #                     self.claheProc.setClipLimit(self.clipLimit)

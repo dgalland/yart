@@ -24,7 +24,9 @@ from TelecineMotor import *
 ## Todo More object oriented and avoid globals !
 
 initSettings = ("sensor_mode",)
+#Base class Picamera settings
 controlSettings = ("awb_mode","awb_gains","shutter_speed","brightness","contrast","saturation", "framerate","exposure_mode","iso", "exposure_compensation", "zoom","meter_mode","sharpness")
+#Derived class TelecineCamera settings
 addedSettings = ("bracket_steps","use_video_port", "bracket_dark_coefficient", "bracket_light_coefficient","capture_method", "shutter_speed_wait", "shutter_auto_wait","pause_pin","pause_level","auto_pause","resize","doResize","jpeg_quality")
 motorSettings = ("speed","pulley_ratio","steps_per_rev","ena_pin","dir_pin","pulse_pin","trigger_pin","capture_speed","play_speed","ena_level","dir_level","trigger_level", "after_trigger")
 readOnlySettings = ("analog_gain", "digital_gain")
@@ -43,6 +45,7 @@ exitFlag = False
 sendImageThread = None
 captureImageThread = None
 
+#Get and set object attributes from a dictionnary
 def getSetting(object, key):
     setting = getattr(object, key)
     if key == 'framerate' :
@@ -87,6 +90,7 @@ class TelecineCamera(PiCamera) :
         self.iso = 100
         self.sharpness=0
         self.jpeg_quality = 85
+
         pi.set_mode(self.pause_pin, pigpio.INPUT)
 
         if self.pause_level == 0 :
@@ -102,12 +106,8 @@ class TelecineCamera(PiCamera) :
                 restartEvent.clear()
             else :
                 restartEvent.set()
-
-#BASIC repeat: frame capture and send
-#ON_FRAME repeat: frame capture and send motor advance until trigger
-#ON-TRIGGER Motor Advance  Repeat: Wait Trigger Capture Send   
-#Warning very sensitive code !!
-    def putHeader(self,bracket) :
+#Queue header an image for the sending thread
+    def queueImage(self,stream, bracket) :
         header = {'type':HEADER_IMAGE}
         header['count'] = self.frameCounter
         header['bracket'] = bracket
@@ -116,22 +116,43 @@ class TelecineCamera(PiCamera) :
         header['analog_gain']=self.analog_gain
         header['digital_gain']=self.digital_gain
         queue.put(header)
+
+        stream.seek(0)
+        queue.put(stream.getvalue())
+        stream.truncate(0)
+
+#Frames Capture
+#Warning very sensitive code !!        
+
+#Capture modes:
+#BASIC or PREVIEW without motor repeat: frame capture and send
+#ON_FRAME repeat: frame capture and send motor advance until trigger
+#ON_TURN  repeat: frame capture and send motor advance one turn       
+#ON_TRIGGER Motor Advance  Repeat: Wait Trigger Capture Send
+#ON_FRAME is the most reliable and prefrred mode        
+
+#Exposure control during capture
+#shutter-speed = 0 and expôsure_mode = 'auto' -> normal image in auto
+#shutter_speed != 0 and exposure_mode = 'off' -> normal image with fixed shutter
+#In auto wait shutter_auto_wait before each frame (Typically 8 frames)       
+
+#HDR if bracket_steps == 3 or 5
+# bracket_light_coefficient applied to the normal frame to obtain the over exposed frame       
+# bracket_dark_coefficient applied to the normal frame to obtain the under exposed frame
+# Wait shutter_speed_wait between each frame
         
     def captureGenerator(self):
-        speed = motor.speed   #save normal speed
         stream = BytesIO()
+        speed = motor.speed   #save normal speed
         startShutterSpeed = self.shutter_speed      #at start fixed shutter ou 0 for auto
         if startShutterSpeed == 0 :
-            msgheader = {'type':HEADER_MESSAGE, 'msg': 'Capture with shutter auto'}
+            msgheader = {'type':HEADER_MESSAGE, 'msg': 'Capture with shutter and exposure_mode auto'}
             queue.put(msgheader)
+            self.exposure_mode = 'auto'
         else :
-            msgheader = {'type':HEADER_MESSAGE, 'msg': 'Capture with fixed shutter'}
+            msgheader = {'type':HEADER_MESSAGE, 'msg': 'Capture with fixed shutter and exposure_mode off'}
             queue.put(msgheader)
-           
-        for foo in range(self.shutter_auto_wait) : 
-            yield stream
-            stream.seek(0)
-            stream.truncate(0)
+            self.exposure_mode = 'off'
         if self.capture_method == CAPTURE_BASIC :
             pass
         elif self.capture_method == CAPTURE_ON_FRAME or self.capture_method == CAPTURE_ON_TURN:
@@ -143,7 +164,11 @@ class TelecineCamera(PiCamera) :
             motor.advance()
         header = {'type':HEADER_IMAGE}
 
+        for foo in range(self.shutter_auto_wait) :
+            yield '/dev/null'
+
         while captureEvent.isSet():
+#Pausing or restarting capture            
             if not restartEvent.isSet() :
                 msgheader = {'type':HEADER_MESSAGE, 'msg': 'Pausing capture'}
                 queue.put(msgheader)
@@ -154,19 +179,13 @@ class TelecineCamera(PiCamera) :
                 if self.capture_method == CAPTURE_ON_TRIGGER :
                     motor.advance()
                 queue.put(msgheader)
+#Motor control                
             if self.capture_method == CAPTURE_ON_TRIGGER :
                 triggerEvent.wait()
             elif self.capture_method == CAPTURE_ON_FRAME :
                 motor.advanceUntilTrigger()
             elif self.capture_method == CAPTURE_ON_TURN :
                 motor.advanceCounted()
-#bypass wait_before frames if bracket or auto exposure
-            if self.bracket_steps != 1 or startShutterSpeed == 0 :
-                for foo in range(self.shutter_auto_wait) :
-                    yield stream
-                    stream.seek(0)
-                    stream.truncate(0)
-                    
 #Wait if queue is full          
             if queue.qsize() > 20 :
                 if self.capture_method == CAPTURE_ON_TRIGGER :
@@ -181,89 +200,51 @@ class TelecineCamera(PiCamera) :
                 if self.capture_method == CAPTURE_ON_TRIGGER :
                     motor.advance()
             self.frameCounter = self.frameCounter + 1 
-
+#bypass wait_before frames if capture with auto exposure
+            if startShutterSpeed == 0 :
+                previous = self.exposure_speed
+                count = 0
+                for foo in range(self.shutter_auto_wait) :
+                    yield '/dev/null'
+                   
 #No bracket
             if self.bracket_steps == 1 :
                 yield stream
-                stream.seek(0)
-                self.putHeader(0)
-                queue.put(stream.getvalue())
-                stream.truncate(0)
+                self.queueImage(stream, 0)
             else :
-#Do braket
-#First shot image #3 Normal (auto) 
-#Second shot image #2 light auto*light coeff
-#Third shot image #1 dark auto*dark coeff
-##                coef = (self.bracket_light_coefficient, self.bracket_dark_coefficient,0) #normal clair sombre
-##                autoExposureSpeed = self.exposure_speed              #First shoot
-##                for i in range(self.bracket_steps) :
-##                    exposureSpeed =  int(autoExposureSpeed * coef[i]) #Exposure for next shot last is 0 (auto)
-##                    self.shutter_speed = exposureSpeed
-##                    yield stream                        
-##                    stream.seek(0)
-##                    self.putHeader(self.bracket_steps - i) #First is 3 Last  is 1
-##                    queue.put(stream.getvalue())
-##                    stream.truncate(0)
-##                    for foo in range(self.shutter_speed_wait) :
-##                        yield stream
-##                        stream.seek(0)
-##                        stream.truncate(0)
-
-#Normal
+#Bracket 3 or 5 exposures
+#If capture with auto its better to return to the first exposure with auto 'off' before returning in auto                
+                coef = None
+                if self.bracket_steps == 5 :
+                    coef = (self.bracket_light_coefficient, self.bracket_light_coefficient/2., self.bracket_dark_coefficient*2, self.bracket_dark_coefficient, 1.) #normal clair sombre
+                else :                   
+                    coef = (self.bracket_light_coefficient, self.bracket_dark_coefficient, 1.)
                 self.exposure_mode='off' #lock the gains
-                refExposureSpeed = self.exposure_speed              #First shoot
-                self.shutter_speed = int(refExposureSpeed*self.bracket_light_coefficient)
-                yield stream                        
-                stream.seek(0)
-                self.putHeader(3) #First is 3 Last  is 1
-                queue.put(stream.getvalue())
-                stream.truncate(0)
-#Overexposed
-                for foo in range(self.shutter_speed_wait) :
-                    yield stream
-                    stream.seek(0)
-                    stream.truncate(0)
-                self.shutter_speed = int(refExposureSpeed*self.bracket_dark_coefficient)
-                yield stream                        
-                stream.seek(0)
-                self.putHeader(2) #Overexposed First is 3 Last  is 1
-                queue.put(stream.getvalue())
-                stream.truncate(0)
-#Underexposed
-                for foo in range(self.shutter_speed_wait) :
-                    yield stream
-                    stream.seek(0)
-                    stream.truncate(0)
-#For the HQ better to return in normal with locked gains befure returning in auto
-                self.shutter_speed = refExposureSpeed  #return to normal auto or fixed 
-                yield stream                        
-                stream.seek(0)
-                self.putHeader(1) #Underexposed First is 3 Last  is 1
-                queue.put(stream.getvalue())
-                stream.truncate(0)
-                for foo in range(self.shutter_speed_wait) :
-                    yield stream
-                    stream.seek(0)
-                    stream.truncate(0)
-                self.exposure_mode='auto' #Return to auto
-                self.shutter_speed = startShutterSpeed  #return to normal auto or fixed 
+                refExposureSpeed = self.exposure_speed
+                
+                for bracket in range  (0, self.bracket_steps)  :
+                    self.shutter_speed = int(refExposureSpeed*coef[bracket]) #Next exposure
+                    yield stream       # Current Exposure
+                    self.queueImage(stream, self.bracket_steps-bracket) 
+                    for foo in range(self.shutter_speed_wait) :
+                        yield '/dev/null'
+                if startShutterSpeed == 0 :
+                    self.exposure_mode='auto' #Return to auto
+                self.shutter_speed = startShutterSpeed  #return to normal auto or fixed
+                
         if self.capture_method == CAPTURE_ON_TRIGGER :
             motor.stop()
         self.shutter_speed = startShutterSpeed  #return to normal auto or fixed
         motor.speed = speed
 
-
+#Capture frames 
     def captureSequence(self) :
         self.capturing = True
         self.frameCounter = 0
-#         if self.capture_method == CAPTURE_ON_TRIGGER :
-#             self.doMaxSpeed()
         startTime = time.time()
         resize = self.resolution
         if self.doResize == True :
             resize = (self.resize[0], self.resize[1])
-#Default jpeg_quality is 85
-#        self.printSettings()
         self.capture_sequence(self.captureGenerator(), format="jpeg", quality=self.jpeg_quality, use_video_port=self.use_video_port, resize=resize)
         stopTime = time.time()
         fps = float(self.frameCounter/(stopTime-startTime))
@@ -275,15 +256,11 @@ class TelecineCamera(PiCamera) :
             time.sleep(1)
         self.capturing=False
 
-#Try to evaluate the maximum framerate        
+#Dummy generator to evaluate the maximum framerate        
     def dummyGenerator(self, count):
         startTime = time.time()
-        stream = BytesIO()
         for i in range (count) :
-            yield stream
-            stream.seek(0)
-            image = stream.getvalue()
-            stream.truncate(0)
+            yield '/dev/null'
         stopTime = time.time()
         fps = float(count/(stopTime-startTime))
         self.framerate = fps
@@ -297,17 +274,14 @@ class TelecineCamera(PiCamera) :
         resize = self.resolution
         if self.doResize == True :
             resize = (self.resize[0], self.resize[1])
-        self.capture_sequence(self.dummyGenerator(count), format="jpeg", use_video_port=True,resize=resize)
+        self.capture_sequence(self.dummyGenerator(count), format="jpeg", quality=self.jpeg_quality, use_video_port=True,resize=resize)
     
     def doMaxSpeed(self) :
-        if self.bracket_steps != 1 : #Reduce motor speed
-            frames = self.shutter_auto_wait + 4.*self.shutter_speed_wait + 1 #un peu de marge
-        else :
-            self.printSettings()
-            if self.shutter_speed != 0 :
-                frames = 2
-            else :
-                frames = self.shutter_auto_wait + 1
+        frames = 2
+        if self.shutter_speed == 0 :
+            frames = frames + self.shutter_auto_wait 
+        if self.bracket_steps != 1 : 
+            frames = frames + self.bracket_steps*self.shutter_speed_wait
         projectorSpeed = self.framerate/ frames  #rev per seconds
         motor.capture_speed = motor.pulley_ratio * projectorSpeed
         msg = "Calculated motor speed %f"%(motor.capture_speed)
@@ -328,11 +302,11 @@ class TelecineCamera(PiCamera) :
         print("zoom ", self.zoom)
         print("Resize ", self.resize)
         print("Resize ", self.doResize)
-        
+
+#Capture one frame
     def captureImage(self) :
         while self.capturing :
             time.sleep(1)
-#        self.printSettings()
         resize = self.resolution
         if self.doResize == True :
             resize = (self.resize[0], self.resize[1])

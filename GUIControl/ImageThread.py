@@ -21,7 +21,6 @@ class ImageThread (QThread):
     headerSignal = pyqtSignal([object,])  #Signal to the GUI display header
     plotSignal = pyqtSignal([object,])  #Signal to the GUI display analyze
     merge = MERGE_NONE
-    brackets = 1
     sharpness = False
     saveToFile = False
     histos = False
@@ -130,7 +129,6 @@ class ImageThread (QThread):
                 if self.merge == MERGE_MERTENS:
                     image = self.mergeMertens.process(self.images)
 #                    image = self.linearTonemap.process(image)
-#                    print("Min:", image.min(), " Max:", image.max())
                     image = cv2.normalize(image, None, 0., 1., cv2.NORM_MINMAX)
                 else :
                     times = np.asarray(self.shutters,dtype=np.float32)/1000000.

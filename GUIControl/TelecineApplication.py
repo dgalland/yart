@@ -294,18 +294,10 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.blueGainBox.setValue(int(float(gains[1])*100.))
 
     def setEqualize(self) :
-        self.claheCheckBox.setChecked(False)
-        self.imageThread.clahe = False
         self.imageThread.equalize = self.equalizeCheckBox.isChecked()
 
     def setWB(self) :
         self.imageThread.wb = self.wbCheckBox.isChecked()
-
-    def setClahe(self) :
-        self.equalizeCheckBox.setChecked(False)
-        self.imageThread.equalize = False
-        self.imageThread.clahe = self.claheCheckBox.isChecked()
-        self.imageThread.clipLimit = self.clipLimitBox.value()
 
 #Modif possible durant capture
     def ROIwChanged(self) :
@@ -367,12 +359,10 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
 #CAPTURE_ON_TRIGGER lauchn motor and capture on trigger        
 #CAPTURE_ON_TURN capture frame and advance motor one turn no trigger needed      
     def captureStart(self):
-        brackets = 1
         frameRate = self.framerateBox.value()
-        if self.bracketCheckBox.isChecked() :
-            brackets = 3
-        self.imageThread.brakckets = brackets
-
+#         if self.bracketCheckBox.isChecked() :
+#             brackets = 3
+        
         method = None
         if self.onFrameButton.isChecked() :
             method = CAPTURE_ON_FRAME
@@ -401,7 +391,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.setResize()
         self.sock.sendObject((SET_CAMERA_SETTINGS, {\
                                                     'framerate':frameRate,\
-                                                    'bracket_steps':brackets, \
+                                                    'bracket_steps':self.bracketsBox.value(), \
                                                     'bracket_dark_coefficient':self.darkCoefficientBox.value(),\
                                                     'bracket_light_coefficient':self.lightCoefficientBox.value(),\
                                                     'shutter_speed_wait':self.shutterSpeedWaitBox.value(),\
@@ -503,7 +493,7 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
         self.isoBox.setValue(settings['iso'])
         self.sharpnessBox.setValue(settings['sharpness'])
         self.exposureCompensationBox.setValue(settings['exposure_compensation'])
-        self.bracketCheckBox.setChecked(settings['bracket_steps'] != 1)
+        self.bracketsBox.setValue(settings['bracket_steps'])
         self.lightCoefficientBox.setValue(settings['bracket_light_coefficient'])
         self.darkCoefficientBox.setValue(settings['bracket_dark_coefficient'])
         self.jpegBox.setValue(settings['jpeg_quality'])
@@ -612,20 +602,14 @@ class TelecineDialog(QDialog, Ui_TelecineDialog):
 
 #Calculate the max motor speed for OnTrigger capture for current bracket
     def maxSpeed(self):
-        self.maxFps()
-        brackets = 1
-        if self.bracketCheckBox.isChecked() :
-            brackets = 3
-
         self.sock.sendObject((SET_CAMERA_SETTINGS, {\
-                                                    'bracket_steps':brackets, \
+                                                    'bracket_steps':self.bracketsBox.value(), \
                                                     'shutter_speed_wait':self.shutterSpeedWaitBox.value(),\
                                                     'shutter_auto_wait':self.shutterAutoWaitBox.value(),\
         }))
                                                     
         self.sock.sendObject((MAX_SPEED,))
         self.captureMotorSpeedBox.setValue(self.getMotorSetting('capture_speed'))
-        self.framerateBox.setValue(self.getCameraSetting('framerate'))
 
     def setDirectory(self) :
         if self.root_directory != None :
